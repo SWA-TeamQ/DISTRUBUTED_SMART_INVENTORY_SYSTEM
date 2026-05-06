@@ -1,0 +1,83 @@
+package com.auction.server.repository;
+
+import com.auction.shared.Constants;
+import com.auction.shared.models.User;
+import com.auction.shared.models.Admin;
+import com.auction.shared.models.Seller;
+import com.auction.shared.models.Bidder;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class UserRepository {
+    private final Connection connection;
+
+    public UserRepository(Connection connection) {
+        this.connection = connection;
+        seedDefaultAdmin();
+    }
+
+    private void seedDefaultAdmin() {
+        try (var stmt = connection.createStatement();
+             var rs = stmt.executeQuery("SELECT COUNT(*) FROM users")) {
+            if (rs.next() && rs.getInt(1) == 0) {
+                insertUser(Constants.DEFAULT_ADMIN_USERNAME,
+                        com.auction.server.util.SecurityUtil.hashPassword(Constants.DEFAULT_ADMIN_PASSWORD),
+                        Constants.ADMIN);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to seed admin", e);
+        }
+    }
+
+    public User findUserByUsername(String username) {
+        String sql = "SELECT password_hash, role FROM users WHERE username = ?";
+        try (var pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, username);
+            try (var rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    String p = rs.getString("password_hash");
+                    String r = rs.getString("role");
+                    if (Constants.ADMIN.equals(r)) return new Admin(username, p);
+                    if (Constants.SELLER.equals(r)) return new Seller(username, p);
+                    if (Constants.BIDDER.equals(r)) return new Bidder(username, p);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to find user", e);
+        }
+        return null;
+    }
+
+    public void insertUser(String username, String passwordHash, String role) {
+        String sql = "INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)";
+        try (var pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, username);
+            pstmt.setString(2, passwordHash);
+            pstmt.setString(3, role);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to insert user", e);
+        }
+    }
+
+    public List<User> findAllUsers() {
+        List<User> users = new ArrayList<>();
+        try (var stmt = connection.createStatement();
+             var rs = stmt.executeQuery("SELECT username, password_hash, role FROM users")) {
+            while (rs.next()) {
+                String u = rs.getString("username");
+                String p = rs.getString("password_hash");
+                String r = rs.getString("role");
+                if (Constants.ADMIN.equals(r)) users.add(new Admin(u, p));
+                else if (Constants.SELLER.equals(r)) users.add(new Seller(u, p));
+                else if (Constants.BIDDER.equals(r)) users.add(new Bidder(u, p));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to fetch users", e);
+        }
+        return users;
+    }
+}
