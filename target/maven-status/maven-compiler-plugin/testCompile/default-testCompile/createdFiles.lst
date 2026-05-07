@@ -1,2 +1,4 @@
+com\auction\server\repository\AuctionRepositoryTest.class
+com\auction\server\repository\BidRepositoryTest.class
 com\auction\server\repository\DatabaseManagerTest.class
 com\auction\server\repository\UserRepositoryTest.class

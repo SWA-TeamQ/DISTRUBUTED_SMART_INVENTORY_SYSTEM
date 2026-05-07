@@ -5,9 +5,9 @@ This document details how data is persisted and secured in the Real-Time Distrib
 ## 1. Database (SQLite)
 A single file (`auction.db`) is managed via the **Repository Pattern**:
 * **DatabaseManager**: Handles the connection and schema initialization.
-* **UserRepository**: Handles CRUD operations for users.
-* **AuctionRepository**: Handles CRUD operations for auctions.
-* **BidRepository**: Handles CRUD operations for bids.
+* **UserRepository**: Handles `insertUser`, `findUserByUsername`, `findAllUsers`.
+* **AuctionRepository**: Handles `insertAuction`, `findAuctionById`, `findActiveAuctions`, `updateAuctionBid`, etc.
+* **BidRepository**: Handles `insertBid`, `findBidsByAuctionId`, `countBidsByAuctionId`.
 
 SQLite is fast, needs no setup, and is perfect for a portable demo.
 

@@ -42,4 +42,10 @@ public final class Constants {
     // --- Default Admin ---
     public static final String DEFAULT_ADMIN_USERNAME = "abelmekonen";
     public static final String DEFAULT_ADMIN_PASSWORD = "demo123";
+
+    // --- Auction Status ---
+    public static final String STATUS_ACTIVE = "ACTIVE";
+    public static final String STATUS_SOLD = "SOLD";
+    public static final String STATUS_EXPIRED = "EXPIRED";
+    public static final String STATUS_CANCELLED = "CANCELLED";
 }
