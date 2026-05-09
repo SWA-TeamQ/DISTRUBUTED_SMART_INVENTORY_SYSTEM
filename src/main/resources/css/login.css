@@ -1,0 +1,114 @@
+.root {
+    -fx-background-color: #010409;
+}
+
+.login-container {
+    -fx-alignment: center;
+    -fx-spacing: 30;
+    -fx-padding: 50;
+}
+
+.logo-box {
+    -fx-background-color: #0d1117;
+    -fx-background-radius: 12;
+    -fx-border-color: #30363d;
+    -fx-border-radius: 12;
+    -fx-min-width: 80;
+    -fx-min-height: 80;
+    -fx-max-width: 80;
+    -fx-max-height: 80;
+    -fx-alignment: center;
+    -fx-effect: dropshadow(three-pass-box, rgba(88, 166, 255, 0.3), 20, 0, 0, 0);
+}
+
+.logo-icon {
+    -fx-icon-color: #58a6ff;
+    -fx-icon-size: 40;
+}
+
+.title-label {
+    -fx-text-fill: white;
+    -fx-font-size: 32;
+    -fx-font-weight: bold;
+}
+
+.subtitle-label {
+    -fx-text-fill: #8b949e;
+    -fx-font-size: 16;
+}
+
+.login-card {
+    -fx-background-color: #0d1117;
+    -fx-background-radius: 8;
+    -fx-border-color: #30363d;
+    -fx-border-radius: 8;
+    -fx-padding: 30;
+    -fx-spacing: 20;
+    -fx-min-width: 380;
+    -fx-max-width: 380;
+}
+
+.form-group {
+    -fx-spacing: 8;
+}
+
+.form-label {
+    -fx-text-fill: #8b949e;
+    -fx-font-size: 14;
+}
+
+.forgot-link {
+    -fx-text-fill: #58a6ff;
+    -fx-cursor: hand;
+    -fx-font-size: 13;
+}
+
+.input-field {
+    -fx-background-color: #010409;
+    -fx-border-color: #30363d;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 10 12;
+    -fx-text-fill: white;
+    -fx-prompt-text-fill: #484f58;
+}
+
+.input-field:focused {
+    -fx-border-color: #58a6ff;
+}
+
+.input-icon {
+    -fx-icon-color: #8b949e;
+    -fx-icon-size: 18;
+}
+
+.login-button {
+    -fx-background-color: #58a6ff;
+    -fx-text-fill: #0d1117;
+    -fx-font-size: 18;
+    -fx-font-weight: bold;
+    -fx-padding: 12;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+    -fx-pref-width: 1000; /* Full width */
+}
+
+.login-button:hover {
+    -fx-background-color: #79c0ff;
+}
+
+.footer-box {
+    -fx-spacing: 5;
+    -fx-alignment: center;
+}
+
+.footer-text {
+    -fx-text-fill: #8b949e;
+    -fx-font-size: 14;
+}
+
+.footer-link {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
