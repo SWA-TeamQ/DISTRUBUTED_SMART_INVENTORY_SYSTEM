@@ -1,7 +1,7 @@
-# Distributed Smart Inventory Management System (DSIMS) Documentation
+# Real-Time Distributed Auction System (RTDAS) Documentation
 
 ## Overview
-DSIMS is a distributed, multi-user inventory system that manages commercial stock using a client-server architecture. The solution showcases advanced Java topics: OOP, collections, multithreading, file I/O, JDBC, and Java RMI. The system includes a headless server for business logic and persistence, and a JavaFX desktop client for role-based interaction.
+RTDAS is a distributed, multi-user auction platform that enables real-time bidding using a client-server architecture. The solution showcases advanced Java topics: OOP, collections, multithreading, file I/O, JDBC, and Java RMI. The system includes a headless server for business logic and persistence, and a JavaFX desktop client for role-based interaction.
 
 ## Architecture Summary
 ### Layers
@@ -19,51 +19,71 @@ DSIMS is a distributed, multi-user inventory system that manages commercial stoc
 ## Functional Requirements
 ### Role-Based Access Control (RBAC)
 - **User (Abstract):** `username`, `password`, `roleType`
-- **Staff:** view inventory, `updateStockQuantity()`
-- **Manager:** all Staff permissions + `importCSV()`, `exportCSV()`, `modifyPrice()`
-- **Admin:** all Manager permissions + `backupDatabase()`, `viewSystemLogs()`, `manageUsers()`
+- **Bidder:** browse active auctions, `placeBid()`, view own bid history
+- **Seller:** all Bidder permissions + `createAuction()`, manage own listings, `exportAuctionsToCSV()`
+- **Admin:** all Seller permissions + `backupDatabase()`, `viewSystemLogs()`, `manageUsers()`
 
-### Inventory & Collections
-- **Product Model:** `Serializable`, `Comparable<Product>`
-- **Server Cache:** `HashMap<Integer, Product>`
-- **Urgent Restock:** `PriorityQueue` for low-stock alerts
-- **Client Sorting:** Comparators for price and category
+### Auction & Collections
+- **AuctionItem Model:** `Serializable`, `Comparable<AuctionItem>`
+- **Bid Model:** `Serializable` — records bidder, amount, timestamp
+- **Server Cache:** `HashMap<Integer, AuctionItem>` for active auctions
+- **Bid Ordering:** `PriorityQueue` for highest-bid tracking per auction
+- **Client Sorting:** Comparators for end time, current bid, and category
 
 ### Hybrid Persistence
-- **Database:** `inventory` table with fields `ID`, `Name`, `SKU`, `Price`, `Qty`, `CategoryId`
-- **CSV:** Buffered read/parse into `Product` objects
+- **Database:** `auction_items` table (`ID`, `Title`, `Description`, `StartingPrice`, `CurrentBid`, `HighestBidder`, `SellerUsername`, `StartTime`, `EndTime`, `Active`)
+- **Database:** `bids` table (`ID`, `AuctionItemId`, `BidderUsername`, `Amount`, `Timestamp`)
+- **Database:** `users` table (`Username`, `Password`, `RoleType`)
+- **CSV:** Buffered read/parse into `AuctionItem` objects
 - **Logging:** Append-only audit log entries
 
 ## Distributed Interface (RMI)
 Core contract between client and server:
-- `List<Product> getAllProducts()`
-- `void updateStock(int productId, int delta)`
-- `byte[] exportInventoryToCSV()`
-- `void importInventoryFromCSV(byte[] fileData)`
+- `List<AuctionItem> getActiveAuctions()`
+- `AuctionItem getAuctionById(int auctionId)`
+- `void placeBid(int auctionId, String bidderUsername, double amount)`
+- `int createAuction(AuctionItem item)`
+- `List<Bid> getBidHistory(int auctionId)`
+- `byte[] exportAuctionsToCSV()`
+- `void importAuctionsFromCSV(byte[] fileData)`
 - `User login(String username, String password)`
 
 ## Non-Functional Requirements
 ### Server-Side Concurrency
-- **Thread Safety:** `updateStock` guarded with `synchronized` or `ReentrantLock`
+- **Thread Safety:** `placeBid` guarded with `synchronized` or `ReentrantLock`
 - **Scalability:** Stateless or thread-safe service design
+- **Auction Timer:** Background thread to auto-close expired auctions
 
 ### Client-Side Concurrency
 - **Non-Blocking UI:** All RMI calls in `javafx.concurrent.Task`
-- **Background Clock:** Thread updates UI via `Platform.runLater()`
+- **Live Bid Updates:** Polling thread refreshes auction state via `Platform.runLater()`
+- **Countdown Timer:** Thread updates remaining time on active auctions
 
 ## Data Dictionary
-### `products` Table
+### `auction_items` Table
 - `id`: INTEGER, PK, AUTOINCREMENT  
-- `name`: VARCHAR(100), NOT NULL  
-- `sku`: VARCHAR(20), UNIQUE  
-- `price`: DOUBLE, CHECK ($price \ge 0$)  
-- `quantity`: INTEGER, CHECK ($quantity \ge 0$)
+- `title`: VARCHAR(100), NOT NULL  
+- `description`: TEXT  
+- `starting_price`: DOUBLE, CHECK (starting_price >= 0)  
+- `current_bid`: DOUBLE, CHECK (current_bid >= 0)  
+- `highest_bidder`: VARCHAR(50)  
+- `seller_username`: VARCHAR(50), NOT NULL  
+- `start_time`: DATETIME, NOT NULL  
+- `end_time`: DATETIME, NOT NULL  
+- `active`: BOOLEAN, DEFAULT TRUE
+
+### `bids` Table
+- `id`: INTEGER, PK, AUTOINCREMENT  
+- `auction_item_id`: INTEGER, FK → `auction_items.id`  
+- `bidder_username`: VARCHAR(50), NOT NULL  
+- `amount`: DOUBLE, CHECK (amount > 0)  
+- `timestamp`: DATETIME, NOT NULL
 
 ### File Layout
-- `/data/inventory_backup.db`
+- `/data/auction_backup.db`
 - `/logs/system_audit.log`
 - `/exports/report_YYYYMMDD.csv`
 
 ## Error Handling
 - **RemoteException:** Display JavaFX alert on connectivity failure
-- **StockException:** Thrown if `updateStock` results in negative quantity
+- **AuctionException:** Thrown if `placeBid` amount is below current bid, auction has ended, or bidder is the seller
