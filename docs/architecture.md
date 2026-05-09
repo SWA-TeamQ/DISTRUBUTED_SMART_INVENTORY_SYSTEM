@@ -1,43 +1,232 @@
-# 🏗️ Architecture & Core Mechanics
+# 🏗️ RTDAS Architecture & Design Decisions
 
-This document explains the core architecture of the Real-Time Distributed Auction System (RTDAS).
+System architecture, component interactions, and rationale for key technical choices.
 
-## 1. The Core Concept: "English Auction"
-Imagine a live eBay sale:
-1. An item starts at a low price.
-2. People keep outbidding each other.
-3. The price only goes **UP**.
-4. When the countdown hits zero, the highest bidder wins and pays their bid.
+---
 
-## 2. Key Terms (The "Lingo")
+## 1. The Core Concept: English Auction
 
-### 👥 The Players
-* **Server:** The brain. It stores all data, runs the clock, enforces rules, and decides who wins.
-* **Client:** The app on your laptop. It gives you a graphical interface (JavaFX) and talks to the server via RMI.
-* **RMI (Remote Method Invocation):** The telephone line. A technology that lets a client call a method that actually runs on the server, as if it were local.
-* **Admin:** The super-user who creates accounts, backs up the database, and views system logs.
-* **Seller:** A user who can create auctions, manage their own listings, export records, and also bid on other people’s items.
-* **Bidder:** A user who browses active auctions and places bids.
+An English auction is an open-outcry ascending auction where:
 
-### 🏛️ Auction Rules & Mechanics
-* **Minimum Increment (5% rule):** You cannot outbid someone by 1 cent. Every new bid must be at least **5% higher** than the current price. This keeps the game fair and stops penny-sniping.
-* **Snipe Protection:** If a bid is placed within the last **30 seconds** of an auction, the countdown timer **resets to 30 seconds**. This gives everyone a chance to react and prevents last‑millisecond “steals”.
-* **Self-Bid Prevention:** A seller cannot bid on their own auction. The server blocks it.
-* **Duplicate Bid Prevention:** You cannot place a bid if you are already the highest bidder. The server tells you you’re already winning.
+1. An item starts at a low price (starting price)
+2. Bidders compete by placing successively higher bids
+3. Each new bid must meet a minimum increment (5%)
+4. When the timer expires, the highest bidder wins
 
-### 🔄 Auction Lifecycle (The State Machine)
-Every auction follows a strict path:
-```text
-ACTIVE ──── (timer expires, has bids) ──→ SOLD
-ACTIVE ──── (timer expires, no bids) ──→ EXPIRED
-ACTIVE ──── (seller cancels, zero bids) → CANCELLED
-EXPIRED ─── (seller relists) ──────────→ ACTIVE
+### Why This Model?
+
+- **Natural concurrency demo:** Multiple bidders racing creates natural race conditions
+- **Simplicity:** Easy to explain, implement, and test
+- **Real-world analogy:** Familiar to users (eBay-style)
+
+---
+
+## 2. Key Terms & Components
+
+| Term | Description |
+|------|-------------|
+| **Server** | Headless RMI service; owns SQLite DB, business logic |
+| **Client** | JavaFX desktop app; three roles (Admin/Seller/Bidder) |
+| **RMI** | Primary communication channel; client polls server |
+| **UDP Broadcast** | Server discovery; server broadcasts every 2s on port 9999 |
+| **Admin** | Super-user; creates accounts, backups, views logs |
+| **Seller** | Can create/cancel/relist auctions, export CSV |
+| **Bidder** | Can browse and bid on others' auctions |
+
+---
+
+## 3. Auction Rules & Mechanics
+
+### Minimum Increment (5% Rule)
+
 ```
-* **ACTIVE:** Bidding is open.
-* **SOLD:** Timer hit zero and at least one bid was placed. Winner gets the item.
-* **EXPIRED:** Timer hit zero but nobody placed a bid. The seller can relist it.
-* **CANCELLED:** The seller manually removed the item before it ended (only allowed if zero bids).
-* **Relisting:** If an auction expired with no bids, the seller can turn it back to ACTIVE with a new end time.
+if bids_exist:
+    min_bid = current_bid * 1.05
+else:
+    min_bid = starting_price
+```
 
-### 🧹 The Auction Reaper
-A background thread that runs **every second** on the server. It looks for any auction whose `end_time` has passed and automatically transitions it to **SOLD** (if there were bids) or **EXPIRED** (if no bids). It keeps the system moving without human intervention.
+**Rationale:** Prevents penny-sniping while keeping mathematics simple.
+
+### Snipe Protection
+
+- **Trigger:** Bid placed when `endTime - now < 30s`
+- **Effect:** `endTime = min(endTime + 30s, capEndTime)`
+- **Cap:** `capEndTime = originalEndTime + 10 minutes`
+
+**Rationale:** Discourages last-second steals without allowing infinite extension wars.
+
+### Self-Bid Prevention
+
+Server validates `bidderUsername != sellerUsername` before accepting bid.
+
+### Duplicate Bid Prevention
+
+Server tracks `highestBidderUsername`; rejects bid if already winning.
+
+---
+
+## 4. Auction Lifecycle State Machine
+
+```
+                    ┌─────────────┐
+                    │   ACTIVE     │
+                    └──────┬───────┘
+                           │
+              ┌────────────┼────────────┐
+              │            │            │
+       (has bids)     (no bids)   (seller cancels, 0 bids)
+              │            │            │
+              ▼            ▼            ▼
+        ┌────────┐   ┌────────┐   ┌──────────┐
+        │  SOLD  │   │EXPIRED│   │CANCELLED │
+        └────────┘   └───┬────┘   └──────────┘
+                         │
+                    (relist via)
+                    ┌────────┐
+                    │ ACTIVE │
+                    └────────┘
+```
+
+| State | Entry Condition | Exit Condition |
+|-------|-----------------|----------------|
+| ACTIVE | Created by seller | Timer expires OR seller cancels |
+| SOLD | Timer expired + bids exist | None (terminal) |
+| EXPIRED | Timer expired + no bids | Relisted (creates new ACTIVE) |
+| CANCELLED | Seller action | None (terminal) |
+
+---
+
+## 5. The Auction Reaper
+
+A background `ScheduledExecutorService` running every 1 second.
+
+### Responsibilities
+
+1. Query for `status='ACTIVE' AND end_time < NOW()`
+2. Acquire per-auction `ReentrantLock`
+3. If bids exist → transition to `SOLD`
+4. If no bids → transition to `EXPIRED`
+5. On server startup: sweep any overdue auctions from crash recovery
+
+### Why a Background Thread?
+
+- **Decouples time from user action:** Auction closes automatically
+- **Demonstrates multithreading:** Independent from request threads
+- **Prevents missed closures:** Even if no clients are connected
+
+---
+
+## 6. RMI Interface Contract (IAuctionService)
+
+Full contract defined in `shared/interfaces/IAuctionService.java`.
+
+### Key Methods (selected)
+
+| Method | Return | Auth | Purpose |
+|--------|--------|------|---------|
+| `login(String, String)` | `Session` | None | Returns token for session |
+| `logout(String token)` | `void` | Token | Invalidates session |
+| `serverTime()` | `String` | None | UTC ISO-8601 for clock sync |
+| `getActiveAuctions()` | `List<AuctionItem>` | Token | Gallery view |
+| `getAuctionById(int)` | `AuctionItem` | Token | Detail view |
+| `placeBid(int, token, long cents, long expected)` | `void` | Token | Bid with stale detection |
+| `createAuction(AuctionItem, byte[]...)` | `int` | Token | Seller creates |
+| `cancelAuction(int, token)` | `void` | Token | Seller cancels |
+| `relistAuction(int, end, token)` | `int` | Token | Creates new auction from expired |
+| `getMyBids(token)` | `List<Bid>` | Token | Bidder activity |
+| `getMyWonAuctions(token)` | `List<AuctionItem>` | Token | Bidder activity |
+| `exportAuctionsToCSV(token)` | `byte[]` | Token | Seller dashboard |
+| `createUser(adminToken, ...)` | `void` | Admin token | Admin creates user |
+| `backupDatabase(adminToken)` | `byte[]` | Admin token | Admin backup |
+| `getAuditLogs(adminToken, N)` | `List<String>` | Admin token | Admin monitoring |
+
+### Why Sessions?
+
+**Decision:** Every mutating call requires a session token issued by `login()`.
+
+**Rationale:** Without tokens, any client can impersonate any user by passing their username. Tokens provide:
+- Proof of authentication
+- Ability to revoke sessions (logout)
+- Path to implement rate-limiting per session
+
+---
+
+## 7. Concurrency Model
+
+### Server-Side Bidding Flow
+
+```java
+// Per-auction lock map
+ConcurrentHashMap<Integer, ReentrantLock> locks = new ConcurrentHashMap<>();
+
+public void placeBid(int auctionId, String token, long cents, long expected) {
+    User user = sessionManager.validate(token);
+    AuctionItem item = getAuctionById(auctionId);
+    
+    ReentrantLock lock = locks.computeIfAbsent(auctionId, k -> new ReentrantLock());
+    lock.lock();
+    try {
+        // All validations inside lock
+        validateFreshness(item.getCurrentBidCents(), expected);
+        validateNotSelfBid(item, user);
+        validateNotAlreadyWinning(item, user);
+        validateMinimumIncrement(item, cents);
+        validateActiveAndNotExpired(item);
+        
+        // Atomic update in single transaction
+        updateBidAndAuction(item, user, cents, lock);
+    } finally {
+        lock.unlock();
+    }
+}
+```
+
+### Why Per-Auction Locks?
+
+- **Fine-grained concurrency:** Bids on different auctions don't block each other
+- **Simple reasoning:** Each lock protects exactly one auction's state
+- **Small footprint:** Only active auctions have locks in the map
+
+### Client-Side Concurrency
+
+- **All RMI calls in `javafx.concurrent.Task`** → UI never freezes
+- **Polling via `ScheduledExecutorService`** every 2s
+- **Results delivered via `Platform.runLater()`**
+- **Thread cleanup:** Polling stops when view is closed (`shutdown()` method)
+
+---
+
+## 8. Clock Synchronization
+
+**Problem:** Client clocks may drift from server clock, causing:
+- Countdown inaccuracies
+- Wrong "snipe" detection (if `now` is from client)
+
+**Solution:**
+1. Client calls `serverTime()` on connect, stores offset
+2. All countdowns use `offset + clientNow = serverNow`
+3. This is **not a strict NTP**; acceptable for a LAN demo
+
+---
+
+## 9. Error Handling Philosophy
+
+| Error | Client Behavior | Server Behavior |
+|-------|-----------------|-----------------|
+| Bad token | Alert + redirect to Connect | `UnauthorizedException` |
+| Stale price | Shake input, show new price | `StaleDataException` |
+| Self-bid | Alert explaining | `SelfBidException` |
+| Already winning | Alert | `DuplicateBidException` |
+| Rate limited | Alert with "try again in Xs" | `RateLimitedException` |
+| Connection lost | "Connection lost" banner, retry every 5s | N/A (client-side) |
+
+---
+
+## 10. Out of Scope (Architecture)
+
+- RMI callbacks/push notifications
+- Internet deployment / NAT traversal
+- JWT or OAuth; simple UUID tokens
+- Salted password hashing; SHA-256 only
+- Horizontal scaling; single-server design
