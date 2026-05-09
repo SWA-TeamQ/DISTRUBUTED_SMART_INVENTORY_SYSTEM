@@ -1,9 +1,9 @@
 # PRD: Real-Time Distributed Auction System (RTDAS)
 
-> **Status:** `approved`
-> **Created:** 2026-05-06
-> **Last Updated:** 2026-05-06
-> **Authors:** SWA-TeamQ
+> **Status:** `approved`  
+> **Created:** 2026-05-06  
+> **Last Updated:** 2026-05-09  
+> **Authors:** SWA-TeamQ  
 > **Demo Setup:** 1 server (you) + 4 clients (teammates), same local Wi-Fi
 
 ---
@@ -65,45 +65,49 @@ A distributed, multi-user **English auction platform** where a headless RMI serv
 ### Snipe Protection
 
 29. As a **Bidder**, I want the auction timer to extend by 30 seconds if a bid is placed in the last 30 seconds, so that last-second sniping is discouraged.
-30. As a **Bidder**, I want to see the updated end time immediately after a snipe extension, so that I know I have more time to respond.
+30. As a **Bidder**, I want the system to cap total extension so auctions don't run forever, so that the demo stays predictable.
+
+### Bidder Activity Dashboard
+
+31. As a **Bidder**, I want to see "My Activity" with tabs for My Bids, Won, and Outbid, so that I can track my bidding history.
 
 ### Auction Creation & Management (Seller)
 
-31. As a **Seller**, I want to create a new auction with a title, description, category, starting price, end time, and up to 3 images (max 2MB each), so that I can list items for sale.
-32. As a **Seller**, I want the client to validate image file sizes before upload and reject files over 2MB with a clear message, so that I don't waste time uploading oversized files.
-33. As a **Seller**, I want the system to auto-generate a 40×40 blurred thumbnail from my first image, so that gallery loading is fast.
-34. As a **Seller**, I want to cancel an auction that has zero bids, so that I can remove items I no longer want to sell.
-35. As a **Seller**, I want to be prevented from cancelling an auction that already has bids, so that bidders are protected.
-36. As a **Seller**, I want to see a dashboard of all my auctions grouped by status (active, sold, expired, cancelled), so that I can track my listings.
-37. As a **Seller**, I want to see the full bid history and final sale price for my sold auctions, so that I have a complete sales record.
-38. As a **Seller**, I want to relist an expired auction that received no bids, so that I can try selling the item again.
-39. As a **Seller**, I want to bid on other sellers' auctions, so that I can participate as a buyer too.
-40. As a **Seller**, I want to export my auctions to a CSV file via a save dialog, so that I have an offline record of my sales.
+32. As a **Seller**, I want to create a new auction with a title, description, category, starting price, end time, and up to 3 images (max 2MB each), so that I can list items for sale.
+33. As a **Seller**, I want the client to validate image file sizes before upload and reject files over 2MB with a clear message, so that I don't waste time uploading oversized files.
+34. As a **Seller**, I want the system to auto-generate a 40×40 blurred thumbnail from my first image, so that gallery loading is fast.
+35. As a **Seller**, I want to cancel an auction that has zero bids, so that I can remove items I no longer want to sell.
+36. As a **Seller**, I want to be prevented from cancelling an auction that already has bids, so that bidders are protected.
+37. As a **Seller**, I want to see a dashboard of all my auctions grouped by status (active, sold, expired, cancelled), so that I can track my listings.
+38. As a **Seller**, I want to see the full bid history and final sale price for my sold auctions, so that I have a complete sales record.
+39. As a **Seller**, I want to relist an expired auction that received no bids as a new auction, so that I can try selling the item again.
+40. As a **Seller**, I want to bid on other sellers' auctions, so that I can participate as a buyer too.
+41. As a **Seller**, I want to export my auctions to a CSV file via a save dialog, so that I have an offline record of my sales.
 
 ### Administration
 
-41. As an **Admin**, I want to back up the SQLite database, so that data is safe.
-42. As an **Admin**, I want to view system audit logs, so that I can monitor activity.
-43. As an **Admin**, I want to see all users in the system, so that I can manage accounts.
+42. As an **Admin**, I want to back up the SQLite database, so that data is safe.
+43. As an **Admin**, I want to view system audit logs, so that I can monitor activity.
+44. As an **Admin**, I want to see all users in the system, so that I can manage accounts.
 
 ### Auction Lifecycle & State Machine
 
-44. As the **System**, I want auctions to follow a strict state machine (ACTIVE → SOLD | EXPIRED → optionally relisted, or ACTIVE → CANCELLED), so that state transitions are predictable.
-45. As the **System**, I want an "Auction Reaper" background thread to scan every 1 second for auctions whose end time has passed and automatically transition them to SOLD (if bids exist) or EXPIRED (if no bids), so that auction closure is automatic and requires no user action.
-46. As the **System**, I want to recover from a server crash by expiring all overdue ACTIVE auctions on startup, so that stale auctions don't persist.
+45. As the **System**, I want auctions to follow a strict state machine (ACTIVE → SOLD | EXPIRED → optionally relisted, or ACTIVE → CANCELLED), so that state transitions are predictable.
+46. As the **System**, I want an "Auction Reaper" background thread to scan every 1 second for auctions whose end time has passed and automatically transition them to SOLD (if bids exist) or EXPIRED (if no bids), so that auction closure is automatic and requires no user action.
+47. As the **System**, I want to recover from a server crash by expiring all overdue ACTIVE auctions on startup, so that stale auctions don't persist.
 
 ### Data Export & Audit
 
-47. As a **Seller**, I want to download a CSV file containing: AuctionID, Title, Category, StartingPrice, FinalPrice, Winner, Status, StartTime, EndTime — so that I have a complete offline record.
-48. As the **System**, I want all significant actions (logins, bids, auction creation, cancellation, status transitions) logged to an append-only audit log file, so that there is a tamper-resistant activity record.
+48. As a **Seller**, I want to download a CSV file containing: AuctionID, Title, Category, StartingPrice, FinalPrice, Winner, Status, StartTime, EndTime — so that I have a complete offline record.
+49. As the **System**, I want all significant actions (logins, bids, auction creation, cancellation, status transitions) logged to an append-only audit log file, so that there is an activity record.
 
 ### Robustness & Edge Cases
 
-49. As a **Bidder**, I want to see a clear error alert if the server is unreachable, so that I know the connection is down.
-50. As a **Bidder**, I want the polling thread to stop automatically when I close the auction detail view, so that resources are cleaned up.
-51. As the **System**, I want to return a placeholder image if a file is missing on disk, so that the client never crashes due to missing assets.
-52. As the **System**, I want all RMI calls on the client to run in background `Task` threads, so that the JavaFX UI never freezes.
-53. As the **System**, I want the server to also validate uploaded images are ≤2MB, so that a malicious or broken client can't bypass client-side checks.
+50. As a **Bidder**, I want to see a clear error alert if the server is unreachable, so that I know the connection is down.
+51. As a **Bidder**, I want the polling thread to stop automatically when I close the auction detail view, so that resources are cleaned up.
+52. As the **System**, I want to return a placeholder image if a file is missing on disk, so that the client never crashes due to missing assets.
+53. As the **System**, I want all RMI calls on the client to run in background `Task` threads, so that the JavaFX UI never freezes.
+54. As the **System**, I want the server to also validate uploaded images are ≤2MB, so that a malicious or broken client can't bypass client-side checks.
 
 ---
 
@@ -113,261 +117,162 @@ A distributed, multi-user **English auction platform** where a headless RMI serv
 
 The project uses a **single Maven module** with package-based separation (`com.auction.shared`, `com.auction.server`, `com.auction.client`). This avoids multi-module overhead while maintaining clean architectural boundaries.
 
-- One root `pom.xml` declares all dependencies (JavaFX 17, SQLite-JDBC) and plugins (javafx-maven-plugin, exec-maven-plugin, maven-shade-plugin).
-- Server runs via `mvn exec:java -Dexec.mainClass="com.auction.server.core.ServerLauncher"`.
-- Client runs via `mvn javafx:run`.
-- Java version: **17** (LTS, required by JavaFX 17+).
-
 ### 2. Networking — Java RMI + UDP Discovery
 
 **RMI (primary communication):**
-- No RMI callbacks. The client polls the server every 2–3 seconds using `ScheduledExecutorService`.
-- This avoids the complexity of RMI callback registration, firewall issues, and client-side RMI export.
-- The RMI remote interface (`IAuctionService`) is the sole contract between client and server.
+- No RMI callbacks. Clients poll every 2s via `ScheduledExecutorService`.
+- Avoids callback registration complexity and firewall issues.
+- `IAuctionService` is the sole contract between client and server.
 
 **UDP Broadcast (server discovery):**
-- The server broadcasts a small UDP packet every 2 seconds on port **9999** containing `RTDAS|<rmiPort>|<serverName>`.
-- Clients listen for these broadcasts on the Connect screen and display discovered servers in a `ListView`.
-- Manual IP entry is always available as a fallback.
-- This demonstrates network programming beyond RMI (`DatagramSocket`, `DatagramPacket`).
+- Server broadcasts `RTDAS|v1|<rmiPort>|<serverName>|<serverId>|<rmiHost>` every 2s on port 9999.
+- Clients listen and display in `ListView`.
+- Manual entry available as fallback.
 
 ### 3. RMI Interface Contract
 
-The interface will be updated from the current skeleton to include:
+All mutating methods require a session token from `login()`.
 
-- `placeBid(int auctionId, String bidderUsername, double amount, double clientExpectedPrice)` — adds `clientExpectedPrice` for stale-data detection.
-- `byte[] getThumbnail(int auctionId, int imageIndex)` — LQIP thumbnail retrieval (index 1–3).
-- `byte[] getFullImage(int auctionId, int imageIndex)` — full image retrieval.
-- `void cancelAuction(int auctionId, String sellerUsername)` — auction cancellation.
-- `void createUser(String username, String password, String role)` — admin user creation.
-- `List<User> getAllUsers()` — admin user listing.
-- `byte[] backupDatabase()` — admin DB backup.
-- `List<String> getAuditLogs(int lastNLines)` — admin log viewing.
-- **Remove** `importAuctionsFromCSV` (out of scope per final blueprint).
+| Method | Signature | Notes |
+|--------|-----------|-------|
+| login | `Session login(String u, String p)` | Returns token |
+| logout | `void logout(String token)` | Invalidates session |
+| serverTime | `String serverTime()` | UTC ISO-8601, for clock sync |
+| placeBid | `void placeBid(int id, String token, long cents, long expected)` | Stale detection |
+| getActiveAuctions | `List<AuctionItem> getActiveAuctions(String token)` | Gallery feed |
+| getAuctionById | `AuctionItem getAuctionById(int id, String token)` | Detail view |
+| getBidHistory | `List<Bid> getBidHistory(int id, String token)` | History table |
+| createAuction | `int createAuction(AuctionItem, byte[]1,2,3, String token)` | Returns new ID |
+| cancelAuction | `void cancelAuction(int id, String token)` | Zero bids only |
+| relistAuction | `int relistAuction(int id, String newEnd, String token)` | Creates new row |
+| getMyBids | `List<Bid> getMyBids(String token)` | Bidder activity |
+| getMyWonAuctions | `List<AuctionItem> getMyWonAuctions(String token)` | Bidder activity |
+| exportAuctionsToCSV | `byte[] exportAuctionsToCSV(String token)` | Seller dashboard |
+| createUser | `void createUser(String adminToken, ...)` | Admin only |
+| getAllUsers | `List<User> getAllUsers(String adminToken)` | Admin only |
+| backupDatabase | `byte[] backupDatabase(String adminToken)` | Via VACUUM INTO |
+| getAuditLogs | `List<String> getAuditLogs(String adminToken, int n)` | Admin only |
+| getThumbnail | `byte[] getThumbnail(int id, int idx, String token)` | LQIP |
+| getFullImage | `byte[] getFullImage(int id, int idx, String token)` | Full-res |
 
 ### 4. Database — SQLite via JDBC
 
 - Single file: `data/auction.db`.
 - Three tables: `users`, `auction_items`, `bids`.
-- `auction_items` uses a `status` TEXT column with CHECK constraint (`ACTIVE`, `SOLD`, `EXPIRED`, `CANCELLED`) instead of a boolean `active` flag. The `AuctionItem` model must be updated to use `String status` and add `category`, `img1`, `img2`, `img3` fields.
-- **All timestamps stored and transported as ISO-8601 String** (`"2026-05-06T14:30:00"`) in both the database and RMI models. Conversion to `LocalDateTime` happens only in display logic on the client. This eliminates serialization ambiguity.
-- `DatabaseHandler` owns the single `Connection` and provides all CRUD methods. Schema is auto-created on first run via `CREATE TABLE IF NOT EXISTS`.
-- Default admin account (`admin`/`admin`) is auto-seeded if the users table is empty.
+- **All monetary values are INTEGER cents** (see rationale below).
+- **All timestamps are ISO-8601 UTC strings with Z suffix.**
+- `PRAGMA foreign_keys = ON` enabled per connection.
+- Schema auto-created on first run via `CREATE TABLE IF NOT EXISTS`.
 
-### 5. Concurrency Model
+### 5. Currency Model — Integer Cents
+
+All prices and bids stored as `INTEGER` cents (not `DOUBLE` dollars).
+
+**Rationale:** Floating-point equality checks are brittle. In a bidding system where `clientExpectedPrice == currentPrice` must work reliably, integer comparison avoids rounding errors entirely.
+
+### 6. Concurrency Model
 
 **Server-side:**
-- `placeBid()` uses per-auction locking via `ConcurrentHashMap<Integer, ReentrantLock>` to prevent race conditions without blocking unrelated auctions.
-- Validation inside the lock: `bidder != seller`, `amount >= currentBid * 1.05`, `clientExpectedPrice == currentBid`, `status == ACTIVE`, `now < endTime`.
-- Snipe protection: if `endTime - now < 30s`, extend `endTime += 30s`.
-- **Auction Reaper** thread: a `ScheduledExecutorService` that fires every 1 second, queries for `status = 'ACTIVE' AND end_time < now()`, and transitions matching auctions to SOLD (if bids exist) or EXPIRED (if none). This is the mechanism that automatically closes auctions — no user action required.
+- Per-auction `ReentrantLock` map prevents race conditions.
+- `placeBid()` and `AuctionReaper` share the same lock for an auction.
+- Transactions wrap bid insert + auction update together.
 
 **Client-side:**
-- All RMI calls wrapped in `javafx.concurrent.Task` to keep the UI responsive.
-- Polling via `ScheduledExecutorService` every 2 seconds; results dispatched via `Platform.runLater()`.
-- Polling stops when the detail view is closed (cleanup in controller's `shutdown()` method).
+- All RMI calls in `javafx.concurrent.Task`.
+- Polling via `ScheduledExecutorService` every 2s.
+- Results via `Platform.runLater()`.
+- Thread cleanup on view exit.
 
-**Capacity:** 4 simultaneous clients polling every 2 seconds = ~8 RMI calls/second. Per-auction locking means concurrent bids on different items never block each other. Zero strain on the server.
+### 7. Snipe Protection with Cap
 
-### 6. Image Handling — LQIP Pattern
+- Trigger: `endTime - now < 30s`
+- Effect: `endTime = min(endTime + 30s, capEndTime)`
+- `capEndTime = originalEndTime + 10 minutes`
 
-**Upload (server-side):**
-- Client validates file size ≤2MB before sending. Server also validates on receipt.
-- Client sends `byte[]` + image index (1–3) during auction creation.
-- Server saves full image as `resources/images/<auctionId>_<index>.jpg`.
-- For index 1, server generates a 40×40 blurred thumbnail using Java's built-in `java.awt.image.BufferedImage` and `javax.imageio` (no external dependency) and saves to `resources/thumbs/<auctionId>_1.jpg`.
+### 8. Image Handling — LQIP Pattern
 
-**Download (client-side):**
-- Gallery: loads only thumbnails (tiny, fast).
-- Detail view: immediately shows thumbnail, starts background `Task` to load full image 1. Images 2 and 3 loaded on demand when the user clicks their thumbnail preview.
-- If image file is missing on disk, server returns a built-in placeholder byte array.
+- Server re-encodes all uploads to JPG (no external dependency).
+- Center-crop 40×40 thumbnail generated from image 1.
+- Missing images return built-in placeholder bytes.
+- Client caches images in-memory per session.
 
-### 7. Security
+### 9. Security
 
-- Passwords hashed with `SHA-256` via `java.security.MessageDigest` before storage.
-- No salt (acceptable for university demo scope).
-- Admin creates all accounts; no self-registration endpoint.
+- Passwords: SHA-256 hash (no salt, acceptable for demo).
+- Authentication: Session tokens with server-side map.
+- Admin-only registration.
+- Rate limiting on `login` and `placeBid` per-IP.
 
-### 8. Auction State Machine
-
-```
-         ┌─────────────┐
-         │   ACTIVE     │
-         └──────┬───────┘
-                │
-        ┌───────┼────────┐
-        │       │        │
-   (has bids) (no bids) (seller cancels,
-        │       │        0 bids)
-        ▼       ▼        ▼
-     ┌──────┐ ┌────────┐ ┌───────────┐
-     │ SOLD │ │EXPIRED │ │ CANCELLED │
-     └──────┘ └───┬────┘ └───────────┘
-                  │
-              (relist)
-                  │
-                  ▼
-              ┌────────┐
-              │ ACTIVE │
-              └────────┘
-```
-
-### 9. CSV Export Specification
-
-The CSV export is available to Sellers from the Seller Dashboard. It contains all of their auctions (any status).
-
-**Columns:**
-
-| Column | Source | Notes |
-|--------|--------|-------|
-| AuctionID | `auction_items.id` | |
-| Title | `auction_items.title` | |
-| Category | `auction_items.category` | |
-| StartingPrice | `auction_items.starting_price` | |
-| FinalPrice | `auction_items.current_bid` | Same as starting price if no bids |
-| Winner | `auction_items.highest_bidder_username` | Empty string if no bids |
-| Status | `auction_items.status` | ACTIVE, SOLD, EXPIRED, CANCELLED |
-| StartTime | `auction_items.start_time` | ISO-8601 |
-| EndTime | `auction_items.end_time` | ISO-8601 |
-
-The CSV is generated server-side (demonstrating server File I/O) and returned as `byte[]` over RMI. The client saves it via a JavaFX `FileChooser` save dialog (demonstrating client File I/O). Dual-sided File I/O usage.
-
-### 10. Audit Log Format
-
-Stored at `logs/audit.log`. Append-only. One line per event.
+### 10. Auction State Machine
 
 ```
-[2026-05-06T14:30:00] [INFO] admin: Created user 'seller1' with role SELLER
-[2026-05-06T14:31:15] [INFO] seller1: Created auction #5 'Vintage Guitar'
-[2026-05-06T14:32:00] [INFO] bidder1: Placed bid $150.00 on auction #5
-[2026-05-06T14:32:28] [INFO] REAPER: Auction #3 expired (no bids)
-[2026-05-06T14:32:28] [INFO] REAPER: Auction #4 sold to bidder2 for $320.00
-[2026-05-06T14:33:00] [WARN] bidder1: Bid rejected on auction #5 (stale price)
+ACTIVE ──(has bids)──→ SOLD
+  │
+  ├──(no bids)────────→ EXPIRED ─/relist/→ ACTIVE (new row)
+  │
+  └──(cancel, 0 bids)─→ CANCELLED
 ```
 
-Format: `[ISO-timestamp] [LEVEL] actor: description`
+### 11. Audit Log Format
 
-### 11. User Model Hierarchy (OOP)
+Append-only text at `logs/audit.log`.
 
 ```
-User (abstract, Serializable)
-├── Admin
-├── Seller
-└── Bidder
+[2026-05-09T14:30:00Z] [INFO] admin: Created user 'seller1' with role SELLER
+[2026-05-09T14:31:15Z] [INFO] seller1: Created auction #5 'Vintage Guitar'
+[2026-05-09T14:32:00Z] [INFO] bidder1: Placed bid 15000 on auction #5
+[2026-05-09T14:32:28Z] [INFO] REAPER: Auction #3 expired (no bids)
+[2026-05-09T14:32:28Z] [INFO] REAPER: Auction #4 sold to bidder2 for 32000
+[2026-05-09T14:33:00Z] [WARN] bidder1: Bid rejected on auction #5 (stale price)
 ```
-
-- `User` stores `username`, `passwordHash`, `roleType`.
-- Subclasses demonstrate inheritance. Role-based behaviour is driven by the `roleType` string at the controller level.
-- A Seller inherits all Bidder capabilities (can browse and bid on others' items) plus has access to the Seller Dashboard for managing their own listings and sales history.
 
 ### 12. JavaFX Views & Application Flow
 
-**Flow:**
 ```
-App Start → Connect Screen → Login Screen → Role-appropriate views
+App Start → Connect → Login → {Admin Panel | Gallery | Bidder Dashboard | Seller Dashboard}
 ```
-
-**Views:**
-
-| View | FXML | Controller | Roles | Purpose |
-|------|------|-----------|-------|---------|
-| Connect | `connect.fxml` | `ConnectController` | All (pre-login) | Auto-discover or manually enter server IP |
-| Login | `login.fxml` | `LoginController` | All | Authenticate with username/password |
-| Admin Panel | `admin_panel.fxml` | `AdminPanelController` | Admin | Create users, backup DB, view logs |
-| Auction Gallery | `gallery.fxml` | `GalleryController` | Seller, Bidder | Browse/filter/sort active auctions |
-| Auction Detail | `auction_detail.fxml` | `AuctionDetailController` | Seller, Bidder | View item, bid, see history, countdown |
-| Seller Dashboard | `seller_dashboard.fxml` | `SellerDashboardController` | Seller | Own auctions by status, create/cancel/relist, export CSV |
-
-- Modern styling via CSS (dark theme).
-- `TableView` for bid history and auction lists, `ImageView` for product images, `ComboBox` for categories.
-- Errors shown as `Alert` dialogs.
 
 ### 13. Categories
 
-Fixed set, implemented as a Java enum:
-- `ELECTRONICS`
-- `FURNITURE`
-- `ART`
-- `OTHER`
+Java enum: `ELECTRONICS`, `FURNITURE`, `ART`, `OTHER`.
 
 ---
 
 ## Testing Decisions
 
-### What makes a good test
-
-Tests verify **external behaviour through public interfaces**, not implementation details. A test should:
-- Set up state (seed the database or create objects).
-- Invoke a public method.
-- Assert on the observable outcome (return value, database state change, exception thrown).
-- Never assert on private field values or internal method call counts.
-
-### Modules to test
-
-| Module | Priority | What to test |
-|--------|----------|-------------|
-| **DatabaseHandler** | High | Schema auto-creation on fresh DB. User CRUD (insert, lookup, password hash verification). Auction CRUD (create, retrieve by ID, retrieve active, update status). Bid insertion and history retrieval ordered by timestamp. Edge cases: duplicate username, bid on non-existent auction. |
-| **AuctionServiceImpl** | High | Successful bid placement (amount ≥ currentBid × 1.05). Rejection: below minimum increment. Rejection: bidder is seller. Rejection: already highest bidder. Rejection: stale price mismatch. Rejection: auction not ACTIVE or past end time. Snipe protection: bid in last 30s extends end time. Concurrent bid placement: two threads — only one wins. |
-| **AuctionReaper** | Medium | Auction with bids past end time → SOLD. Auction without bids past end time → EXPIRED. Auction with future end time → unchanged. |
-| **FileHandler** | Medium | CSV export generates correct columns and data. Image file saving and retrieval. Placeholder returned when image file missing. Audit log append-only writing. |
-
-**How:** All database-backed tests use an in-memory SQLite database (`jdbc:sqlite::memory:`) for fast, isolated execution.
-
-### Modules NOT tested (and why)
-
-- **Controllers, ViewLoader, ClientLauncher:** Thin UI wiring. Testing requires TestFX, adding disproportionate complexity for a university project.
-- **RmiClientProvider, ServerLauncher, ConnectController:** Integration-only; tested manually during demo.
-
-### Prior art
-
-No existing tests in the codebase. Tests will be created from scratch using JUnit 5.
+See `docs/database.md#Testing` for full test matrix.
 
 ---
 
 ## Out of Scope
 
-1. **Internet deployment** — Local Wi-Fi only. No cloud, NAT traversal, or TLS.
-2. **RMI callbacks / server push** — Notifications use client polling.
-3. **User self-registration** — Admin-only account creation.
-4. **Reserve prices** — Starting price is the minimum.
-5. **Payment processing** — No real money.
-6. **Multi-module Maven** — Single-module (Option A).
-7. **Salted password hashing** — SHA-256 without salt is acceptable for demo.
-8. **Automated CI/CD** — Manual build and run.
-9. **Internationalisation (i18n)** — English only.
-10. **Accessibility (a11y)** — Not a grading criterion.
-11. **CSV import** — Only CSV export is implemented.
-12. **Admin approval of client connections** — Server is public; any client can connect.
+1. Internet deployment
+2. RMI callbacks / server push
+3. User self-registration
+4. Reserve prices
+5. Payment processing
+6. Multi-module Maven
+7. Salted password hashing
+8. CI/CD
+9. Internationalisation
+10. Accessibility
+11. CSV import
+12. Admin approval of connections
 
 ---
 
-## Further Notes
+## Demo Day & Grading
 
-### Demo Day Setup (1 server + 4 clients)
+See `docs/demo-runbook.md`.
 
-1. **Your PC (Server):** Run `mvn exec:java -Dexec.mainClass="com.auction.server.core.ServerLauncher"`. The server starts broadcasting on UDP port 9999.
-2. **Teammates' PCs (Clients):** Run `mvn javafx:run`. The Connect screen auto-discovers the server. Click "Connect", then log in.
-3. **Seed data:** The server auto-creates an `admin/admin` account on first run. Use Admin Panel to create seller and bidder accounts for teammates.
-4. **Demo script:** Have teammates simultaneously bid on the same auction to showcase real-time concurrency and snipe protection.
+---
 
-### Grading Alignment
+## Cross-References
 
-| Requirement | Where it appears |
-|-------------|-----------------|
-| OOP (inheritance, polymorphism, abstraction) | `User` → `Admin`/`Seller`/`Bidder` hierarchy, `Serializable`, `Comparable` |
-| Collections | `HashMap` auction cache, `PriorityQueue` bid tracking, `List` results, `Comparator` sorting |
-| Multithreading | `AuctionReaper` thread, `ReentrantLock` in `placeBid`, client polling thread, JavaFX `Task`, UDP broadcast thread |
-| File I/O | CSV export (server generates, client saves), audit log, image read/write (binary streams) |
-| JDBC | `DatabaseHandler` — full SQLite CRUD via `java.sql.*` |
-| RMI | `IAuctionService` remote interface, `UnicastRemoteObject`, `LocateRegistry` |
-| Networking (bonus) | UDP broadcast/discovery via `DatagramSocket` |
-| GUI | JavaFX with FXML, CSS styling, `TableView`, `ImageView`, `ComboBox`, `Alert`, `FileChooser` |
-
-### Risk Mitigations
-
-| Risk | Mitigation |
-|------|-----------|
-| `LocalDateTime` serialization issues over RMI | All timestamps are ISO-8601 Strings in models; parse to `LocalDateTime` only for display. |
-| Image file missing on disk | Server returns a built-in placeholder byte array. Client shows a default "no image" graphic. |
-| Server crash mid-auction | Reaper runs on startup and closes all overdue ACTIVE auctions immediately. |
-| Wi-Fi instability during demo | Client shows "Connection lost" alert. Polling auto-retries. Manual reconnect available via Connect screen. |
+| Topic | Document |
+|-------|----------|
+| UI Design | `docs/DESIGN.md` |
+| Architecture | `docs/architecture.md` |
+| Database | `docs/database.md` |
+| Networking | `docs/networking.md` |
+| Demo Runbook | `docs/demo-runbook.md` |
