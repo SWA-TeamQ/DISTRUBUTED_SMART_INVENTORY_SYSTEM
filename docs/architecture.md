@@ -21,212 +21,90 @@ An English auction is an open-outcry ascending auction where:
 
 ---
 
-## 2. Key Terms & Components
+## 2. Server Architecture: Deep Modules
 
-| Term | Description |
-|------|-------------|
-| **Server** | Headless RMI service; owns SQLite DB, business logic |
-| **Client** | JavaFX desktop app; three roles (Admin/Seller/Bidder) |
-| **RMI** | Primary communication channel; client polls server |
-| **UDP Broadcast** | Server discovery; server broadcasts every 2s on port 9999 |
-| **Admin** | Super-user; creates accounts, backups, views logs |
-| **Seller** | Can create/cancel/relist auctions, export CSV |
-| **Bidder** | Can browse and bid on others' auctions |
+The RTDAS server is built using a **Deep Module** architecture to ensure high **leverage** and **locality**.
+
+| Module | Interface (Seam) | Implementation (Depth) |
+|--------|------------------|------------------------|
+| **AuctionManager** | `placeBid`, `createAuction` | All bidding invariants (5%, snipe, stale), transaction safety |
+| **LifecycleManager** | `sweepOverdue` | State machine (ACTIVE -> SOLD/EXPIRED), termination logic |
+| **ImageStore** | `saveAuctionImages` | Filesystem I/O + Database path synchronization |
+| **AuctionServiceImpl** | `IAuctionService` (RMI) | Thin **Adapter**; handles networking and session auth only |
+
+### Why This Design?
+
+- **Locality**: Bidding rules (e.g., "5% increment") live only in `AuctionManager`. Deleting RMI doesn't lose this logic.
+- **Leverage**: The RMI service is a simple pass-through. It is "shallow" by design, delegating complex behavior to "deep" managers.
+- **Testability**: Managers can be unit-tested without starting RMI or mocking network exceptions.
 
 ---
 
-## 3. Auction Rules & Mechanics
+## 3. Component Interactions
+
+### Bidding Flow
+
+1. **Client** calls `placeBid` over RMI.
+2. **AuctionServiceImpl** (Adapter) validates session token.
+3. **AuctionManager** (Core) enforces all domain rules:
+    - Minimum increment (5%)
+    - Self-bid prevention
+    - Stale data detection (optimistic locking)
+    - Snipe protection (extends timer)
+4. **AuctionRepository** & **BidRepository** persist changes.
+
+### Expiration Flow (The Reaper)
+
+1. **AuctionReaper** (Trigger) runs every 1 second.
+2. It calls `LifecycleManager.sweepOverdue()`.
+3. **LifecycleManager** identifies overdue auctions and executes state transitions.
+4. Transitions are logged to the database and audit trail.
+
+---
+
+## 4. Key Mechanics
 
 ### Minimum Increment (5% Rule)
 
+Enforced by `AuctionManager`:
+```java
+if (amount < currentBid * 1.05) throw new InsufficientBidException();
 ```
-if bids_exist:
-    min_bid = current_bid * 1.05
-else:
-    min_bid = starting_price
-```
-
-**Rationale:** Prevents penny-sniping while keeping mathematics simple.
 
 ### Snipe Protection
 
-- **Trigger:** Bid placed when `endTime - now < 30s`
-- **Effect:** `endTime = min(endTime + 30s, capEndTime)`
-- **Cap:** `capEndTime = originalEndTime + 10 minutes`
-
-**Rationale:** Discourages last-second steals without allowing infinite extension wars.
-
-### Self-Bid Prevention
-
-Server validates `bidderUsername != sellerUsername` before accepting bid.
-
-### Duplicate Bid Prevention
-
-Server tracks `highestBidderUsername`; rejects bid if already winning.
+Triggered by `AuctionManager` during bid placement if `now` is within 30s of `endTime`.
 
 ---
 
-## 4. Auction Lifecycle State Machine
+## 5. RMI Interface Contract (IAuctionService)
 
-```
-                    ┌─────────────┐
-                    │   ACTIVE     │
-                    └──────┬───────┘
-                           │
-              ┌────────────┼────────────┐
-              │            │            │
-       (has bids)     (no bids)   (seller cancels, 0 bids)
-              │            │            │
-              ▼            ▼            ▼
-        ┌────────┐   ┌────────┐   ┌──────────┐
-        │  SOLD  │   │EXPIRED│   │CANCELLED │
-        └────────┘   └───┬────┘   └──────────┘
-                         │
-                    (relist via)
-                    ┌────────┐
-                    │ ACTIVE │
-                    └────────┘
-```
+Full contract in `shared/interfaces/IAuctionService.java`.
 
-| State | Entry Condition | Exit Condition |
-|-------|-----------------|----------------|
-| ACTIVE | Created by seller | Timer expires OR seller cancels |
-| SOLD | Timer expired + bids exist | None (terminal) |
-| EXPIRED | Timer expired + no bids | Relisted (creates new ACTIVE) |
-| CANCELLED | Seller action | None (terminal) |
+### Key Methods
+
+| Method | Role | Delegation |
+|--------|------|------------|
+| `placeBid(...)` | Adapter | `AuctionManager.placeBid(...)` |
+| `createAuction(...)` | Adapter | `AuctionManager.createAuction(...)` + `ImageStore` |
+| `getActiveAuctions()` | Adapter | `AuctionManager.getActiveAuctions()` |
 
 ---
 
-## 5. The Auction Reaper
+## 6. Concurrency Model
 
-A background `ScheduledExecutorService` running every 1 second.
+### Server-Side Locking
 
-### Responsibilities
+`AuctionManager` manages per-auction concurrency using fine-grained locks (or database transactions) to ensure atomic bid updates.
 
-1. Query for `status='ACTIVE' AND end_time < NOW()`
-2. Acquire per-auction `ReentrantLock`
-3. If bids exist → transition to `SOLD`
-4. If no bids → transition to `EXPIRED`
-5. On server startup: sweep any overdue auctions from crash recovery
+### Background Lifecycle
 
-### Why a Background Thread?
-
-- **Decouples time from user action:** Auction closes automatically
-- **Demonstrates multithreading:** Independent from request threads
-- **Prevents missed closures:** Even if no clients are connected
+`AuctionReaper` runs as a daemon thread, ensuring terminal states are reached even if no users are active.
 
 ---
 
-## 6. RMI Interface Contract (IAuctionService)
+## 7. Out of Scope
 
-Full contract defined in `shared/interfaces/IAuctionService.java`.
-
-### Key Methods (selected)
-
-| Method | Return | Auth | Purpose |
-|--------|--------|------|---------|
-| `login(String, String)` | `Session` | None | Returns token for session |
-| `logout(String token)` | `void` | Token | Invalidates session |
-| `serverTime()` | `String` | None | UTC ISO-8601 for clock sync |
-| `getActiveAuctions()` | `List<AuctionItem>` | Token | Gallery view |
-| `getAuctionById(int)` | `AuctionItem` | Token | Detail view |
-| `placeBid(int, token, long cents, long expected)` | `void` | Token | Bid with stale detection |
-| `createAuction(AuctionItem, byte[]...)` | `int` | Token | Seller creates |
-| `cancelAuction(int, token)` | `void` | Token | Seller cancels |
-| `relistAuction(int, end, token)` | `int` | Token | Creates new auction from expired |
-| `getMyBids(token)` | `List<Bid>` | Token | Bidder activity |
-| `getMyWonAuctions(token)` | `List<AuctionItem>` | Token | Bidder activity |
-| `exportAuctionsToCSV(token)` | `byte[]` | Token | Seller dashboard |
-| `createUser(adminToken, ...)` | `void` | Admin token | Admin creates user |
-| `backupDatabase(adminToken)` | `byte[]` | Admin token | Admin backup |
-| `getAuditLogs(adminToken, N)` | `List<String>` | Admin token | Admin monitoring |
-
-### Why Sessions?
-
-**Decision:** Every mutating call requires a session token issued by `login()`.
-
-**Rationale:** Without tokens, any client can impersonate any user by passing their username. Tokens provide:
-- Proof of authentication
-- Ability to revoke sessions (logout)
-- Path to implement rate-limiting per session
-
----
-
-## 7. Concurrency Model
-
-### Server-Side Bidding Flow
-
-```java
-// Per-auction lock map
-ConcurrentHashMap<Integer, ReentrantLock> locks = new ConcurrentHashMap<>();
-
-public void placeBid(int auctionId, String token, long cents, long expected) {
-    User user = sessionManager.validate(token);
-    AuctionItem item = getAuctionById(auctionId);
-    
-    ReentrantLock lock = locks.computeIfAbsent(auctionId, k -> new ReentrantLock());
-    lock.lock();
-    try {
-        // All validations inside lock
-        validateFreshness(item.getCurrentBidCents(), expected);
-        validateNotSelfBid(item, user);
-        validateNotAlreadyWinning(item, user);
-        validateMinimumIncrement(item, cents);
-        validateActiveAndNotExpired(item);
-        
-        // Atomic update in single transaction
-        updateBidAndAuction(item, user, cents, lock);
-    } finally {
-        lock.unlock();
-    }
-}
-```
-
-### Why Per-Auction Locks?
-
-- **Fine-grained concurrency:** Bids on different auctions don't block each other
-- **Simple reasoning:** Each lock protects exactly one auction's state
-- **Small footprint:** Only active auctions have locks in the map
-
-### Client-Side Concurrency
-
-- **All RMI calls in `javafx.concurrent.Task`** → UI never freezes
-- **Polling via `ScheduledExecutorService`** every 2s
-- **Results delivered via `Platform.runLater()`**
-- **Thread cleanup:** Polling stops when view is closed (`shutdown()` method)
-
----
-
-## 8. Clock Synchronization
-
-**Problem:** Client clocks may drift from server clock, causing:
-- Countdown inaccuracies
-- Wrong "snipe" detection (if `now` is from client)
-
-**Solution:**
-1. Client calls `serverTime()` on connect, stores offset
-2. All countdowns use `offset + clientNow = serverNow`
-3. This is **not a strict NTP**; acceptable for a LAN demo
-
----
-
-## 9. Error Handling Philosophy
-
-| Error | Client Behavior | Server Behavior |
-|-------|-----------------|-----------------|
-| Bad token | Alert + redirect to Connect | `UnauthorizedException` |
-| Stale price | Shake input, show new price | `StaleDataException` |
-| Self-bid | Alert explaining | `SelfBidException` |
-| Already winning | Alert | `DuplicateBidException` |
-| Rate limited | Alert with "try again in Xs" | `RateLimitedException` |
-| Connection lost | "Connection lost" banner, retry every 5s | N/A (client-side) |
-
----
-
-## 10. Out of Scope (Architecture)
-
-- RMI callbacks/push notifications
-- Internet deployment / NAT traversal
-- JWT or OAuth; simple UUID tokens
-- Salted password hashing; SHA-256 only
-- Horizontal scaling; single-server design
+- RMI callbacks (clients must poll).
+- Salted password hashing (using SHA-256 for demo simplicity).
+- Horizontal scaling.
