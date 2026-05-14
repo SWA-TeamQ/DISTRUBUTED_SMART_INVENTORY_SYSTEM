@@ -5,18 +5,16 @@ import com.auction.shared.interfaces.IAuctionService;
 import com.auction.shared.models.AuctionItem;
 import com.auction.shared.models.Bid;
 import com.auction.shared.models.User;
-import com.auction.server.repository.AuctionRepository;
-import com.auction.server.repository.BidRepository;
-import com.auction.server.repository.DatabaseManager;
+import com.auction.server.core.AuctionManager;
+import com.auction.server.core.LifecycleManager;
+import com.auction.server.core.ImageStore;
 import com.auction.server.repository.UserRepository;
-import com.auction.server.repository.FileHandler;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
+
 
 /**
  * RMI service implementation. Extends UnicastRemoteObject for automatic RMI export.
@@ -25,30 +23,18 @@ import java.util.concurrent.locks.ReentrantLock;
 public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionService {
     private static final long serialVersionUID = 1L;
 
-    private final DatabaseManager dbManager;
-    private final UserRepository userRepo;
-    private final AuctionRepository auctionRepo;
-    private final BidRepository bidRepo;
-    private final FileHandler fileHandler;
-    private final ImageManager imageManager;
+    private final AuctionManager auctionManager;
+    private final LifecycleManager lifecycleManager;
+    private final ImageStore imageStore;
+    private final UserRepository userRepo; // Kept for auth
 
-    /** Per-auction locks for synchronized bidding. */
-    private final ConcurrentHashMap<Integer, ReentrantLock> auctionLocks = new ConcurrentHashMap<>();
-
-    public AuctionServiceImpl(DatabaseManager dbManager, FileHandler fileHandler,
-                               ImageManager imageManager) throws RemoteException {
+    public AuctionServiceImpl(UserRepository userRepo, AuctionManager auctionManager,
+                              LifecycleManager lifecycleManager, ImageStore imageStore) throws RemoteException {
         super();
-        this.dbManager = dbManager;
-        this.userRepo = new UserRepository(dbManager.getConnection());
-        this.auctionRepo = new AuctionRepository(dbManager.getConnection());
-        this.bidRepo = new BidRepository(dbManager.getConnection());
-        this.fileHandler = fileHandler;
-        this.imageManager = imageManager;
-    }
-
-    /** Gets or creates a lock for a specific auction ID. */
-    private ReentrantLock getLock(int auctionId) {
-        return auctionLocks.computeIfAbsent(auctionId, k -> new ReentrantLock());
+        this.userRepo = userRepo;
+        this.auctionManager = auctionManager;
+        this.lifecycleManager = lifecycleManager;
+        this.imageStore = imageStore;
     }
 
     // --- Authentication ---
@@ -67,131 +53,64 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
     // --- Auction Browsing ---
     @Override
     public List<AuctionItem> getActiveAuctions() throws RemoteException {
-        return auctionRepo.findActiveAuctions();
+        // Delegate to repo through manager or directly if simple read
+        // For architectural purity, we could add a read interface to AuctionManager, 
+        // but since it's a simple find, direct repo access in service is acceptable 
+        // as long as no logic is duplicated.
+        // However, let's keep it clean.
+        return auctionManager.getActiveAuctions();
     }
 
     @Override
     public AuctionItem getAuctionById(int auctionId) throws RemoteException {
-        return auctionRepo.findAuctionById(auctionId);
+        return auctionManager.getAuctionById(auctionId);
     }
 
     // --- Bidding ---
     @Override
     public void placeBid(int auctionId, String bidderUsername, double amount,
                           double clientExpectedPrice) throws RemoteException, AuctionException {
-        ReentrantLock lock = getLock(auctionId);
-        lock.lock();
-        try {
-            AuctionItem item = auctionRepo.findAuctionById(auctionId);
-            if (item == null) throw new AuctionException("Auction not found");
-            if (!com.auction.shared.Constants.STATUS_ACTIVE.equals(item.getStatus())) {
-                throw new com.auction.shared.exceptions.AuctionClosedException("Auction is closed");
-            }
-            if (bidderUsername.equals(item.getSellerUsername())) {
-                throw new com.auction.shared.exceptions.SelfBidException("Cannot bid on your own auction");
-            }
-            if (bidderUsername.equals(item.getHighestBidderUsername())) {
-                throw new com.auction.shared.exceptions.DuplicateBidException("You are already the highest bidder");
-            }
-            if (clientExpectedPrice != item.getCurrentBid()) {
-                throw new com.auction.shared.exceptions.StaleDataException("Price has changed. Please refresh and try again.");
-            }
-            if (amount < item.getCurrentBid() * 1.05 && amount > 0) {
-                // First bid is allowed to be exactly starting price or more, subsequent bids must be +5%
-                if (!(item.getHighestBidderUsername() == null && amount >= item.getStartingPrice())) {
-                    throw new com.auction.shared.exceptions.InsufficientBidException("Bid must be at least 5% higher than current bid");
-                }
-            }
-
-            java.time.Instant now = java.time.Instant.now();
-            java.time.Instant endTime = java.time.Instant.parse(item.getEndTime());
-            if (now.isAfter(endTime)) {
-                throw new com.auction.shared.exceptions.AuctionClosedException("Auction time has expired");
-            }
-
-            // Snipe protection
-            if (java.time.Duration.between(now, endTime).getSeconds() < 30) {
-                endTime = now.plusSeconds(30);
-                auctionRepo.updateAuctionEndTime(auctionId, endTime.toString());
-            }
-
-            auctionRepo.updateAuctionBid(auctionId, amount, bidderUsername);
-            
-            Bid bid = new Bid();
-            bid.setAuctionItemId(auctionId);
-            bid.setBidderUsername(bidderUsername);
-            bid.setAmount(amount);
-            bid.setTimestamp(now.toString());
-            bidRepo.insertBid(bid);
-            
-            // Log audit
-            // We assume fileHandler is used to write audit logs later
-            // fileHandler.appendAuditLog("...");
-        } finally {
-            lock.unlock();
-        }
+        auctionManager.placeBid(auctionId, bidderUsername, amount, clientExpectedPrice);
     }
 
     @Override
     public List<Bid> getBidHistory(int auctionId) throws RemoteException {
-        return bidRepo.findBidsByAuctionId(auctionId);
+        return auctionManager.getBidHistory(auctionId);
     }
 
     // --- Auction Management ---
     @Override
-    public int createAuction(AuctionItem item, byte[] image1, byte[] image2, byte[] image3)
-            throws RemoteException {
-        item.setStatus(com.auction.shared.Constants.STATUS_ACTIVE);
-        int auctionId = auctionRepo.insertAuction(item);
-        
-        String p1 = null, p2 = null, p3 = null;
-        if (image1 != null && image1.length > 0) p1 = imageManager.saveImage(auctionId, 1, image1);
-        if (image2 != null && image2.length > 0) p2 = imageManager.saveImage(auctionId, 2, image2);
-        if (image3 != null && image3.length > 0) p3 = imageManager.saveImage(auctionId, 3, image3);
-        
-        if (p1 != null || p2 != null || p3 != null) {
-            auctionRepo.updateAuctionImages(auctionId, p1, p2, p3);
-        }
+    public int createAuction(AuctionItem item, byte[] i1, byte[] i2, byte[] i3) throws RemoteException {
+        int auctionId = auctionManager.createAuction(item);
+        imageStore.saveAuctionImages(auctionId, i1, i2, i3);
         return auctionId;
     }
 
     @Override
-    public void cancelAuction(int auctionId, String sellerUsername)
-            throws RemoteException, AuctionException {
-        ReentrantLock lock = getLock(auctionId);
-        lock.lock();
-        try {
-            AuctionItem item = auctionRepo.findAuctionById(auctionId);
-            if (item == null) throw new AuctionException("Auction not found");
-            if (!item.getSellerUsername().equals(sellerUsername)) {
-                throw new AuctionException("Only the seller can cancel this auction");
-            }
-            if (bidRepo.countBidsByAuctionId(auctionId) > 0) {
-                throw new AuctionException("Cannot cancel auction with active bids");
-            }
-            auctionRepo.updateAuctionStatus(auctionId, com.auction.shared.Constants.STATUS_CANCELLED);
-        } finally {
-            lock.unlock();
-        }
+    public void cancelAuction(int auctionId, String sellerUsername) throws RemoteException, AuctionException {
+        auctionManager.cancelAuction(auctionId, sellerUsername);
     }
 
     // --- Image Handling ---
     @Override
     public byte[] getThumbnail(int auctionId, int imageIndex) throws RemoteException {
-        // TODO: delegate to ImageManager
-        return new byte[0];
+        return imageStore.loadThumbnail(auctionId);
     }
 
     @Override
     public byte[] getFullImage(int auctionId, int imageIndex) throws RemoteException {
-        // TODO: delegate to ImageManager
-        return new byte[0];
+        AuctionItem item = auctionManager.getAuctionById(auctionId);
+        String path = null;
+        if (imageIndex == 1) path = item.getImg1();
+        else if (imageIndex == 2) path = item.getImg2();
+        else if (imageIndex == 3) path = item.getImg3();
+        return imageStore.loadFullImage(path);
     }
 
     // --- Data Export ---
     @Override
     public byte[] exportAuctionsToCSV(String sellerUsername) throws RemoteException {
-        // TODO: query seller's auctions, generate CSV via FileHandler
+        // TODO: This should probably go to a ReportingManager deep module
         return new byte[0];
     }
 
@@ -221,14 +140,14 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
 
     @Override
     public byte[] backupDatabase(String adminUsername) throws RemoteException, AuctionException {
-        // TODO: verify admin, return DB file bytes
+        // TODO: delegate to a SystemManager
         return new byte[0];
     }
 
     @Override
     public List<String> getAuditLogs(String adminUsername, int lastNLines)
             throws RemoteException, AuctionException {
-        // TODO: verify admin, read last N lines from audit log
+        // TODO: delegate to SystemManager/AuditLog
         return Collections.emptyList();
     }
 }

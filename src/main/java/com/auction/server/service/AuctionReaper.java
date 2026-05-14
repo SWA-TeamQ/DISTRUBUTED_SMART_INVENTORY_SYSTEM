@@ -1,7 +1,9 @@
 package com.auction.server.service;
 
 import com.auction.server.repository.AuctionRepository;
+import com.auction.server.core.LifecycleManager;
 import com.auction.shared.Constants;
+
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -16,11 +18,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class AuctionReaper {
 
-    private final AuctionRepository auctionRepo;
+    private final LifecycleManager lifecycleManager;
     private ScheduledExecutorService scheduler;
 
-    public AuctionReaper(AuctionRepository auctionRepo) {
-        this.auctionRepo = auctionRepo;
+    public AuctionReaper(LifecycleManager lifecycleManager) {
+        this.lifecycleManager = lifecycleManager;
     }
 
     /** Start the reaper. Call once at server startup. */
@@ -30,7 +32,7 @@ public class AuctionReaper {
             t.setDaemon(true);
             return t;
         });
-        scheduler.scheduleAtFixedRate(this::reap, 0,
+        scheduler.scheduleAtFixedRate(lifecycleManager::sweepOverdue, 0,
                 Constants.REAPER_INTERVAL_SECONDS, TimeUnit.SECONDS);
     }
 
@@ -41,18 +43,9 @@ public class AuctionReaper {
         }
     }
 
-    /**
-     * Single reap cycle. Finds overdue ACTIVE auctions, transitions them.
-     * Package-private for testing.
-     */
-    void reap() {
-        // TODO: query for ACTIVE auctions where end_time < now
-        // TODO: for each, check if bids exist -> SOLD or EXPIRED
-        // TODO: log transitions to audit log
-    }
-
     /** Crash recovery: expire all overdue ACTIVE auctions. Call once at startup. */
     public void recoverFromCrash() {
-        reap(); // same logic
+        lifecycleManager.sweepOverdue();
     }
 }
+
