@@ -1,33 +1,11 @@
 ```
-# Compiled and build artifacts
-*.pyc
-__pycache__/
-*.o
-*.obj
-*.class
-*.exe
-*.dll
-*.so
-*.a
-*.out
-# Dependencies
-.venv/
-venv/
-node_modules/
+# Java/Maven build artifacts
 target/
-.mypy_cache/
-.pytest_cache/
-# Logs and temp files
-*.log
-*.tmp
-*.swp
-# Environment
-.env
-.env.local
-*.env.*
-# Editors
-.vscode/
-.idea/
-# Database
-data/auction.db
+dependency-reduced-pom.xml
+
+# Test reports
+**/surefire-reports/
+
+# Compiled classes
+**/maven-status/
 ```
