@@ -1,11 +1,7 @@
 ```
-# Java/Maven build artifacts
+# Java build artifacts
 target/
-dependency-reduced-pom.xml
 
 # Test reports
-**/surefire-reports/
-
-# Compiled classes
-**/maven-status/
+target/surefire-reports/
 ```
