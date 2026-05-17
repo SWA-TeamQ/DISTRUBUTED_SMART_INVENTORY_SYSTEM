@@ -1,7 +1,4 @@
 ```
-# Java build artifacts
-target/
-
-# Test reports
-target/surefire-reports/
+# Editors
+.vscode/
 ```
