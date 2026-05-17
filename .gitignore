@@ -1,4 +1,9 @@
-```
+```gitignore
 # Editors
 .vscode/
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
 ```
