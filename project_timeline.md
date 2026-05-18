@@ -2,7 +2,7 @@
 
 ## Overview
 - **Duration**: 6 Days (Starting Tomorrow)
-- **Team Size**: 3 Members
+- **Team Size**: 2 Members
 - **Goal**: Complete remaining implementation, integration, and testing of RTDAS
 - **Current Status**: ✅ Infrastructure Complete | ⚠️ Controllers Need Implementation
 
@@ -40,127 +40,110 @@
 
 ## Revised Team Roles - Module-Based Ownership
 
-Each member owns **full-stack features** (backend logic + RMI exposure + GUI controller) for their assigned modules:
+Each member owns full-stack features independently, and only shared interfaces require coordination:
 
-### Member 1 (M1) - Authentication & User Management Module
-**Owns**: Login flow, user creation, admin operations
-- **Backend**: User authentication, admin operations in `AuctionServiceImpl`
-- **RMI**: Ensure auth methods work correctly
-- **GUI**: `LoginController`, `ConnectController`
-- **Integration**: Full login → dashboard flow
+### Member 1 (M1) - Authentication, User Management, and Admin Ops
+**Owns**: Login flow, server connection, user creation, admin operations, backup/logs
+- **Backend**: Auth/admin service methods in `AuctionServiceImpl`
+- **RMI**: Authentication and admin methods
+- **GUI**: `LoginController`, `ConnectController`, `AdminPanelController`
+- **Integration**: Login → dashboard → admin workflow
 
-### Member 2 (M2) - Auction Bidding Module  
-**Owns**: Auction browsing, bidding system, real-time updates
-- **Backend**: Bid validation enhancements, polling support
-- **RMI**: Optimize bid methods, ensure thread safety
-- **GUI**: `GalleryController`, `AuctionDetailController`, `PollingService`
-- **Integration**: Full browse → bid → poll flow
-
-### Member 3 (M3) - Seller & Admin Module
-**Owns**: Auction creation, seller dashboard, admin panel
-- **Backend**: Create auction, CSV export, backup, audit logs
-- **RMI**: Complete TODO methods in `AuctionServiceImpl`
-- **GUI**: `SellerDashboardController`, `AdminPanelController`
-- **Integration**: Full create/manage auction flow, admin operations
+### Member 2 (M2) - Auction Bidding, Real-Time, and Seller Ops
+**Owns**: Auction browsing, bidding system, real-time updates, seller dashboard
+- **Backend**: Bid validation, seller operations, CSV export
+- **RMI**: Bid methods and seller methods
+- **GUI**: `GalleryController`, `AuctionDetailController`, `PollingService`, `SellerDashboardController`
+- **Integration**: Browse → bid → poll → create/manage auction flow
 
 ---
 
-## Day-by-Day Schedule (Revised for Remaining Work)
+## Day-by-Day Schedule (Revised for 2 Members)
 
 ### Day 1: Connection & Authentication Flow
 **Theme**: Establish server connection and login system
 
-| Time | M1 (Auth Module) | M2 (Bidding Module) | M3 (Seller/Admin Module) |
-|------|-----------------|---------------------|--------------------------|
-| Morning | - Implement `ConnectController`<br>- Add UDP discovery or manual connect<br>- Store server connection | - Implement `PollingService`<br>- Add scheduled executor logic<br>- Test with mock data | - Complete `exportAuctionsToCSV()` in service<br>- Complete `backupDatabase()` in service<br>- Complete `getAuditLogs()` in service |
-| Afternoon | - Implement `LoginController`<br>- Call RMI login<br>- Navigate based on role | - Start `GalleryController` structure<br>- Load active auctions from RMI<br>- Display auction cards | - Start `SellerDashboardController` structure<br>- Load seller's auctions<br>- Display in table |
-| Evening Integration | **Joint Session (1.5 hours)**<br>- Test: Connect → Login → Dashboard navigation<br>- Verify role-based routing (Bidder/Seller/Admin)<br>- Test connection error handling |
+| Time | M1 (Auth/Admin) | M2 (Bidding/Seller) |
+|------|-----------------|----------------------|
+| Morning | Implement `ConnectController`; add UDP discovery or manual connect; store server connection | Implement `PollingService`; add scheduled executor logic; test with mock data |
+| Afternoon | Implement `LoginController`; call RMI login; navigate based on role | Start `GalleryController`; load active auctions; display auction cards |
+| Evening Integration | **Joint Session (1.5 hours)**: test connect → login → dashboard navigation; verify role routing; test connection errors | **Joint Session (1.5 hours)**: same checkpoint |
 
 **Deliverables**:
-- ✅ Server connection works (UDP or manual)
-- ✅ Login authenticates via RMI
-- ✅ Users routed to correct dashboard by role
-
----
+- Server connection works (UDP or manual)
+- Login authenticates via RMI
+- Users routed to correct dashboard by role
 
 ### Day 2: Auction Browsing & Gallery
 **Theme**: View and explore active auctions
 
-| Time | M1 (Auth Module) | M2 (Bidding Module) | M3 (Seller/Admin Module) |
-|------|-----------------|---------------------|--------------------------|
-| Morning | - Add session management<br>- Implement logout functionality<br>- Test re-authentication | - Complete `GalleryController`<br>- Fetch thumbnails via RMI<br>- Add click-to-detail navigation | - Implement create auction form in `SellerDashboardController`<br>- Add image picker for 3 images<br>- Validate form inputs |
-| Afternoon | - Help M2 with thumbnail loading if needed | - Implement image loading optimization<br>- Add lazy loading for gallery<br>- Test with many auctions | - Wire up create auction to RMI<br>- Handle success/error feedback<br>- Test auction appears in gallery |
-| Evening Integration | **Joint Session (1.5 hours)**<br>- Test: Login → Browse Gallery → View Details<br>- Create auction → Appears in gallery<br>- Test thumbnail loading performance |
+| Time | M1 (Auth/Admin) | M2 (Bidding/Seller) |
+|------|-----------------|----------------------|
+| Morning | Add session management; implement logout; test re-authentication | Complete `GalleryController`; fetch thumbnails; add click-to-detail navigation |
+| Afternoon | Start `AdminPanelController`; create user form; list all users table | Implement create auction form in `SellerDashboardController`; add image picker; validate inputs |
+| Evening Integration | Test login → gallery → details; test new user creation | Test create auction flow; verify auction appears in gallery |
 
 **Deliverables**:
-- ✅ Gallery displays all active auctions with thumbnails
-- ✅ Clicking auction opens detail view
-- ✅ Sellers can create new auctions
-
----
+- Gallery displays all active auctions with thumbnails
+- Clicking auction opens detail view
+- Sellers can create new auctions
 
 ### Day 3: Bidding System & Real-Time Updates
 **Theme**: Place bids and see live updates
 
-| Time | M1 (Auth Module) | M2 (Bidding Module) | M3 (Seller/Admin Module) |
-|------|-----------------|---------------------|--------------------------|
-| Morning | - Start `AdminPanelController`<br>- Create user form<br>- List all users table | - Complete `AuctionDetailController`<br>- Display auction info & current bid<br>- Implement bid placement UI | - Add cancel auction feature<br>- Add CSV export button<br>- Test seller restrictions |
-| Afternoon | - Complete admin user creation<br>- Wire to RMI `createUser()`<br>- Test new user can login | - Integrate `PollingService` in detail view<br>- Update UI on poll callback (Platform.runLater)<br>- Show bid history | - Start `AdminPanelController` backup/logs sections<br>- Wire backup button<br>- Display audit logs |
-| Evening Integration | **Joint Session (2 hours)**<br>- Test: Place bid → Poll updates UI<br>- Multiple clients bidding simultaneously<br>- Test stale data detection<br>- Admin creates user → User can login |
+| Time | M1 (Auth/Admin) | M2 (Bidding/Seller) |
+|------|-----------------|----------------------|
+| Morning | Complete admin user creation; wire `createUser()`; test new user can login | Complete `AuctionDetailController`; display auction info and current bid; implement bid UI |
+| Afternoon | Expand admin backup/logs sections; wire backup button; display audit logs | Integrate `PollingService` in detail view; update UI on poll callback; show bid history |
+| Evening Integration | Test bid → poll updates UI; multiple clients bidding; stale data detection | Test admin creates user → user can login |
 
 **Deliverables**:
-- ✅ Bids can be placed via detail view
-- ✅ Polling updates price/bidder in real-time
-- ✅ Admin can create users and view system data
-
----
+- Bids can be placed via detail view
+- Polling updates price/bidder in real-time
+- Admin can create users and view system data
 
 ### Day 4: Seller Dashboard & Auction Management
 **Theme**: Complete seller features and polish
 
-| Time | M1 (Auth Module) | M2 (Bidding Module) | M3 (Seller/Admin Module) |
-|------|-----------------|---------------------|--------------------------|
-| Morning | - Add password change feature<br>- Implement user profile view<br>- Test security | - Add bid validation feedback<br>- Show error messages for invalid bids<br>- Add countdown timer display | - Complete seller's auction list with status<br>- Add relist ended auctions feature<br>- Test cancellation rules |
-| Afternoon | - Polish login error messages<br>- Add "remember me" option<br>- Test edge cases | - Optimize polling interval<br>- Add pause/resume on view switch<br>- Memory leak check | - Polish admin panel layout<br>- Add confirmation dialogs<br>- Test all admin operations |
-| Evening Integration | **Joint Session (2 hours)**<br>- Full seller flow: Create → Monitor → Cancel/Export<br>- Full admin flow: Create user → View logs → Backup<br>- Test concurrent sellers |
+| Time | M1 (Auth/Admin) | M2 (Bidding/Seller) |
+|------|-----------------|----------------------|
+| Morning | Add password change feature; implement user profile view; test security | Complete seller auction list with status; add relist ended auctions; test cancellation rules |
+| Afternoon | Polish login error messages; add remember-me option; test edge cases | Polish seller/admin layouts; add confirmation dialogs; test all operations |
+| Evening Integration | Test full admin flow: create user → view logs → backup | Test full seller flow: create → monitor → cancel/export |
 
 **Deliverables**:
-- ✅ Sellers can manage all their auctions
-- ✅ Admin panel fully functional
-- ✅ All error states handled gracefully
-
----
+- Sellers can manage all their auctions
+- Admin panel fully functional
+- All error states handled gracefully
 
 ### Day 5: Comprehensive Testing & Bug Fixes
 **Theme**: Find and fix all issues
 
-| Time | M1 (Auth Module) | M2 (Bidding Module) | M3 (Seller/Admin Module) |
-|------|-----------------|---------------------|--------------------------|
-| Morning | - Test auth edge cases<br>- Concurrent logins<br>- Session timeout | - Stress test bidding<br>- 10+ concurrent bidders<br>- Network disconnection scenarios | - Test all seller operations<br>- Large image uploads<br>- CSV export verification |
-| Afternoon | - Fix discovered bugs<br>- Performance profiling<br>- Memory optimization | - Fix race conditions<br>- Optimize RMI calls<br>- Reduce polling overhead | - Fix UI glitches<br>- CSS refinements<br>- Cross-platform testing |
-| Evening Integration | **Joint Session (2.5 hours)**<br>- Full regression test suite<br>- Document all remaining issues<br>- Prioritize fixes for Day 6 |
+| Time | M1 (Auth/Admin) | M2 (Bidding/Seller) |
+|------|-----------------|----------------------|
+| Morning | Test auth edge cases; concurrent logins; session timeout | Stress test bidding; concurrent bidders; network disconnection scenarios |
+| Afternoon | Fix discovered bugs; performance profiling; memory optimization | Fix race conditions; optimize RMI calls; reduce polling overhead |
+| Evening Integration | Full regression test suite; document remaining issues; prioritize fixes for Day 6 | Full regression test suite; document remaining issues; prioritize fixes for Day 6 |
 
 **Deliverables**:
-- ✅ All critical bugs fixed
-- ✅ Performance acceptable (<2s response time)
-- ✅ No memory leaks detected
-
----
+- All critical bugs fixed
+- Performance acceptable (<2s response time)
+- No memory leaks detected
 
 ### Day 6: Final Polish & Deployment Preparation
 **Theme**: Production readiness
 
-| Time | M1 (Auth Module) | M2 (Bidding Module) | M3 (Seller/Admin Module) |
-|------|-----------------|---------------------|--------------------------|
-| Morning | - Write user authentication guide<br>- Record login flow demo<br>- Final security review | - Write bidding system documentation<br>- Record bidding demo<br>- Final performance check | - Write seller/admin guide<br>- Record management demo<br>- Final UI polish |
-| Afternoon | - Build production JAR<br>- Test standalone server<br>- Test multi-client scenario | - Create deployment checklist<br>- Document ports/firewall rules<br>- Troubleshooting guide | - Package all resources<br>- Verify all images/assets<br>- Create quick-start guide |
-| Evening Integration | **Final Demo & Presentation (2.5 hours)**<br>- Complete end-to-end demonstration<br>- Record final demo video<br>- Prepare presentation slides<br>- Celebrate! 🎉 |
+| Time | M1 (Auth/Admin) | M2 (Bidding/Seller) |
+|------|-----------------|----------------------|
+| Morning | Write authentication guide; record login flow demo; final security review | Write bidding and seller docs; record demo; final performance check |
+| Afternoon | Build production JAR; test standalone server; test multi-client scenario | Create deployment checklist; document ports/firewall rules; troubleshooting guide |
+| Evening Integration | Final demo and presentation; record final demo video; prepare slides | Final demo and presentation; record final demo video; prepare slides |
 
 **Deliverables**:
-- ✅ Production-ready fat JAR
-- ✅ Complete documentation set
-- ✅ Demo video recorded
-- ✅ All team members can present any feature
+- Production-ready fat JAR
+- Complete documentation set
+- Demo video recorded
+- Both members can present any feature
 
 ---
 
@@ -180,22 +163,22 @@ Each member owns **full-stack features** (backend logic + RMI exposure + GUI con
 ## Risk Mitigation
 
 ### Potential Risks
-1. **RMI Connection Issues** - M2 leads troubleshooting, M1 assists
+1. **RMI Connection Issues** - both members can reproduce and isolate the issue quickly
 2. **UI Freezing on Network Calls** - M2 ensures background threading in controllers
-3. **Integration Conflicts** - Daily evening sync prevents accumulation
-4. **Polling Performance** - M2 optimizes interval, implements pause/resume
+3. **Integration Conflicts** - scheduled sync prevents accumulation
+4. **Polling Performance** - M2 optimizes interval and implements pause/resume
 
 ### Contingency Plan
-- If a task falls behind: Reallocate from next day's buffer time
-- If integration fails: Roll back to morning's stable version
-- If team member unavailable: Other members cover critical path tasks
+- If a task falls behind: reallocate from the next day's buffer time
+- If integration fails: roll back to the morning's stable version
+- If a member is unavailable: the other continues unaffected on independent work
 - Day 5 afternoon reserved for overflow bug fixes
 
 ---
 
 ## Success Criteria
 
-- [ ] All 6 days completed with daily integrations
+- [ ] All 6 days completed with scheduled integrations
 - [ ] Zero merge conflicts in final build
 - [ ] All controllers implemented and wired to RMI
 - [ ] Polling service updates UI in real-time
@@ -210,4 +193,4 @@ Each member owns **full-stack features** (backend logic + RMI exposure + GUI con
 - **Code Reviews**: Pair review before each integration session
 - **Git Strategy**: Feature branches → Daily merge to `develop` → Final merge to `main`
 - **Communication**: Use group chat for quick questions, save detailed discussions for integration sessions
-- **Module Ownership**: Each member fully owns their module (backend + RMI + GUI)
+- **Module Ownership**: Each member fully owns their module independently; shared interfaces require coordination

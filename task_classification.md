@@ -1,7 +1,7 @@
 # Task Classification - Real-Time Distributed Auction System (Updated)
 
 ## Overview
-This document classifies all **remaining** project tasks by category, priority, and assignment. Each team member owns complete modules (backend + RMI + GUI) to minimize overlap and ensure clear integration points.
+This document classifies all **remaining** project tasks by category, priority, and assignment. With two members, each person owns complete modules (backend + RMI + GUI) so both can work independently without waiting on the other, while shared interface changes stay coordinated.
 
 **Current Status**: Infrastructure complete, controllers need implementation
 
@@ -17,12 +17,12 @@ This document classifies all **remaining** project tasks by category, priority, 
 - Auction browsing, bidding, polling updates
 - Owns: `GalleryController`, `AuctionDetailController`, `PollingService`
 
-### 🟠 ORANGE - Seller & Admin Dashboard (Member 3)
-- Auction creation, seller dashboard, admin panel
-- Owns: `SellerDashboardController`, `AdminPanelController`, TODO service methods
+### 🟠 ORANGE - Admin & Service Operations (Member 1)
+- User management, audit/backup tasks, shared service methods
+- Owns: `AdminPanelController`, TODO service methods
 
 ### 🟣 PURPLE - Integration & Testing (All Members)
-- Daily integration sessions, end-to-end testing, deployment
+- Independent implementation first, then scheduled integration checks, end-to-end testing, deployment
 
 ---
 
@@ -92,49 +92,49 @@ This document classifies all **remaining** project tasks by category, priority, 
 
 ---
 
-### 5. Seller Dashboard & Auction Creation (M3)
+### 5. Seller Dashboard & Auction Creation (M2)
 
 | ID | Task | Category | Priority | Owner | Est. Hours | Dependencies |
 |----|------|----------|----------|-------|------------|--------------|
-| SELL-01 | Implement `SellerDashboardController` structure | 🟠 ORANGE | High | M3 | 2 | AUTH-06 |
-| SELL-02 | Load seller's auctions via RMI | 🟠 ORANGE | High | M3 | 2 | SELL-01 |
-| SELL-03 | Display auctions in table with status | 🟠 ORANGE | High | M3 | 2 | SELL-02 |
-| SELL-04 | Create auction form UI | 🟠 ORANGE | High | M3 | 3 | SELL-03 |
-| SELL-05 | Add image picker for 3 images | 🟠 ORANGE | High | M3 | 2 | SELL-04 |
-| SELL-06 | Validate form inputs | 🟠 ORANGE | High | M3 | 2 | SELL-05 |
-| SELL-07 | Call RMI `createAuction()` with images | 🟠 ORANGE | High | M3 | 2 | SELL-06 |
-| SELL-08 | Handle success/error feedback | 🟠 ORANGE | High | M3 | 1 | SELL-07 |
-| SELL-09 | Implement cancel auction feature | 🟠 ORANGE | Medium | M3 | 2 | SELL-03 |
-| SELL-10 | Add relist ended auctions | 🟠 ORANGE | Low | M3 | 2 | SELL-09 |
-| SELL-11 | Test cancellation rules | 🟣 PURPLE | Medium | M3 | 1 | SELL-09 |
+| SELL-01 | Implement `SellerDashboardController` structure | 🟠 ORANGE | High | M2 | 2 | AUTH-06 |
+| SELL-02 | Load seller's auctions via RMI | 🟠 ORANGE | High | M2 | 2 | SELL-01 |
+| SELL-03 | Display auctions in table with status | 🟠 ORANGE | High | M2 | 2 | SELL-02 |
+| SELL-04 | Create auction form UI | 🟠 ORANGE | High | M2 | 3 | SELL-03 |
+| SELL-05 | Add image picker for 3 images | 🟠 ORANGE | High | M2 | 2 | SELL-04 |
+| SELL-06 | Validate form inputs | 🟠 ORANGE | High | M2 | 2 | SELL-05 |
+| SELL-07 | Call RMI `createAuction()` with images | 🟠 ORANGE | High | M2 | 2 | SELL-06 |
+| SELL-08 | Handle success/error feedback | 🟠 ORANGE | High | M2 | 1 | SELL-07 |
+| SELL-09 | Implement cancel auction feature | 🟠 ORANGE | Medium | M2 | 2 | SELL-03 |
+| SELL-10 | Add relist ended auctions | 🟠 ORANGE | Low | M2 | 2 | SELL-09 |
+| SELL-11 | Test cancellation rules | 🟣 PURPLE | Medium | All | 1 | SELL-09 |
 
 ---
 
-### 6. Admin Panel & User Management (M1 + M3)
+### 6. Admin Panel & User Management (M1)
 
 | ID | Task | Category | Priority | Owner | Est. Hours | Dependencies |
 |----|------|----------|----------|-------|------------|--------------|
-| ADM-01 | Implement `AdminPanelController` structure | 🟠 ORANGE | High | M3 | 2 | AUTH-06 |
+| ADM-01 | Implement `AdminPanelController` structure | 🟠 ORANGE | High | M1 | 2 | AUTH-06 |
 | ADM-02 | Create user form UI | 🔵 BLUE | High | M1 | 2 | ADM-01 |
 | ADM-03 | List all users table | 🔵 BLUE | High | M1 | 2 | ADM-02 |
 | ADM-04 | Call RMI `createUser()` | 🔵 BLUE | High | M1 | 2 | ADM-03 |
 | ADM-05 | Test new user can login | 🟣 PURPLE | High | M1 | 1 | ADM-04 |
-| ADM-06 | Wire backup database button | 🟠 ORANGE | Medium | M3 | 2 | ADM-01 |
-| ADM-07 | Display audit logs | 🟠 ORANGE | Medium | M3 | 2 | ADM-06 |
-| ADM-08 | Add confirmation dialogs | 🟠 ORANGE | Low | M3 | 1 | ADM-07 |
+| ADM-06 | Wire backup database button | 🟠 ORANGE | Medium | M1 | 2 | ADM-01 |
+| ADM-07 | Display audit logs | 🟠 ORANGE | Medium | M1 | 2 | ADM-06 |
+| ADM-08 | Add confirmation dialogs | 🟠 ORANGE | Low | M1 | 1 | ADM-07 |
 | ADM-09 | Test all admin operations | 🟣 PURPLE | High | All | 2 | ADM-08 |
 
 ---
 
-### 7. Service Layer TODOs (M3)
+### 7. Service Layer TODOs (M1)
 
 | ID | Task | Category | Priority | Owner | Est. Hours | Dependencies |
 |----|------|----------|----------|-------|------------|--------------|
-| SVC-01 | Implement `exportAuctionsToCSV()` | 🟠 ORANGE | Medium | M3 | 2 | None |
-| SVC-02 | Implement `backupDatabase()` | 🟠 ORANGE | Medium | M3 | 2 | SVC-01 |
-| SVC-03 | Implement `getAuditLogs()` | 🟠 ORANGE | Medium | M3 | 2 | SVC-02 |
-| SVC-04 | Test CSV export format | 🟣 PURPLE | Low | M3 | 1 | SVC-01 |
-| SVC-05 | Test database backup file | 🟣 PURPLE | Low | M3 | 1 | SVC-02 |
+| SVC-01 | Implement `exportAuctionsToCSV()` | 🟠 ORANGE | Medium | M1 | 2 | None |
+| SVC-02 | Implement `backupDatabase()` | 🟠 ORANGE | Medium | M1 | 2 | SVC-01 |
+| SVC-03 | Implement `getAuditLogs()` | 🟠 ORANGE | Medium | M1 | 2 | SVC-02 |
+| SVC-04 | Test CSV export format | 🟣 PURPLE | Low | All | 1 | SVC-01 |
+| SVC-05 | Test database backup file | 🟣 PURPLE | Low | All | 1 | SVC-02 |
 
 ---
 
@@ -160,8 +160,8 @@ This document classifies all **remaining** project tasks by category, priority, 
 | DOC-02 | Record login flow demo | 🔵 BLUE | Medium | M1 | 1 | AUTH-08 |
 | DOC-03 | Write bidding system docs | 🟢 GREEN | Medium | M2 | 1 | DET-08 |
 | DOC-04 | Record bidding demo | 🟢 GREEN | Medium | M2 | 1 | DET-08 |
-| DOC-05 | Write seller/admin guide | 🟠 ORANGE | Medium | M3 | 1 | ADM-09 |
-| DOC-06 | Record management demo | 🟠 ORANGE | Medium | M3 | 1 | ADM-09 |
+| DOC-05 | Write seller/admin guide | 🟠 ORANGE | Medium | M2 | 1 | ADM-09 |
+| DOC-06 | Record management demo | 🟠 ORANGE | Medium | M2 | 1 | ADM-09 |
 | DOC-07 | Build production JAR | 🟣 PURPLE | High | All | 1 | INT-07 |
 | DOC-08 | Create deployment checklist | 🟣 PURPLE | Medium | All | 1 | DOC-07 |
 | DOC-09 | Document ports/firewall rules | 🟣 PURPLE | Medium | All | 1 | DOC-08 |
@@ -173,31 +173,24 @@ This document classifies all **remaining** project tasks by category, priority, 
 
 ## Workload Distribution
 
-### Member 1 (Authentication & User Management)
+### Member 1 (Authentication, User Management, and Admin Ops)
 | Category | Tasks | Exclusive Hours | Integration Hours |
 |----------|-------|-----------------|-------------------|
 | Auth Controllers | AUTH-01 to AUTH-08 | 11 | - |
-| Admin Features | ADM-02 to ADM-05 | 7 | 2 |
+| Admin Features | ADM-01 to ADM-08 | 14 | 2 |
+| Service TODOs | SVC-01 to SVC-05 | 8 | 2 |
 | Documentation | DOC-01, DOC-02 | 2 | - |
-| **Total** | | **20 hours** | **~15 hours** |
+| **Total** | | **35 hours** | **~17 hours** |
 
-### Member 2 (Auction Bidding & Real-Time)
+### Member 2 (Auction Bidding, Real-Time, and Seller Ops)
 | Category | Tasks | Exclusive Hours | Integration Hours |
 |----------|-------|-----------------|-------------------|
 | Gallery | GAL-01 to GAL-08 | 13 | - |
 | Auction Detail | DET-01 to DET-09 | 14 | 2 |
 | Polling Service | POLL-01 to POLL-10 | 13 | - |
-| Documentation | DOC-03, DOC-04 | 2 | - |
-| **Total** | | **42 hours** | **~15 hours** |
-
-### Member 3 (Seller & Admin Dashboard)
-| Category | Tasks | Exclusive Hours | Integration Hours |
-|----------|-------|-----------------|-------------------|
 | Seller Dashboard | SELL-01 to SELL-11 | 18 | 2 |
-| Admin Panel | ADM-01, ADM-06 to ADM-09 | 7 | 2 |
-| Service TODOs | SVC-01 to SVC-05 | 8 | 2 |
-| Documentation | DOC-05, DOC-06 | 2 | - |
-| **Total** | | **35 hours** | **~15 hours** |
+| Documentation | DOC-03 to DOC-06 | 4 | - |
+| **Total** | | **62 hours** | **~17 hours** |
 
 ---
 
@@ -210,16 +203,16 @@ develop (daily integration)
   ↑
 feature/m1-auth-module
 feature/m2-bidding-module
-feature/m3-seller-admin-module
+feature/m2-auction-seller-module
 ```
 
 ### Merge Protocol
 1. Complete task on feature branch
 2. Run local tests
-3. Request review from one other team member
+3. Request review from one other team member when the change is ready
 4. Address feedback
-5. Merge to `develop` during evening integration
-6. Test integrated build together
+5. Merge to `develop` during the next integration window
+6. Test the integrated build after both members have finished their independent work
 7. Resolve conflicts immediately
 
 ---
@@ -259,12 +252,6 @@ feature/m3-seller-admin-module
 - 🚧 Blocked: [Task IDs + reason]
 - 📅 Next: [Task IDs]
 
-#### M3 (Seller/Admin Module)
-- ✅ Completed: [Task IDs]
-- 🔄 In Progress: [Task IDs]
-- 🚧 Blocked: [Task IDs + reason]
-- 📅 Next: [Task IDs]
-
 #### Integration Notes
 - [Issues discovered during evening integration]
 - [Action items for tomorrow]
@@ -277,22 +264,20 @@ feature/m3-seller-admin-module
 ### M1 Files
 - `src/main/java/com/auction/client/controllers/LoginController.java`
 - `src/main/java/com/auction/client/controllers/ConnectController.java`
+- `src/main/java/com/auction/client/controllers/AdminPanelController.java`
+- `src/main/java/com/auction/server/service/AuctionServiceImpl.java` (TODO methods)
 - `src/main/resources/fxml/login.fxml`
 - `src/main/resources/fxml/connect.fxml`
+- `src/main/resources/fxml/admin_panel.fxml`
 
 ### M2 Files
 - `src/main/java/com/auction/client/controllers/GalleryController.java`
 - `src/main/java/com/auction/client/controllers/AuctionDetailController.java`
 - `src/main/java/com/auction/client/service/PollingService.java`
+- `src/main/java/com/auction/client/controllers/SellerDashboardController.java`
 - `src/main/resources/fxml/gallery.fxml`
 - `src/main/resources/fxml/auction_detail.fxml`
-
-### M3 Files
-- `src/main/java/com/auction/client/controllers/SellerDashboardController.java`
-- `src/main/java/com/auction/client/controllers/AdminPanelController.java`
-- `src/main/java/com/auction/server/service/AuctionServiceImpl.java` (TODO methods)
 - `src/main/resources/fxml/seller_dashboard.fxml`
-- `src/main/resources/fxml/admin_panel.fxml`
 
 ### Shared Files (Require Coordination)
 - `src/main/java/com/auction/shared/interfaces/IAuctionService.java`
@@ -304,8 +289,8 @@ feature/m3-seller-admin-module
 ## Notes
 
 - Tasks are organized by **module ownership**, not layer
-- Each member handles backend logic + RMI + GUI for their module
-- Integration happens daily to prevent accumulation of conflicts
+- Each member handles backend logic + RMI + GUI for their module independently
+- Integration happens on a scheduled basis so either member can keep moving while the other is still working
 - Estimated hours are guidelines; adjust based on actual progress
-- Purple (integration) tasks require all members present
+- Purple (integration) tasks are the shared checkpoint after independent module work
 - Day 5 afternoon reserved for overflow bug fixes
