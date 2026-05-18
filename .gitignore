@@ -2,8 +2,6 @@
 # Editors
 .vscode/
 
-# Logs and temp files
-*.log
-*.tmp
-*.swp
+# Documentation
+*.md
 ```
