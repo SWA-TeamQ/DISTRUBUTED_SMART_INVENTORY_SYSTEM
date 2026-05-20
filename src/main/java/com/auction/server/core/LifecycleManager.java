@@ -4,52 +4,59 @@ import com.auction.server.repository.AuctionRepository;
 import com.auction.server.repository.BidRepository;
 import com.auction.shared.Constants;
 import com.auction.shared.models.AuctionItem;
+import com.auction.server.core.logging.AsyncLogger;
+import com.auction.server.core.logging.LogCategory;
+import com.auction.server.core.logging.EventType;
 
 import java.time.Instant;
 import java.util.List;
 
-/**
- * Deep module owning auction state transitions and background sweeping.
- * Concentrates logic for auction termination and lifecycle events.
- */
 public class LifecycleManager {
     private final AuctionRepository auctionRepo;
     private final BidRepository bidRepo;
+    private final LockManager lockManager;
+    private final TransactionManager txManager;
 
-    public LifecycleManager(AuctionRepository auctionRepo, BidRepository bidRepo) {
+    public LifecycleManager(AuctionRepository auctionRepo, BidRepository bidRepo, 
+                            LockManager lockManager, TransactionManager txManager) {
         this.auctionRepo = auctionRepo;
         this.bidRepo = bidRepo;
+        this.lockManager = lockManager;
+        this.txManager = txManager;
     }
 
-    /**
-     * Scans for ACTIVE auctions that have passed their end time and 
-     * transitions them to SOLD or EXPIRED based on bid presence.
-     */
     public void sweepOverdue() {
-        List<AuctionItem> active = auctionRepo.findActiveAuctions();
-        Instant now = Instant.now();
-
-        for (AuctionItem item : active) {
+        String nowTimeIso = Instant.now().toString();
+        List<AuctionItem> overdueItems = auctionRepo.findActiveExpiredAuctions(nowTimeIso);
+        
+        for (AuctionItem item : overdueItems) {
+            int auctionId = item.getId();
+            lockManager.lock(auctionId);
             try {
-                Instant endTime = Instant.parse(item.getEndTime());
-                if (now.isAfter(endTime)) {
-                    finalizeAuction(item);
-                }
+                txManager.executeWithoutResult(() -> {
+                    // Re-check status inside lock to prevent race condition
+                    AuctionItem currentItem = auctionRepo.findAuctionById(auctionId);
+                    if (currentItem != null && Constants.STATUS_ACTIVE.equals(currentItem.getStatus())) {
+                        
+                        if (Instant.now().isAfter(Instant.parse(currentItem.getEndTime()))) {
+                            int bidCount = bidRepo.countBidsByAuctionId(auctionId);
+                            if (bidCount > 0) {
+                                auctionRepo.updateAuctionStatus(auctionId, Constants.STATUS_SOLD);
+                                AsyncLogger.log(LogCategory.SYSTEM, EventType.AUCTION_SOLD, 
+                                    "Auction=" + auctionId + " Winner=" + currentItem.getHighestBidderUsername() + " Amount=" + currentItem.getCurrentBidCents());
+                            } else {
+                                auctionRepo.updateAuctionStatus(auctionId, Constants.STATUS_EXPIRED);
+                                AsyncLogger.log(LogCategory.SYSTEM, EventType.AUCTION_EXPIRED, 
+                                    "Auction=" + auctionId + " Status=EXPIRED");
+                            }
+                        }
+                    }
+                });
             } catch (Exception e) {
-                System.err.println("Failed to sweep auction " + item.getId() + ": " + e.getMessage());
+                System.err.println("Error sweeping auction " + auctionId + ": " + e.getMessage());
+            } finally {
+                lockManager.unlock(auctionId);
             }
         }
-    }
-
-    /**
-     * Transitions an auction to its final state.
-     */
-    private void finalizeAuction(AuctionItem item) {
-        int bidCount = bidRepo.countBidsByAuctionId(item.getId());
-        String finalStatus = (bidCount > 0) ? Constants.STATUS_SOLD : Constants.STATUS_EXPIRED;
-        
-        auctionRepo.updateAuctionStatus(item.getId(), finalStatus);
-        
-        // Potential extension point: Notify highest bidder/seller via future notification module
     }
 }

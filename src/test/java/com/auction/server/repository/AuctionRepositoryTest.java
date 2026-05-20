@@ -37,11 +37,12 @@ class AuctionRepositoryTest {
         item.setTitle("Vintage Lamp");
         item.setDescription("Old lamp");
         item.setCategory("Antiques");
-        item.setStartingPrice(50.0);
-        item.setCurrentBid(50.0);
+        item.setStartingPriceCents(5000);
+        item.setCurrentBidCents(5000);
         item.setSellerUsername("seller1");
         item.setStartTime("2026-05-01T10:00:00Z");
         item.setEndTime("2026-05-10T10:00:00Z");
+        item.setCapEndTime("2026-05-10T10:10:00Z");
         item.setStatus("ACTIVE");
         
         int id = auctionRepo.insertAuction(item);

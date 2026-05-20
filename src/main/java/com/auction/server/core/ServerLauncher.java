@@ -22,6 +22,9 @@ public class ServerLauncher {
     public static void main(String[] args) {
         try {
             System.out.println("[RTDAS] Initializing server...");
+            
+            // Initialize Logging
+            com.auction.server.core.logging.AsyncLogger.initialize();
 
             // 1. Init Database
             DatabaseManager dbManager = new DatabaseManager();
@@ -34,8 +37,11 @@ public class ServerLauncher {
             BidRepository bidRepo = new BidRepository(conn);
 
             // 3. Init Deep Core Modules (Deepening Architecture)
-            AuctionManager auctionManager = new AuctionManager(auctionRepo, bidRepo);
-            LifecycleManager lifecycleManager = new LifecycleManager(auctionRepo, bidRepo);
+            TransactionManager txManager = new TransactionManager(conn);
+            LockManager lockManager = new LockManager();
+            
+            AuctionManager auctionManager = new AuctionManager(auctionRepo, bidRepo, lockManager, txManager);
+            LifecycleManager lifecycleManager = new LifecycleManager(auctionRepo, bidRepo, lockManager, txManager);
             ImageStore imageStore = new ImageStore(auctionRepo);
 
             // 4. Init Service (Adapter)

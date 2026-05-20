@@ -19,6 +19,10 @@ public class UserRepository {
         seedDefaultAdmin();
     }
 
+    public Connection getConnection() {
+        return connection;
+    }
+
     private void seedDefaultAdmin() {
         try (var stmt = connection.createStatement();
              var rs = stmt.executeQuery("SELECT COUNT(*) FROM users")) {
@@ -52,11 +56,12 @@ public class UserRepository {
     }
 
     public void insertUser(String username, String passwordHash, String role) {
-        String sql = "INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO users (username, password_hash, role, created_at) VALUES (?, ?, ?, ?)";
         try (var pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, username);
             pstmt.setString(2, passwordHash);
             pstmt.setString(3, role);
+            pstmt.setString(4, java.time.Instant.now().toString());
             pstmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Failed to insert user", e);
