@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "*.css": "css"
+    },
+    "css.lint.vendorPrefix": "ignore",
+    "css.lint.fontFaceProperties": "ignore",
+    "[css]": {
+        "editor.quickSuggestions": true
+    }
+}
