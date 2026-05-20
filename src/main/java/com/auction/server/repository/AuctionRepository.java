@@ -13,22 +13,28 @@ public class AuctionRepository {
     }
 
     public int insertAuction(AuctionItem item) {
-        String sql = "INSERT INTO auction_items (title, description, category, starting_price, current_bid, " +
-                "seller_username, start_time, end_time, status, img1, img2, img3) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO auction_items (title, description, category, starting_price_cents, current_bid_cents, " +
+                "seller_username, start_time, end_time, cap_end_time, status, img1, img2, img3, relisted_from) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (var pstmt = connection.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, item.getTitle());
             pstmt.setString(2, item.getDescription());
             pstmt.setString(3, item.getCategory());
-            pstmt.setDouble(4, item.getStartingPrice());
-            pstmt.setDouble(5, item.getCurrentBid());
+            pstmt.setLong(4, item.getStartingPriceCents());
+            pstmt.setLong(5, item.getCurrentBidCents());
             pstmt.setString(6, item.getSellerUsername());
             pstmt.setString(7, item.getStartTime());
             pstmt.setString(8, item.getEndTime());
-            pstmt.setString(9, item.getStatus());
-            pstmt.setString(10, item.getImg1());
-            pstmt.setString(11, item.getImg2());
-            pstmt.setString(12, item.getImg3());
+            pstmt.setString(9, item.getCapEndTime());
+            pstmt.setString(10, item.getStatus());
+            pstmt.setString(11, item.getImg1());
+            pstmt.setString(12, item.getImg2());
+            pstmt.setString(13, item.getImg3());
+            if (item.getRelistedFrom() != null) {
+                pstmt.setInt(14, item.getRelistedFrom());
+            } else {
+                pstmt.setNull(14, java.sql.Types.INTEGER);
+            }
             pstmt.executeUpdate();
             try (var rs = pstmt.getGeneratedKeys()) {
                 if (rs.next()) {
@@ -49,16 +55,19 @@ public class AuctionRepository {
         item.setTitle(rs.getString("title"));
         item.setDescription(rs.getString("description"));
         item.setCategory(rs.getString("category"));
-        item.setStartingPrice(rs.getDouble("starting_price"));
-        item.setCurrentBid(rs.getDouble("current_bid"));
+        item.setStartingPriceCents(rs.getLong("starting_price_cents"));
+        item.setCurrentBidCents(rs.getLong("current_bid_cents"));
         item.setHighestBidderUsername(rs.getString("highest_bidder_username"));
         item.setSellerUsername(rs.getString("seller_username"));
         item.setStartTime(rs.getString("start_time"));
         item.setEndTime(rs.getString("end_time"));
+        item.setCapEndTime(rs.getString("cap_end_time"));
         item.setStatus(rs.getString("status"));
         item.setImg1(rs.getString("img1"));
         item.setImg2(rs.getString("img2"));
         item.setImg3(rs.getString("img3"));
+        int relistedFromVal = rs.getInt("relisted_from");
+        item.setRelistedFrom(rs.wasNull() ? null : relistedFromVal);
         return item;
     }
 
@@ -87,6 +96,20 @@ public class AuctionRepository {
         return list;
     }
 
+    public List<AuctionItem> findActiveExpiredAuctions(String nowTimeIso) {
+        List<AuctionItem> list = new java.util.ArrayList<>();
+        String sql = "SELECT * FROM auction_items WHERE status = 'ACTIVE' AND end_time <= ?";
+        try (var pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, nowTimeIso);
+            try (var rs = pstmt.executeQuery()) {
+                while (rs.next()) list.add(mapRowToAuction(rs));
+            }
+        } catch (java.sql.SQLException e) {
+            throw new RuntimeException("Failed to fetch active expired auctions", e);
+        }
+        return list;
+    }
+
     public List<AuctionItem> findAuctionsBySeller(String sellerUsername) {
         List<AuctionItem> list = new java.util.ArrayList<>();
         String sql = "SELECT * FROM auction_items WHERE seller_username = ?";
@@ -101,10 +124,10 @@ public class AuctionRepository {
         return list;
     }
 
-    public void updateAuctionBid(int auctionId, double newBid, String bidderUsername) {
-        String sql = "UPDATE auction_items SET current_bid = ?, highest_bidder_username = ? WHERE id = ?";
+    public void updateAuctionBid(int auctionId, long newBidCents, String bidderUsername) {
+        String sql = "UPDATE auction_items SET current_bid_cents = ?, highest_bidder_username = ? WHERE id = ?";
         try (var pstmt = connection.prepareStatement(sql)) {
-            pstmt.setDouble(1, newBid);
+            pstmt.setLong(1, newBidCents);
             pstmt.setString(2, bidderUsername);
             pstmt.setInt(3, auctionId);
             pstmt.executeUpdate();
@@ -146,5 +169,21 @@ public class AuctionRepository {
         } catch (java.sql.SQLException e) {
             throw new RuntimeException("Failed to update images", e);
         }
+    }
+
+
+
+    public List<AuctionItem> findWonAuctionsByBidder(String bidderUsername) {
+        List<AuctionItem> list = new java.util.ArrayList<>();
+        String sql = "SELECT * FROM auction_items WHERE highest_bidder_username = ? AND status = 'SOLD'";
+        try (var pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, bidderUsername);
+            try (var rs = pstmt.executeQuery()) {
+                while (rs.next()) list.add(mapRowToAuction(rs));
+            }
+        } catch (java.sql.SQLException e) {
+            throw new RuntimeException("Failed to fetch won auctions", e);
+        }
+        return list;
     }
 }

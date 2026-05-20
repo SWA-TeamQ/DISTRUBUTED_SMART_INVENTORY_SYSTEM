@@ -51,26 +51,26 @@ Each item lists **file → exact change**. This is the master "nothing missed" l
 
 ### 1.1 Documentation
 
-- [ ] **README.md** — replace the duplicated spec with a short overview + link to PRD. Remove: `importAuctionsFromCSV`, `active BOOLEAN`, H2 alternative, `HashMap` server cache, "manageUsers()". Add: link to PRD, demo runbook pointer.
-- [ ] **docs/RTDAS_PRD.md** — apply edits per §1.4 below.
-- [ ] **docs/architecture.md** — add: snipe cap, locking discipline, atomic bid commit, server-time clock authority. Remove "tamper-resistant" wording.
-- [ ] **docs/database.md** — add full schema (tables, columns, types, indexes, CHECK constraints, FKs, `PRAGMA foreign_keys`). Add `relisted_from` column. Document online backup. Remove tamper-resistant claim.
-- [ ] **docs/networking.md** — add UDP packet v1 schema, `serverTime()` method, reconnect UX, multi-NIC note.
-- [ ] **docs/ui.md** — drop free-text search, drop animation requirements (mark as stretch), align with DESIGN.md component scope.
-- [ ] **docs/DESIGN.md** — drop "search bar" and FAB if not implemented; reduce animation list to "stretch"; explicitly list AtlantaFX components used.
+- [x] **README.md** — replace the duplicated spec with a short overview + link to PRD. Remove: `importAuctionsFromCSV`, `active BOOLEAN`, H2 alternative, `HashMap` server cache, "manageUsers()". Add: link to PRD, demo runbook pointer.
+- [x] **docs/RTDAS_PRD.md** — apply edits per §1.4 below.
+- [x] **docs/architecture.md** — add: snipe cap, locking discipline, atomic bid commit, server-time clock authority. Remove "tamper-resistant" wording.
+- [x] **docs/database.md** — add full schema (tables, columns, types, indexes, CHECK constraints, FKs, `PRAGMA foreign_keys`). Add `relisted_from` column. Document online backup. Remove tamper-resistant claim.
+- [x] **docs/networking.md** — add UDP packet v1 schema, `serverTime()` method, reconnect UX, multi-NIC note.
+- [x] **docs/ui.md** — drop free-text search, drop animation requirements (mark as stretch), align with DESIGN.md component scope.
+- [x] **docs/DESIGN.md** — drop "search bar" and FAB if not implemented; reduce animation list to "stretch"; explicitly list AtlantaFX components used.
 
 ### 1.2 Code skeleton
 
-- [ ] **`shared/Constants.java`** — set admin to `admin/admin`; add `SNIPE_CAP_DEFAULT_MINUTES = 10`; add `SESSION_TTL_MINUTES`; add money helpers (e.g., cents formatter).
-- [ ] **`shared/interfaces/IAuctionService.java`** — add `String login(...)` returning token (or wrapping object); add `logout(token)`; add `serverTime()`; add `String token` arg to `placeBid`, `createAuction`, `cancelAuction`, `relistAuction`, `createUser`, `getAllUsers`, `backupDatabase`, `getAuditLogs`, `exportAuctionsToCSV`. Add `relistAuction(int auctionId, String newEndTimeIso, String token)`. Add Bidder activity reads: `List<Bid> getMyBids(token)`, `List<AuctionItem> getMyWonAuctions(token)`. Money args become `long amountCents` and `long clientExpectedPriceCents`.
-- [ ] **`shared/models/AuctionItem.java`** — change `double startingPrice/currentBid` to `long startingPriceCents/currentBidCents`. Add `Long capEndTime` (ISO string, UTC). Add `Integer relistedFrom`. Update Javadoc to specify UTC `Z` timestamps.
-- [ ] **`shared/models/Bid.java`** — `long amountCents`; UTC timestamp.
+- [x] **`shared/Constants.java`** — set admin to `admin/admin`; add `SNIPE_CAP_DEFAULT_MINUTES = 10`; add `SESSION_TTL_MINUTES`; add money helpers (e.g., cents formatter).
+- [x] **`shared/interfaces/IAuctionService.java`** — add `String login(...)` returning token (or wrapping object); add logout(token); add `serverTime()`; add `String token` arg to `placeBid`, `createAuction`, `cancelAuction`, `relistAuction`, `createUser`, `getAllUsers`, `backupDatabase`, `getAuditLogs`, `exportAuctionsToCSV`. Add `relistAuction(int auctionId, String newEndTimeIso, String token)`. Add Bidder activity reads: `List<Bid> getMyBids(token)`, `List<AuctionItem> getMyWonAuctions(token)`. Money args become `long amountCents` and `long clientExpectedPriceCents`.
+- [x] **`shared/models/AuctionItem.java`** — change `double startingPrice/currentBid` to `long startingPriceCents/currentBidCents`. Add `Long capEndTime` (ISO string, UTC). Add `Integer relistedFrom`. Update Javadoc to specify UTC `Z` timestamps.
+- [x] **`shared/models/Bid.java`** — `long amountCents`; UTC timestamp.
 - [ ] **`shared/models/User.java`** — confirm `passwordHash`, `roleType`. Ensure no plaintext password ever leaves the server.
-- [ ] **`shared/exceptions/`** — add `UnauthorizedException` (bad/missing token), `RateLimitedException`, `SnipeCapReachedException` (optional — could fold into AuctionClosedException).
-- [ ] **`server/repository/DatabaseManager.java`** — set `PRAGMA foreign_keys = ON` per connection; create directories on init; create indexes; add `relisted_from` column.
-- [ ] **`server/repository/AuctionRepository.java`** — long-cents columns; `findActiveExpired()` query for the reaper; update with snipe-extended `end_time`; insert-with-relisted_from; transactional `placeBidAndUpdate(...)`.
-- [ ] **`server/repository/BidRepository.java`** — long-cents amount; `findByBidder(username)` for the activity view.
-- [ ] **`server/repository/UserRepository.java`** — verify `findAll`, `findByUsername`, `insert`. Username uniqueness enforced at DB.
+- [x] **`shared/exceptions/`** — add `UnauthorizedException` (bad/missing token), `RateLimitedException`, `SnipeCapReachedException` (optional — could fold into AuctionClosedException).
+- [x] **`server/repository/DatabaseManager.java`** — set `PRAGMA foreign_keys = ON` per connection; create directories on init; create indexes; add `relisted_from` column.
+- [x] **`server/repository/AuctionRepository.java`** — long-cents columns; `findActiveExpired()` query for the reaper; update with snipe-extended `end_time`; insert-with-relisted_from; transactional `placeBidAndUpdate(...)`.
+- [x] **`server/repository/BidRepository.java`** — long-cents amount; `findByBidder(username)` for the activity view.
+- [x] **`server/repository/UserRepository.java`** — verify `findAll`, `findByUsername`, `insert`. Username uniqueness enforced at DB.
 - [ ] **`server/service/AuctionServiceImpl.java`** — implement: session map, rate limiter, per-auction `ReentrantLock` map, `placeBid` flow with all D5/D6/D7/D8 rules, `relistAuction`, `serverTime`, activity reads, online-backup.
 - [ ] **`server/service/AuctionReaper.java`** — acquire per-auction lock before transitioning. On startup, sweep overdue ACTIVE rows.
 - [ ] **`server/repository/FileHandler.java`** (or `ImageManager.java`) — JPG re-encode, EXIF strip, center-crop thumbnail, placeholder-on-missing.
@@ -98,21 +98,21 @@ Each item lists **file → exact change**. This is the master "nothing missed" l
 
 ### 1.4 PRD concrete edits
 
-1. Replace double prices with cents (long) everywhere.
-2. State the explicit bid acceptance predicate (D5).
-3. Add `cap_end_time` to the AuctionItem model and snipe section (D6).
-4. Add session-token auth model with login/logout (D2).
-5. Add `serverTime()` and UTC `Z` rule (D17).
-6. Add `relisted_from` column and "new row" relist (D16).
-7. Add Bidder "My Activity" view to user stories and views table (D14).
-8. Update RMI contract list to match `IAuctionService` after edits.
-9. Update §4 (DB) with full schema, indexes, `PRAGMA foreign_keys`, `relisted_from` (D21).
-10. Update §6 (Image handling) with JPG re-encode + center-crop (D22).
-11. Update §5 (Concurrency) with locking discipline + transactional bid commit (D7, D8).
-12. Replace UDP packet description with v1 schema (D18).
-13. Add reconnect UX & persisted-last-server (D20).
-14. Add demo-runbook items: directory bootstrap, `java.rmi.server.hostname`, seed script (D19, D26, D27).
-15. Drop "tamper-resistant" wording from audit log description (D28).
+- [x] 1. Replace double prices with cents (long) everywhere.
+- [x] 2. State the explicit bid acceptance predicate (D5).
+- [x] 3. Add `cap_end_time` to the AuctionItem model and snipe section (D6).
+- [x] 4. Add session-token auth model with login/logout (D2).
+- [x] 5. Add `serverTime()` and UTC `Z` rule (D17).
+- [x] 6. Add `relisted_from` column and "new row" relist (D16).
+- [x] 7. Add Bidder "My Activity" view to user stories and views table (D14).
+- [x] 8. Update RMI contract list to match `IAuctionService` after edits.
+- [x] 9. Update §4 (DB) with full schema, indexes, `PRAGMA foreign_keys`, `relisted_from` (D21).
+- [x] 10. Update §6 (Image handling) with JPG re-encode + center-crop (D22).
+- [x] 11. Update §5 (Concurrency) with locking discipline + transactional bid commit (D7, D8).
+- [x] 12. Replace UDP packet description with v1 schema (D18).
+- [x] 13. Add reconnect UX & persisted-last-server (D20).
+- [x] 14. Add demo-runbook items: directory bootstrap, `java.rmi.server.hostname`, seed script (D19, D26, D27).
+- [x] 15. Drop "tamper-resistant" wording from audit log description (D28).
 
 ---
 

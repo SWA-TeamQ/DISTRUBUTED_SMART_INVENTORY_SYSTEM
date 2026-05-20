@@ -32,11 +32,12 @@ class BidRepositoryTest {
         AuctionItem item = new AuctionItem();
         item.setTitle("Test Item");
         item.setCategory("Test");
-        item.setStartingPrice(10.0);
-        item.setCurrentBid(10.0);
+        item.setStartingPriceCents(1000);
+        item.setCurrentBidCents(1000);
         item.setSellerUsername("seller1");
         item.setStartTime("2026-05-01T10:00:00Z");
         item.setEndTime("2026-05-10T10:00:00Z");
+        item.setCapEndTime("2026-05-10T10:10:00Z");
         item.setStatus("ACTIVE");
         
         testAuctionId = auctionRepo.insertAuction(item);
@@ -52,7 +53,7 @@ class BidRepositoryTest {
         Bid bid = new Bid();
         bid.setAuctionItemId(testAuctionId);
         bid.setBidderUsername("bidder1");
-        bid.setAmount(15.0);
+        bid.setAmountCents(1500);
         bid.setTimestamp("2026-05-02T10:00:00Z");
         
         bidRepo.insertBid(bid);
@@ -60,7 +61,7 @@ class BidRepositoryTest {
         
         List<Bid> bids = bidRepo.findBidsByAuctionId(testAuctionId);
         assertEquals(1, bids.size());
-        assertEquals(15.0, bids.get(0).getAmount());
+        assertEquals(1500, bids.get(0).getAmountCents());
         
         assertEquals(1, bidRepo.countBidsByAuctionId(testAuctionId));
     }

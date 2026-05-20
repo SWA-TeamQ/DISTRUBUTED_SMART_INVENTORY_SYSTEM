@@ -12,16 +12,16 @@ public class Bid implements Serializable {
     private int id;
     private int auctionItemId;
     private String bidderUsername;
-    private double amount;
-    private String timestamp; // ISO-8601
+    private long amountCents;
+    private String timestamp; // ISO-8601 UTC
 
     public Bid() {}
 
-    public Bid(int id, int auctionItemId, String bidderUsername, double amount, String timestamp) {
+    public Bid(int id, int auctionItemId, String bidderUsername, long amountCents, String timestamp) {
         this.id = id;
         this.auctionItemId = auctionItemId;
         this.bidderUsername = bidderUsername;
-        this.amount = amount;
+        this.amountCents = amountCents;
         this.timestamp = timestamp;
     }
 
@@ -29,19 +29,19 @@ public class Bid implements Serializable {
     public int getId() { return id; }
     public int getAuctionItemId() { return auctionItemId; }
     public String getBidderUsername() { return bidderUsername; }
-    public double getAmount() { return amount; }
+    public long getAmountCents() { return amountCents; }
     public String getTimestamp() { return timestamp; }
 
     // --- Setters ---
     public void setId(int id) { this.id = id; }
     public void setAuctionItemId(int auctionItemId) { this.auctionItemId = auctionItemId; }
     public void setBidderUsername(String bidderUsername) { this.bidderUsername = bidderUsername; }
-    public void setAmount(double amount) { this.amount = amount; }
+    public void setAmountCents(long amountCents) { this.amountCents = amountCents; }
     public void setTimestamp(String timestamp) { this.timestamp = timestamp; }
 
     @Override
     public String toString() {
         return "Bid{id=" + id + ", auction=" + auctionItemId
-             + ", bidder='" + bidderUsername + "', amount=" + amount + "}";
+             + ", bidder='" + bidderUsername + "', amountCents=" + amountCents + "}";
     }
 }

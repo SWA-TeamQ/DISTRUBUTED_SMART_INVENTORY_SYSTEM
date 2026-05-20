@@ -1,0 +1,20 @@
+package com.auction.server.core.logging;
+
+public enum EventType {
+    LOGIN,
+    LOGIN_FAILED,
+    LOGOUT,
+    CREATE_AUCTION,
+    RELIST_AUCTION,
+    CANCEL_AUCTION,
+    PLACE_BID,
+    OUTBID,
+    AUCTION_EXPIRED,
+    AUCTION_SOLD,
+    SERVER_START,
+    SERVER_STOP,
+    IMAGE_SAVE_FAILED,
+    TRANSACTION_FAILED,
+    CSV_EXPORT,
+    DB_BACKUP
+}

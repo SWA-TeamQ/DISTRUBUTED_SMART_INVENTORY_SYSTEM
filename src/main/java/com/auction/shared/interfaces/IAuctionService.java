@@ -16,37 +16,46 @@ import java.util.List;
 public interface IAuctionService extends Remote {
 
     // --- Authentication ---
-    User login(String username, String password) throws RemoteException;
+    /** Returns a unique session token UUID if login is successful. */
+    String login(String username, String password) throws RemoteException, AuctionException;
+    void logout(String token) throws RemoteException;
+    String serverTime() throws RemoteException;
 
     // --- Auction Browsing ---
     List<AuctionItem> getActiveAuctions() throws RemoteException;
     AuctionItem getAuctionById(int auctionId) throws RemoteException;
 
     // --- Bidding ---
-    /** clientExpectedPrice enables stale-data detection on the server. */
-    void placeBid(int auctionId, String bidderUsername, double amount,
-                  double clientExpectedPrice) throws RemoteException, AuctionException;
+    /** clientExpectedPriceCents enables stale-data detection on the server. */
+    void placeBid(int auctionId, long amountCents, long clientExpectedPriceCents, String token)
+            throws RemoteException, AuctionException;
     List<Bid> getBidHistory(int auctionId) throws RemoteException;
 
     // --- Auction Management (Seller) ---
     /** Returns the new auction's ID. image bytes may be null if no image provided. */
-    int createAuction(AuctionItem item, byte[] image1, byte[] image2, byte[] image3)
-            throws RemoteException;
-    void cancelAuction(int auctionId, String sellerUsername)
+    int createAuction(AuctionItem item, byte[] image1, byte[] image2, byte[] image3, String token)
             throws RemoteException, AuctionException;
+    void cancelAuction(int auctionId, String token)
+            throws RemoteException, AuctionException;
+    void relistAuction(int auctionId, String newEndTimeIso, String token)
+            throws RemoteException, AuctionException;
+
+    // --- Bidder Activity ---
+    List<Bid> getMyBids(String token) throws RemoteException, AuctionException;
+    List<AuctionItem> getMyWonAuctions(String token) throws RemoteException, AuctionException;
 
     // --- Image Handling (LQIP) ---
     byte[] getThumbnail(int auctionId, int imageIndex) throws RemoteException;
     byte[] getFullImage(int auctionId, int imageIndex) throws RemoteException;
 
     // --- Data Export ---
-    byte[] exportAuctionsToCSV(String sellerUsername) throws RemoteException;
+    byte[] exportAuctionsToCSV(String token) throws RemoteException, AuctionException;
 
     // --- Administration ---
-    void createUser(String adminUsername, String newUsername, String password, String role)
+    void createUser(String newUsername, String password, String role, String token)
             throws RemoteException, AuctionException;
-    List<User> getAllUsers(String adminUsername) throws RemoteException, AuctionException;
-    byte[] backupDatabase(String adminUsername) throws RemoteException, AuctionException;
-    List<String> getAuditLogs(String adminUsername, int lastNLines)
+    List<User> getAllUsers(String token) throws RemoteException, AuctionException;
+    byte[] backupDatabase(String token) throws RemoteException, AuctionException;
+    List<String> getAuditLogs(int lastNLines, String token)
             throws RemoteException, AuctionException;
 }
