@@ -1,3 +1,8 @@
+# Build directories
+target/
+build/
+dist/
+
 # Compiled class file
 *.class
 *agent*
@@ -6,6 +11,20 @@ openspec/
 
 # Log file
 *.log
+logs/
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.classpath
+.project
+.settings/
+*.swp
+*.swo
+*~
 
 # BlueJ files
 *.ctxt
@@ -22,7 +41,26 @@ openspec/
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+# Operating System
+.DS_Store
+Thumbs.db
+
+# Virtual machine crash logs
 hs_err_pid*
 replay_pid*
 .kilo*
+
+# Maven
+.m2/
+maven-repo/
+
+# Node (if used for frontend)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Misc
+*.tmp
+*.bak
+*.swp
+.gradle/
