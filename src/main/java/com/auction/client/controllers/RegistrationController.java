@@ -2,7 +2,6 @@ package com.auction.client.controllers;
 
 import com.auction.client.core.ClientContext;
 import com.auction.shared.Constants;
-import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
