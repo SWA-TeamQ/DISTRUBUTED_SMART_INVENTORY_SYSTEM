@@ -16,7 +16,8 @@ public class ClientApp extends Application {
     public void start(Stage primaryStage) throws Exception {
         Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
         com.auction.client.ui.ViewLoader loader = new com.auction.client.ui.ViewLoader(primaryStage);
-        loader.loadView("login.fxml");
+        com.auction.client.core.ClientContext.getInstance().setViewLoader(loader);
+        loader.loadView("connect.fxml");
         primaryStage.setTitle("RTDAS - Real-Time Distributed Auction System");
         primaryStage.setWidth(800);
         primaryStage.setHeight(600);

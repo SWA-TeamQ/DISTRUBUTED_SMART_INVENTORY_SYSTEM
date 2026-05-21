@@ -18,6 +18,8 @@ public interface IAuctionService extends Remote {
     // --- Authentication ---
     /** Returns a unique session token UUID if login is successful. */
     String login(String username, String password) throws RemoteException, AuctionException;
+    /** Registers a new user. */
+    void register(String username, String password, String role) throws RemoteException, AuctionException;
     void logout(String token) throws RemoteException;
     String serverTime() throws RemoteException;
 
