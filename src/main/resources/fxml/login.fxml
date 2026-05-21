@@ -60,7 +60,7 @@
     <!-- Footer -->
     <HBox styleClass="footer-box">
         <Label text="Unregistered Node?" styleClass="footer-text"/>
-        <Label text="Request Access" styleClass="footer-link"/>
+        <Label text="Request Access" styleClass="footer-link" onMouseClicked="#handleNavigateToRegister"/>
     </HBox>
 
 </VBox>

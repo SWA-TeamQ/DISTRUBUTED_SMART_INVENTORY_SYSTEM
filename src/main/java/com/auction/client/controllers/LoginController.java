@@ -19,6 +19,11 @@ public class LoginController {
     }
 
     @FXML
+    private void handleNavigateToRegister() {
+        com.auction.client.core.ClientContext.getInstance().getViewLoader().loadView("registration.fxml");
+    }
+
+    @FXML
     private void handleLogin() {
         String username = usernameField.getText();
         String password = passwordField.getText();
