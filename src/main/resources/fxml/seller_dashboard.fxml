@@ -1,6 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.Label?>
-<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.SellerDashboardController">
-    <Label text="Seller Dashboard Placeholder"/>
-</VBox>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.SellerDashboardController">
+    <top>
+        <HBox spacing="20" alignment="CENTER_LEFT" style="-fx-padding: 10; -fx-background-color: #2b2b2b;">
+            <Label text="Seller Dashboard" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Logout" onAction="#handleLogout" styleClass="danger"/>
+        </HBox>
+    </top>
+    
+    <center>
+        <SplitPane dividerPositions="0.4">
+            <!-- Create Auction Form -->
+            <VBox spacing="10" style="-fx-padding: 15;">
+                <Label text="Create New Auction" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                <TextField fx:id="titleField" promptText="Title"/>
+                <TextArea fx:id="descArea" promptText="Description" prefRowCount="3"/>
+                <TextField fx:id="categoryField" promptText="Category"/>
+                <TextField fx:id="priceField" promptText="Starting Price (e.g. 10.50)"/>
+                <TextField fx:id="endTimeField" promptText="Duration in minutes (e.g. 60)"/>
+                
+                <Label text="Images (Max 3):"/>
+                <HBox spacing="5">
+                    <Button text="Img 1" onAction="#handlePickImg1"/>
+                    <Button text="Img 2" onAction="#handlePickImg2"/>
+                    <Button text="Img 3" onAction="#handlePickImg3"/>
+                </HBox>
+                <Label fx:id="imagesLabel" text="No images selected"/>
+                
+                <Button text="Create Auction" onAction="#handleCreateAuction" defaultButton="true" maxWidth="Infinity"/>
+                <Label fx:id="statusLabel" textFill="red" wrapText="true"/>
+            </VBox>
+            
+            <!-- Auction List -->
+            <VBox spacing="10" style="-fx-padding: 15;">
+                <Label text="My Auctions" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                <TableView fx:id="auctionsTable" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn text="ID" prefWidth="50">
+                            <cellValueFactory><PropertyValueFactory property="id"/></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn text="Title" prefWidth="150">
+                            <cellValueFactory><PropertyValueFactory property="title"/></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn text="Status" prefWidth="100">
+                            <cellValueFactory><PropertyValueFactory property="status"/></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn text="Current Bid" prefWidth="100">
+                            <cellValueFactory><PropertyValueFactory property="currentBidCents"/></cellValueFactory>
+                        </TableColumn>
+                    </columns>
+                </TableView>
+                <HBox spacing="10">
+                    <Button text="Cancel Auction" onAction="#handleCancelAuction"/>
+                    <Button text="Relist Auction" onAction="#handleRelistAuction"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="Export to CSV" onAction="#handleExportCSV"/>
+                </HBox>
+            </VBox>
+        </SplitPane>
+    </center>
+</BorderPane>

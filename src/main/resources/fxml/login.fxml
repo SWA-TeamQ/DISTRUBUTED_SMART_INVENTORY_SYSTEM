@@ -54,6 +54,7 @@
 
         <!-- Action Button -->
         <Button text="Enter the Auction" onAction="#handleLogin" styleClass="login-button"/>
+        <Label fx:id="statusLabel" textFill="red" style="-fx-padding: 10 0 0 0;" wrapText="true" alignment="CENTER" maxWidth="Infinity"/>
     </VBox>
 
     <!-- Footer -->

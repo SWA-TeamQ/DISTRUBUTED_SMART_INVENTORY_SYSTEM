@@ -1,6 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.Label?>
-<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.AdminPanelController">
-    <Label text="Admin Panel Placeholder"/>
-</VBox>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.AdminPanelController">
+    <top>
+        <HBox spacing="20" alignment="CENTER_LEFT" style="-fx-padding: 10; -fx-background-color: #2b2b2b;">
+            <Label text="Admin Panel" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Logout" onAction="#handleLogout" styleClass="danger"/>
+        </HBox>
+    </top>
+    
+    <center>
+        <SplitPane dividerPositions="0.3">
+            <VBox spacing="10" style="-fx-padding: 15;">
+                <Label text="Create User" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                <TextField fx:id="usernameField" promptText="Username"/>
+                <PasswordField fx:id="passwordField" promptText="Password"/>
+                <ComboBox fx:id="roleCombo" promptText="Role"/>
+                <Button text="Create User" onAction="#handleCreateUser" defaultButton="true" maxWidth="Infinity"/>
+                <Label fx:id="statusLabel" textFill="red" wrapText="true"/>
+                
+                <Separator/>
+                <Label text="System Tools" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                <Button text="Backup Database" onAction="#handleBackup" maxWidth="Infinity"/>
+                <Button text="Refresh Audit Logs" onAction="#handleRefreshLogs" maxWidth="Infinity"/>
+            </VBox>
+            
+            <SplitPane orientation="VERTICAL" dividerPositions="0.5">
+                <VBox spacing="10" style="-fx-padding: 15;">
+                    <Label text="All Users" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                    <TableView fx:id="usersTable" VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn text="ID" prefWidth="50">
+                                <cellValueFactory><PropertyValueFactory property="id"/></cellValueFactory>
+                            </TableColumn>
+                            <TableColumn text="Username" prefWidth="150">
+                                <cellValueFactory><PropertyValueFactory property="username"/></cellValueFactory>
+                            </TableColumn>
+                            <TableColumn text="Role" prefWidth="100">
+                                <cellValueFactory><PropertyValueFactory property="roleType"/></cellValueFactory>
+                            </TableColumn>
+                            <TableColumn text="Created At" prefWidth="150">
+                                <cellValueFactory><PropertyValueFactory property="createdAt"/></cellValueFactory>
+                            </TableColumn>
+                        </columns>
+                    </TableView>
+                </VBox>
+                
+                <VBox spacing="10" style="-fx-padding: 15;">
+                    <Label text="Audit Logs" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                    <ListView fx:id="auditListView" VBox.vgrow="ALWAYS"/>
+                </VBox>
+            </SplitPane>
+        </SplitPane>
+    </center>
+</BorderPane>
