@@ -46,7 +46,7 @@ public class LoginController {
             if (com.auction.shared.Constants.ADMIN.equals(role)) {
                 context.getViewLoader().loadView("admin_panel.fxml");
             } else {
-                context.getViewLoader().loadView("gallery.fxml");
+                context.getViewLoader().loadView("user_dashboard.fxml");
             }
         } catch (Exception e) {
             if (statusLabel != null) statusLabel.setText("Login failed. Please try again.");

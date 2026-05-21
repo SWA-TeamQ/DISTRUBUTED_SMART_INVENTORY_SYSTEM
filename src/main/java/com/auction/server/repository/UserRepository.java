@@ -40,13 +40,13 @@ public class UserRepository {
         try (var pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, username);
             try (var rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    String p = rs.getString("password_hash");
-                    String r = rs.getString("role");
-                    String createdAt = rs.getString("created_at");
-                    if (Constants.ADMIN.equals(r)) return new Admin(username, p, createdAt);
-                    return new User(username, p, Constants.USER, createdAt);
-                }
+                        if (rs.next()) {
+                            String p = rs.getString("password_hash");
+                            String r = rs.getString("role");
+                            String createdAt = rs.getString("created_at");
+                            if (Constants.ADMIN.equals(r)) return new Admin(username, p, createdAt);
+                            if (Constants.USER.equals(r)) return new User(username, p, Constants.USER, createdAt);
+                        }
             }
         } catch (SQLException e) {
             throw new RuntimeException("Failed to find user", e);
@@ -60,7 +60,6 @@ public class UserRepository {
             pstmt.setString(1, username);
             pstmt.setString(2, passwordHash);
             pstmt.setString(3, role);
-            pstmt.setString(4, Instant.now().toString());
             pstmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Failed to insert user", e);
@@ -135,7 +134,7 @@ public class UserRepository {
                 String r = rs.getString("role");
                 String createdAt = rs.getString("created_at");
                 if (Constants.ADMIN.equals(r)) users.add(new Admin(u, p, createdAt));
-                else users.add(new User(u, p, Constants.USER, createdAt));
+                else if (Constants.USER.equals(r)) users.add(new User(u, p, Constants.USER, createdAt));
             }
         } catch (SQLException e) {
             throw new RuntimeException("Failed to fetch users", e);

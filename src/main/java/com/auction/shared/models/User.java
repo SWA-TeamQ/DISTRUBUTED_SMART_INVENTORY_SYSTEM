@@ -15,15 +15,15 @@ public class User implements Serializable {
     private String roleType;
     private String createdAt;
 
-    public User(String username, String passwordHash, String roleType) {
-        this(username, passwordHash, roleType, java.time.Instant.now().toString());
-    }
-
     public User(String username, String passwordHash, String roleType, String createdAt) {
         this.username = username;
         this.passwordHash = passwordHash;
         this.roleType = roleType;
         this.createdAt = createdAt;
+    }
+
+    public User(String username, String passwordHash, String roleType) {
+        this(username, passwordHash, roleType, java.time.Instant.now().toString());
     }
 
     public String getUsername() { return username; }
