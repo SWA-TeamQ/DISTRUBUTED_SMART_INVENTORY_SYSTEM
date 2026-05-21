@@ -8,8 +8,7 @@ public final class Constants {
 
     // --- Roles ---
     public static final String ADMIN = "ADMIN";
-    public static final String BIDDER = "BIDDER";
-    public static final String SELLER = "SELLER";
+    public static final String USER = "USER";
 
     // --- RMI ---
     public static final String RMI_SERVICE_NAME = "AuctionService";

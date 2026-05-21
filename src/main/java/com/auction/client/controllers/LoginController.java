@@ -1,5 +1,7 @@
 package com.auction.client.controllers;
 
+import java.io.IOException;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -19,7 +21,7 @@ public class LoginController {
     }
 
     @FXML
-    private void handleNavigateToRegister() {
+    private void handleNavigateToRegister() throws IOException {
         com.auction.client.core.ClientContext.getInstance().getViewLoader().loadView("registration.fxml");
     }
 

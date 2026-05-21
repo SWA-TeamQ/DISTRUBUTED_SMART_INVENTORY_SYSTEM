@@ -31,11 +31,6 @@
             <PasswordField fx:id="passwordField" promptText="Choose a password"/>
         </VBox>
 
-        <VBox styleClass="form-group">
-            <Label text="Role" styleClass="form-label"/>
-            <ComboBox fx:id="roleComboBox" promptText="Select Role" maxWidth="Infinity"/>
-        </VBox>
-
         <Button text="Register" onAction="#handleRegister" styleClass="login-button" maxWidth="Infinity"/>
         <Label fx:id="statusLabel" textFill="red" style="-fx-padding: 10 0 0 0;" wrapText="true" alignment="CENTER" maxWidth="Infinity"/>
     </VBox>

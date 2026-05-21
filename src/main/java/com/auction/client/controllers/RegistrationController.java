@@ -10,21 +10,15 @@ public class RegistrationController {
 
     @FXML private TextField usernameField;
     @FXML private PasswordField passwordField;
-    @FXML private ComboBox<String> roleComboBox;
     @FXML private Label statusLabel;
-
-    @FXML
-    public void initialize() {
-        roleComboBox.setItems(FXCollections.observableArrayList(Constants.BIDDER, Constants.SELLER));
-    }
 
     @FXML
     private void handleRegister() {
         String username = usernameField.getText();
         String password = passwordField.getText();
-        String role = roleComboBox.getValue();
+        String role = Constants.USER;
 
-        if (username.isEmpty() || password.isEmpty() || role == null) {
+        if (username.isEmpty() || password.isEmpty()) {
             statusLabel.setText("Please fill in all fields.");
             return;
         }
