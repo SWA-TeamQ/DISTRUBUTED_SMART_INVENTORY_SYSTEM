@@ -28,13 +28,29 @@ public class UdpBroadcaster {
 
     /** Start broadcasting. Call once at server startup. */
     public void start() {
-        // TODO: open DatagramSocket, schedule broadcast every UDP_BROADCAST_INTERVAL_MS
+        if (scheduler != null) return;
+        
+        scheduler = Executors.newSingleThreadScheduledExecutor();
+        String message = Constants.UDP_PREFIX + "|" + serverName + "|" + rmiPort;
+        byte[] data = message.getBytes();
+
+        scheduler.scheduleAtFixedRate(() -> {
+            try (DatagramSocket socket = new DatagramSocket()) {
+                socket.setBroadcast(true);
+                InetAddress address = InetAddress.getByName("255.255.255.255");
+                DatagramPacket packet = new DatagramPacket(data, data.length, address, Constants.UDP_BROADCAST_PORT);
+                socket.send(packet);
+            } catch (IOException e) {
+                System.err.println("[RTDAS] Broadcaster error: " + e.getMessage());
+            }
+        }, 0, Constants.UDP_BROADCAST_INTERVAL_MS, TimeUnit.MILLISECONDS);
     }
 
     /** Stop broadcasting. Call on server shutdown. */
     public void stop() {
-        if (scheduler != null && !scheduler.isShutdown()) {
+        if (scheduler != null) {
             scheduler.shutdownNow();
+            scheduler = null;
         }
     }
 }
