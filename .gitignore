@@ -64,3 +64,4 @@ yarn-error.log
 *.bak
 *.swp
 .gradle/
+docs/day1_member2_kickoff.md

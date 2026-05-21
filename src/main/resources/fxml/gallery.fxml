@@ -1,6 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.GalleryController">
-    <Label text="Gallery Screen Placeholder"/>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.auction.client.controllers.GalleryController"
+      spacing="12" style="-fx-padding: 20;">
+    <children>
+        <Label text="Mock Gallery" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+        <Label fx:id="statusLabel" text="Loading auctions..."/>
+        <ListView fx:id="auctionListView" VBox.vgrow="ALWAYS" onMouseClicked="#handleDoubleClick"/>
+        <HBox spacing="10">
+            <children>
+                <Button text="Open Selected Auction" onAction="#openSelectedAuction"/>
+            </children>
+        </HBox>
+    </children>
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
 </VBox>

@@ -1,6 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.AuctionDetailController">
-    <Label text="Auction Detail Placeholder"/>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.auction.client.controllers.AuctionDetailController"
+      spacing="12" style="-fx-padding: 20;">
+    <children>
+        <Label fx:id="titleLabel" text="Auction Title" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+        <Label fx:id="statusLabel" text="Status: Unknown"/>
+        <Label fx:id="currentBidLabel" text="Current Bid: --"/>
+        <Label fx:id="bidderLabel" text="Highest Bidder: --"/>
+        <HBox spacing="10">
+            <children>
+                <TextField fx:id="bidField" promptText="Enter bid amount in dollars" HBox.hgrow="ALWAYS"/>
+                <Button fx:id="bidButton" text="Place Bid" onAction="#handleBid"/>
+            </children>
+        </HBox>
+        <Label fx:id="messageLabel" text="" style="-fx-text-fill: #ffb86c;"/>
+        <Label text="Bid History" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+        <ListView fx:id="bidHistoryView" VBox.vgrow="ALWAYS"/>
+        <Button text="Back to Gallery" onAction="#goBackToGallery"/>
+    </children>
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
 </VBox>

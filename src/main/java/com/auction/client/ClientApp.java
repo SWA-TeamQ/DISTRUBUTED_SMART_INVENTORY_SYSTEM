@@ -1,5 +1,6 @@
 package com.auction.client;
 
+import com.auction.client.ui.ClientNavigator;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
@@ -16,7 +17,12 @@ public class ClientApp extends Application {
     public void start(Stage primaryStage) throws Exception {
         Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
         com.auction.client.ui.ViewLoader loader = new com.auction.client.ui.ViewLoader(primaryStage);
-        loader.loadView("login.fxml");
+        ClientNavigator.setViewLoader(loader);
+        if (Boolean.parseBoolean(System.getProperty("rtdas.mockMode", "true"))) {
+            loader.loadView("gallery.fxml");
+        } else {
+            loader.loadView("login.fxml");
+        }
         primaryStage.setTitle("RTDAS - Real-Time Distributed Auction System");
         primaryStage.setWidth(800);
         primaryStage.setHeight(600);
