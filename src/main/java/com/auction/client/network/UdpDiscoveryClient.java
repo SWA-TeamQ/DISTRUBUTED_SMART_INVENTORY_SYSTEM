@@ -28,9 +28,42 @@ public class UdpDiscoveryClient {
 
     /** Start listening for server broadcasts. */
     public void startListening() {
-        // TODO: open DatagramSocket on UDP_BROADCAST_PORT
-        // TODO: parse packets matching UDP_PREFIX format
-        // TODO: add to discoveredServers (avoid duplicates)
+        if (running) return;
+        running = true;
+        listenerThread = new Thread(() -> {
+            try (DatagramSocket socket = new DatagramSocket(Constants.UDP_BROADCAST_PORT)) {
+                socket.setSoTimeout(1000); // 1 second timeout to allow interrupt checking
+                byte[] buffer = new byte[1024];
+                while (running) {
+                    try {
+                        DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+                        socket.receive(packet);
+                        String data = new String(packet.getData(), 0, packet.getLength()).trim();
+                        // Format: RTDAS|<ServerName>|<RmiPort>
+                        if (data.startsWith(Constants.UDP_PREFIX + "|")) {
+                            String[] parts = data.split("\\|");
+                            if (parts.length == 3) {
+                                String serverName = parts[1];
+                                int rmiPort = Integer.parseInt(parts[2]);
+                                String host = packet.getAddress().getHostAddress();
+                                ServerInfo info = new ServerInfo(serverName, host, rmiPort);
+                                if (!discoveredServers.contains(info)) {
+                                    discoveredServers.add(info);
+                                }
+                            }
+                        }
+                    } catch (java.net.SocketTimeoutException e) {
+                        // Expected timeout, loop continues and checks running flag
+                    }
+                }
+            } catch (Exception e) {
+                if (running) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        listenerThread.setDaemon(true);
+        listenerThread.start();
     }
 
     /** Stop listening. */

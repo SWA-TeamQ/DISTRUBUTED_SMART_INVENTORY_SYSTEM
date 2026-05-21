@@ -13,7 +13,7 @@ A distributed, multi-user English auction platform demonstrating advanced Java c
 
 ```bash
 # Terminal 1 - Start the server
-mvn exec:java -Dexec.mainClass="com.auction.server.core.ServerLauncher"
+mvn exec:java
 
 # Terminal 2 - Launch a client
 mvn javafx:run

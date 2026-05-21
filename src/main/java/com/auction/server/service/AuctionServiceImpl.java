@@ -136,6 +136,18 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
     }
 
     @Override
+    public void register(String username, String password, String role) throws RemoteException, AuctionException {
+        checkRateLimit(getClientIp(), loginAttempts, 5, 10);
+        if (userRepo.findUserByUsername(username) != null) {
+            throw new AuctionException("Username already exists");
+        }
+        String hash = SecurityUtil.hashPassword(password);
+        userRepo.insertUser(username, hash, role);
+        AsyncLogger.log(LogCategory.SECURITY, EventType.CREATE_AUCTION, "New User Registered: " + username + " Role=" + role);
+    }
+
+
+    @Override
     public void logout(String token) throws RemoteException {
         SessionInfo sessionInfo = sessions.remove(token);
         if (sessionInfo != null) {
