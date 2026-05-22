@@ -32,6 +32,12 @@ public class AuctionManager {
         return auctionRepo.findActiveAuctions();
     }
 
+    public List<AuctionItem> findActiveAuctionsBySeller(String sellerUsername) {
+        return auctionRepo.findAuctionsBySeller(sellerUsername).stream()
+            .filter(a -> Constants.STATUS_ACTIVE.equals(a.getStatus()))
+            .toList();
+    }
+
     public AuctionItem getAuctionById(int id) {
         return auctionRepo.findAuctionById(id);
     }

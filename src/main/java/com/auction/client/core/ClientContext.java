@@ -42,4 +42,13 @@ public class ClientContext {
         this.userRole = null;
         this.username = null;
     }
+
+    public void handleConnectionLost() {
+        getRmiProvider().reset();
+        try {
+            getViewLoader().loadView("connect.fxml");
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

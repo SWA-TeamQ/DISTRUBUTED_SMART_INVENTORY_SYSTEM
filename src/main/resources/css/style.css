@@ -1,19 +1,451 @@
-/* Global CSS for RTDAS */
+/* RTDAS Shared UI System */
+
 .root {
-    -fx-font-family: 'Segoe UI', Tahoma, sans-serif;
-    -fx-background-color: #2b2b2b;
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+    -fx-background-color: #010409;
 }
 
 .label {
-    -fx-text-fill: #e0e0e0;
+    -fx-text-fill: #c9d1d9;
 }
 
-.button {
-    -fx-background-color: #0078d7;
-    -fx-text-fill: white;
+.page-shell {
+    -fx-background-color: linear-gradient(
+        to bottom right,
+        #010409,
+        #0b1220 55%,
+        #070a10
+    );
+}
+
+.page-header {
+    -fx-background-color: rgba(13, 17, 23, 0.94);
+    -fx-border-color: rgba(48, 54, 61, 0.85);
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 18px 22px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.35), 24, 0, 0, 8);
+}
+
+.page-title {
+    -fx-font-size: 26px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #f0f6fc;
+    -fx-font-family: "Inter";
+}
+
+.page-subtitle {
+    -fx-font-size: 13px;
+    -fx-text-fill: #8b949e;
+    -fx-font-family: "Inter";
+}
+
+.section-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #f0f6fc;
+    -fx-font-family: "Inter";
+}
+
+.section-copy {
+    -fx-font-size: 12px;
+    -fx-text-fill: #8b949e;
+    -fx-font-family: "Inter";
+}
+
+.panel-card,
+.hero-card,
+.metric-card,
+.toolbar-card {
+    -fx-background-color: rgba(13, 17, 23, 0.94);
+    -fx-background-radius: 18px;
+    -fx-border-color: rgba(48, 54, 61, 0.9);
+    -fx-border-radius: 18px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.42), 26, 0, 0, 8);
+}
+
+.panel-card,
+.hero-card,
+.toolbar-card {
+    -fx-padding: 18px;
+}
+
+.metric-card {
+    -fx-padding: 16px 18px;
+    -fx-background-color: linear-gradient(
+        to bottom right,
+        rgba(13, 17, 23, 0.98),
+        rgba(17, 24, 39, 0.92)
+    );
+}
+
+.metric-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #8b949e;
+    -fx-font-family: "Inter";
+    -fx-font-weight: 600;
+}
+
+.metric-value {
+    -fx-font-size: 28px;
+    -fx-text-fill: #f0f6fc;
+    -fx-font-family: "Inter";
+    -fx-font-weight: 800;
+}
+
+.status-chip {
+    -fx-background-radius: 999px;
+    -fx-border-radius: 999px;
+    -fx-padding: 6px 12px;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-font-family: "Inter";
+}
+
+.status-chip-success {
+    -fx-background-color: rgba(46, 160, 67, 0.16);
+    -fx-text-fill: #7ee787;
+    -fx-border-color: rgba(46, 160, 67, 0.25);
+}
+
+.status-chip-accent {
+    -fx-background-color: rgba(88, 166, 255, 0.15);
+    -fx-text-fill: #79c0ff;
+    -fx-border-color: rgba(88, 166, 255, 0.28);
+}
+
+.status-chip-warning {
+    -fx-background-color: rgba(210, 153, 34, 0.18);
+    -fx-text-fill: #e3b341;
+    -fx-border-color: rgba(210, 153, 34, 0.28);
+}
+
+.primary-button,
+.secondary-button,
+.ghost-button,
+.login-button {
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-padding: 11px 14px;
+    -fx-font-family: "Inter";
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
     -fx-cursor: hand;
 }
 
-.button:hover {
-    -fx-background-color: #005a9e;
+.primary-button,
+.login-button {
+    -fx-background-color: #1f6feb;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(31, 111, 235, 0.28), 10, 0, 0, 2);
+}
+
+.primary-button:hover,
+.login-button:hover {
+    -fx-background-color: #388bfd;
+}
+
+.primary-button:pressed,
+.login-button:pressed {
+    -fx-background-color: #1a5cc7;
+    -fx-translate-y: 1px;
+}
+
+.secondary-button {
+    -fx-background-color: #161b22;
+    -fx-text-fill: #c9d1d9;
+    -fx-border-color: #30363d;
+    -fx-border-width: 1px;
+}
+
+.secondary-button:hover {
+    -fx-background-color: #21262d;
+    -fx-border-color: #58a6ff;
+}
+
+.secondary-button:pressed {
+    -fx-background-color: #0f1318;
+    -fx-translate-y: 1px;
+}
+
+.ghost-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #c9d1d9;
+    -fx-border-color: #30363d;
+    -fx-border-width: 1px;
+}
+
+.ghost-button:hover {
+    -fx-background-color: rgba(88, 166, 255, 0.08);
+    -fx-border-color: #58a6ff;
+}
+
+.compact-field,
+.search-field,
+.input-field,
+.text-field,
+.password-field,
+.text-area,
+.combo-box-base {
+    -fx-background-color: #0b0f15;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-border-color: #30363d;
+    -fx-border-width: 1.25px;
+    -fx-text-fill: #f0f6fc;
+    -fx-prompt-text-fill: #5b6570;
+    -fx-font-family: "Inter";
+}
+
+.compact-field,
+.search-field,
+.input-field,
+.text-field,
+.password-field,
+.combo-box-base {
+    -fx-padding: 11px 12px;
+    -fx-min-height: 44px;
+}
+
+.text-area {
+    -fx-padding: 10px 12px;
+}
+
+.compact-field:focused,
+.search-field:focused,
+.input-field:focused,
+.text-field:focused,
+.password-field:focused,
+.text-area:focused,
+.combo-box-base:focused {
+    -fx-border-color: #58a6ff;
+    -fx-effect: dropshadow(gaussian, rgba(88, 166, 255, 0.22), 14, 0, 0, 0);
+}
+
+.nav-bar,
+.tab-bar,
+.action-strip {
+    -fx-background-color: rgba(13, 17, 23, 0.92);
+    -fx-background-radius: 14px;
+    -fx-border-color: rgba(48, 54, 61, 0.8);
+    -fx-border-radius: 14px;
+    -fx-border-width: 1px;
+    -fx-padding: 12px;
+}
+
+.tab-pane {
+    -fx-background-color: transparent;
+}
+
+.tab-pane .tab-header-background {
+    -fx-background-color: transparent;
+}
+
+.tab-pane:top .tab-header-area {
+    -fx-padding: 0 0 12px 0;
+    -fx-background-color: transparent;
+}
+
+.tab {
+    -fx-background-color: transparent;
+    -fx-text-fill: #c9d1d9;
+    -fx-padding: 10px 16px;
+    -fx-font-family: "Inter";
+    -fx-font-weight: 600;
+    -fx-font-size: 13px;
+}
+
+.tab:selected {
+    -fx-background-color: rgba(88, 166, 255, 0.12);
+    -fx-text-fill: #58a6ff;
+    -fx-border-color: #58a6ff;
+    -fx-border-width: 0 0 2 0;
+}
+
+.tab:hover {
+    -fx-background-color: rgba(88, 166, 255, 0.06);
+}
+
+.nav-tab {
+    -fx-background-color: transparent;
+    -fx-text-fill: #c9d1d9;
+    -fx-border-color: transparent;
+    -fx-border-width: 0 0 2 0;
+    -fx-padding: 10px 14px;
+    -fx-font-family: "Inter";
+    -fx-font-weight: 700;
+    -fx-cursor: hand;
+}
+
+.nav-tab:hover {
+    -fx-text-fill: #f0f6fc;
+    -fx-border-color: rgba(88, 166, 255, 0.35);
+}
+
+.nav-tab:selected {
+    -fx-text-fill: #58a6ff;
+    -fx-border-color: #58a6ff;
+}
+
+.content-scroll,
+.panel-scroll {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.content-scroll > .viewport,
+.panel-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.users-table,
+.audit-list,
+.auction-table,
+.data-table {
+    -fx-background-color: #0b0f15;
+    -fx-background-radius: 14px;
+    -fx-border-color: #30363d;
+    -fx-border-radius: 14px;
+    -fx-border-width: 1px;
+}
+
+.users-table .column-header-background,
+.auction-table .column-header-background,
+.data-table .column-header-background {
+    -fx-background-color: linear-gradient(to bottom, #161b22, #0f1318);
+    -fx-background-radius: 14px 14px 0 0;
+}
+
+.users-table .column-header,
+.auction-table .column-header,
+.data-table .column-header,
+.users-table .filler,
+.auction-table .filler,
+.data-table .filler {
+    -fx-background-color: transparent;
+    -fx-border-color: rgba(48, 54, 61, 0.8);
+    -fx-border-width: 0 0 1 0;
+}
+
+.users-table .column-header .label,
+.auction-table .column-header .label,
+.data-table .column-header .label,
+.audit-list .label {
+    -fx-text-fill: #c9d1d9;
+    -fx-font-weight: 700;
+    -fx-font-family: "Inter";
+}
+
+.users-table .table-row-cell,
+.auction-table .table-row-cell,
+.data-table .table-row-cell {
+    -fx-background-color: #0b0f15;
+    -fx-border-color: rgba(48, 54, 61, 0.35);
+}
+
+.users-table .table-row-cell:filled:hover,
+.auction-table .table-row-cell:filled:hover,
+.data-table .table-row-cell:filled:hover {
+    -fx-background-color: rgba(88, 166, 255, 0.08);
+}
+
+.users-table .table-row-cell:filled:selected,
+.auction-table .table-row-cell:filled:selected,
+.data-table .table-row-cell:filled:selected {
+    -fx-background-color: rgba(88, 166, 255, 0.16);
+}
+
+.users-table .table-cell,
+.auction-table .table-cell,
+.data-table .table-cell,
+.audit-list .list-cell {
+    -fx-text-fill: #c9d1d9;
+    -fx-font-family: "Inter";
+}
+
+.audit-list .list-cell {
+    -fx-background-color: #0b0f15;
+    -fx-padding: 8px 10px;
+}
+
+.audit-list .list-cell:filled:hover {
+    -fx-background-color: rgba(88, 166, 255, 0.08);
+}
+
+.audit-list .list-cell:filled:selected {
+    -fx-background-color: rgba(88, 166, 255, 0.16);
+}
+
+.empty-state {
+    -fx-text-fill: #8b949e;
+    -fx-font-style: italic;
+    -fx-padding: 18px;
+}
+
+.dashboard-shell {
+    -fx-background-color: #010409;
+}
+
+.dashboard-sidebar,
+.dashboard-main {
+    -fx-background-color: transparent;
+}
+
+.sidebar-stack,
+.main-stack,
+.form-stack {
+    -fx-spacing: 16px;
+    -fx-padding: 18px;
+}
+
+/* Metric Card Variants */
+.metric-card-accent {
+    -fx-border-color: rgba(88, 166, 255, 0.42);
+}
+
+.metric-card-warm {
+    -fx-border-color: rgba(248, 81, 73, 0.28);
+}
+
+/* Status Line for error messages */
+.status-line {
+    -fx-text-fill: #f85149;
+    -fx-font-size: 12px;
+    -fx-font-family: "Inter";
+    -fx-padding: 6px 0;
+}
+
+/* Footer Elements */
+.footer-box {
+    -fx-alignment: center;
+    -fx-spacing: 6px;
+    -fx-padding: 0 0 10px 0;
+}
+
+.footer-text {
+    -fx-text-fill: #484f58;
+    -fx-font-size: 13px;
+    -fx-font-family: "Inter";
+}
+
+.footer-link {
+    -fx-text-fill: #58a6ff;
+    -fx-font-size: 13px;
+    -fx-font-family: "Inter";
+    -fx-cursor: hand;
+}
+
+.footer-link:hover {
+    -fx-text-fill: #79b8ff;
+    -fx-underline: true;
+}
+
+/* Login-specific Input Icon */
+.input-icon {
+    -fx-icon-size: 16px;
+    -fx-icon-color: #8b949e;
+}
+
+.input-field:focused-within .input-icon {
+    -fx-icon-color: #58a6ff;
 }

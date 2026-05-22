@@ -37,4 +37,9 @@ public class RmiClientProvider {
     public boolean isConnected() {
         return service != null;
     }
+
+    /** Clear the current service stub. */
+    public void reset() {
+        this.service = null;
+    }
 }

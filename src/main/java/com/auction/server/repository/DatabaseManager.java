@@ -43,7 +43,7 @@ public class DatabaseManager {
             stmt.execute("CREATE TABLE IF NOT EXISTS users (" +
                     "username TEXT PRIMARY KEY, " +
                     "password_hash TEXT NOT NULL, " +
-                    "role TEXT NOT NULL CHECK(role IN ('" + Constants.ADMIN + "','" + Constants.SELLER + "','" + Constants.BIDDER + "')), " +
+                    "role TEXT NOT NULL CHECK(role IN ('" + Constants.ADMIN + "','" + Constants.USER + "')), " +
                     "created_at TEXT NOT NULL" +
                     ")");
 
@@ -81,6 +81,7 @@ public class DatabaseManager {
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_auction_status_end ON auction_items(status, end_time)");
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_auction_seller ON auction_items(seller_username)");
         }
+
     }
 
     public Connection getConnection() {

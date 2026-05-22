@@ -24,11 +24,15 @@ public class RegistrationController {
 
         try {
             ClientContext context = ClientContext.getInstance();
-            context.getRmiProvider().getService().register(username, password, role);
+            com.auction.shared.interfaces.IAuctionService service = context.getRmiProvider().getService();
+            service.register(username, password, role);
+            String token = service.login(username, password);
+            context.setSessionToken(token);
+            context.setUsername(username);
+            context.setUserRole(service.getMyRole(token));
             statusLabel.setStyle("-fx-text-fill: green;");
-            statusLabel.setText("Registration successful!");
-            // Optionally navigate back to login
-            context.getViewLoader().loadView("login.fxml");
+            statusLabel.setText("Registration successful! Entering the application...");
+            context.getViewLoader().loadView("seller_dashboard.fxml");
         } catch (Exception e) {
             statusLabel.setStyle("-fx-text-fill: red;");
             statusLabel.setText("Registration failed: " + e.getMessage());
