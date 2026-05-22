@@ -3,8 +3,6 @@ package com.auction.server.repository;
 import com.auction.shared.Constants;
 import com.auction.shared.models.User;
 import com.auction.shared.models.Admin;
-import com.auction.shared.models.Seller;
-import com.auction.shared.models.Bidder;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -45,8 +43,7 @@ public class UserRepository {
                     String p = rs.getString("password_hash");
                     String r = rs.getString("role");
                     if (Constants.ADMIN.equals(r)) return new Admin(username, p);
-                    if (Constants.SELLER.equals(r)) return new Seller(username, p);
-                    if (Constants.BIDDER.equals(r)) return new Bidder(username, p);
+                    if (Constants.USER.equals(r)) return new User(username, p, Constants.USER);
                 }
             }
         } catch (SQLException e) {
@@ -56,12 +53,11 @@ public class UserRepository {
     }
 
     public void insertUser(String username, String passwordHash, String role) {
-        String sql = "INSERT INTO users (username, password_hash, role, created_at) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)";
         try (var pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, username);
             pstmt.setString(2, passwordHash);
             pstmt.setString(3, role);
-            pstmt.setString(4, java.time.Instant.now().toString());
             pstmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Failed to insert user", e);
@@ -77,8 +73,7 @@ public class UserRepository {
                 String p = rs.getString("password_hash");
                 String r = rs.getString("role");
                 if (Constants.ADMIN.equals(r)) users.add(new Admin(u, p));
-                else if (Constants.SELLER.equals(r)) users.add(new Seller(u, p));
-                else if (Constants.BIDDER.equals(r)) users.add(new Bidder(u, p));
+                else if (Constants.USER.equals(r)) users.add(new User(u, p, Constants.USER));
             }
         } catch (SQLException e) {
             throw new RuntimeException("Failed to fetch users", e);

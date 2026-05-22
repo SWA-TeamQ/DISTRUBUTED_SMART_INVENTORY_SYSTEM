@@ -163,8 +163,9 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
     // --- Auction Browsing ---
 
     @Override
-    public List<AuctionItem> getActiveAuctions() throws RemoteException {
-        return auctionManager.getActiveAuctions();
+    public List<AuctionItem> getActiveAuctionsBySeller(String sellerUsername, String token) throws RemoteException, AuctionException {
+        validateSession(token);
+        return auctionManager.findActiveAuctionsBySeller(sellerUsername);
     }
 
     @Override
@@ -178,7 +179,7 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
     public void placeBid(int auctionId, long amountCents, long clientExpectedPriceCents, String token)
             throws RemoteException, AuctionException {
         checkRateLimit(getClientIp(), bidAttempts, 10, 10);
-        SessionContext context = validateRole(token, Constants.BIDDER);
+        SessionContext context = validateRole(token, Constants.USER);
 
         try {
             auctionManager.placeBid(auctionId, context, amountCents, clientExpectedPriceCents);
@@ -199,7 +200,7 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
     @Override
     public int createAuction(AuctionItem item, byte[] image1, byte[] image2, byte[] image3, String token)
             throws RemoteException, AuctionException {
-        SessionContext context = validateRole(token, Constants.SELLER);
+        SessionContext context = validateRole(token, Constants.USER);
 
         String[] stagedPaths = null;
         try {
@@ -216,7 +217,7 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
 
     @Override
     public void cancelAuction(int auctionId, String token) throws RemoteException, AuctionException {
-        SessionContext context = validateRole(token, Constants.SELLER, Constants.ADMIN);
+        SessionContext context = validateRole(token, Constants.USER, Constants.ADMIN);
 
         try {
             auctionManager.cancelAuction(auctionId, context);
@@ -230,7 +231,7 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
     @Override
     public void relistAuction(int auctionId, String newEndTimeIso, String token)
             throws RemoteException, AuctionException {
-        SessionContext context = validateRole(token, Constants.SELLER, Constants.ADMIN);
+        SessionContext context = validateRole(token, Constants.USER, Constants.ADMIN);
 
         try {
             auctionManager.relistAuction(auctionId, newEndTimeIso, context);
@@ -245,13 +246,13 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
 
     @Override
     public List<Bid> getMyBids(String token) throws RemoteException, AuctionException {
-        SessionContext context = validateRole(token, Constants.BIDDER);
+        SessionContext context = validateRole(token, Constants.USER);
         return auctionManager.findBidsByBidder(context.username());
     }
 
     @Override
     public List<AuctionItem> getMyWonAuctions(String token) throws RemoteException, AuctionException {
-        SessionContext context = validateRole(token, Constants.BIDDER);
+        SessionContext context = validateRole(token, Constants.USER);
         return auctionManager.findWonAuctionsByBidder(context.username());
     }
 
@@ -283,11 +284,12 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
         List<AuctionItem> items;
         if (Constants.ADMIN.equals(context.role())) {
             items = auctionManager.getActiveAuctions();
-        } else if (Constants.SELLER.equals(context.role())) {
+        } else if (Constants.USER.equals(context.role())) {
             items = auctionManager.findAuctionsBySeller(context.username());
         } else {
-            throw new UnauthorizedException("Only sellers or admins can export auctions to CSV");
+            throw new UnauthorizedException("Only users or admins can export auctions to CSV");
         }
+
 
         StringBuilder sb = new StringBuilder();
         sb.append("AuctionID,Title,Category,StartingPrice,FinalPrice,Winner,Status,StartTime,EndTime\n");

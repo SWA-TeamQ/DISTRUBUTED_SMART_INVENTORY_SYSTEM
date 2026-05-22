@@ -34,17 +34,11 @@
                     <Label text="All Users" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
                     <TableView fx:id="usersTable" VBox.vgrow="ALWAYS">
                         <columns>
-                            <TableColumn text="ID" prefWidth="50">
-                                <cellValueFactory><PropertyValueFactory property="id"/></cellValueFactory>
-                            </TableColumn>
                             <TableColumn text="Username" prefWidth="150">
                                 <cellValueFactory><PropertyValueFactory property="username"/></cellValueFactory>
                             </TableColumn>
                             <TableColumn text="Role" prefWidth="100">
                                 <cellValueFactory><PropertyValueFactory property="roleType"/></cellValueFactory>
-                            </TableColumn>
-                            <TableColumn text="Created At" prefWidth="150">
-                                <cellValueFactory><PropertyValueFactory property="createdAt"/></cellValueFactory>
                             </TableColumn>
                         </columns>
                     </TableView>

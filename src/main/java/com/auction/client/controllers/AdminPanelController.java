@@ -14,8 +14,7 @@ public class AdminPanelController {
     @FXML
     public void initialize() {
         roleCombo.getItems().addAll(
-            com.auction.shared.Constants.BIDDER, 
-            com.auction.shared.Constants.SELLER, 
+            com.auction.shared.Constants.USER, 
             com.auction.shared.Constants.ADMIN
         );
         roleCombo.getSelectionModel().selectFirst();
@@ -29,6 +28,8 @@ public class AdminPanelController {
             com.auction.client.core.ClientContext context = com.auction.client.core.ClientContext.getInstance();
             java.util.List<com.auction.shared.models.User> users = context.getRmiProvider().getService().getAllUsers(context.getSessionToken());
             usersTable.getItems().setAll(users);
+        } catch (java.rmi.RemoteException e) {
+            com.auction.client.core.ClientContext.getInstance().handleConnectionLost();
         } catch (Exception e) {
             statusLabel.setText("Failed to load users: " + e.getMessage());
         }
@@ -39,6 +40,8 @@ public class AdminPanelController {
             com.auction.client.core.ClientContext context = com.auction.client.core.ClientContext.getInstance();
             java.util.List<String> logs = context.getRmiProvider().getService().getAuditLogs(100, context.getSessionToken());
             auditListView.getItems().setAll(logs);
+        } catch (java.rmi.RemoteException e) {
+            com.auction.client.core.ClientContext.getInstance().handleConnectionLost();
         } catch (Exception e) {
             statusLabel.setText("Failed to load audit logs: " + e.getMessage());
         }
@@ -56,6 +59,8 @@ public class AdminPanelController {
             statusLabel.setText("User created successfully");
             usernameField.clear(); passwordField.clear();
             loadUsers();
+        } catch (java.rmi.RemoteException e) {
+            com.auction.client.core.ClientContext.getInstance().handleConnectionLost();
         } catch (Exception e) {
             statusLabel.setText("Creation failed: " + e.getMessage());
         }
