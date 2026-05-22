@@ -20,6 +20,8 @@ public interface IAuctionService extends Remote {
     String login(String username, String password) throws RemoteException, AuctionException;
     /** Registers a new user. */
     void register(String username, String password, String role) throws RemoteException, AuctionException;
+        /** Returns the authenticated user's role for the current session. */
+        String getMyRole(String token) throws RemoteException, AuctionException;
     void logout(String token) throws RemoteException;
     String serverTime() throws RemoteException;
 

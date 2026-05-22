@@ -40,8 +40,6 @@
         <VBox styleClass="form-group">
             <HBox alignment="CENTER_LEFT">
                 <Label text="Passkey" styleClass="form-label"/>
-                <Region HBox.hgrow="ALWAYS"/>
-                <Label text="Forgot?" styleClass="forgot-link"/>
             </HBox>
             <HBox alignment="CENTER_LEFT" spacing="10" styleClass="input-field">
                 <FontIcon iconLiteral="fas-lock" styleClass="input-icon"/>

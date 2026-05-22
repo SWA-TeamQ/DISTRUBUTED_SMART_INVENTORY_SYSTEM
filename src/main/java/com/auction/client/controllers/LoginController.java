@@ -38,19 +38,13 @@ public class LoginController {
             com.auction.client.core.ClientContext context = com.auction.client.core.ClientContext.getInstance();
             com.auction.shared.interfaces.IAuctionService service = context.getRmiProvider().getService();
             String token = service.login(username, password);
-            // Authenticate and fetch user role
             context.setSessionToken(token);
             context.setUsername(username);
-            
-            // Fetch user record to determine role
-            com.auction.shared.models.User user = service.getAllUsers(token).stream()
-                .filter(u -> u.getUsername().equals(username))
-                .findFirst()
-                .orElseThrow(() -> new Exception("User record not found"));
-            
-            context.setUserRole(user.getRoleType());
-            
-            if (com.auction.shared.Constants.ADMIN.equals(user.getRoleType())) {
+
+            String role = service.getMyRole(token);
+            context.setUserRole(role);
+
+            if (com.auction.shared.Constants.ADMIN.equals(role)) {
                 context.getViewLoader().loadView("admin_panel.fxml");
             } else {
                 context.getViewLoader().loadView("seller_dashboard.fxml");

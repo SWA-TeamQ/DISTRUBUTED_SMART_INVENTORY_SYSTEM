@@ -146,6 +146,11 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
         AsyncLogger.log(LogCategory.SECURITY, EventType.CREATE_AUCTION, "New User Registered: " + username + " Role=" + role);
     }
 
+    @Override
+    public String getMyRole(String token) throws RemoteException, AuctionException {
+        return validateSession(token).role();
+    }
+
 
     @Override
     public void logout(String token) throws RemoteException {
