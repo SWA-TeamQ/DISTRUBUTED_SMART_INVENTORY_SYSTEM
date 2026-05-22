@@ -1,38 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import org.kordamp.ikonli.javafx.FontIcon?>
 <?import java.net.URL?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" 
-      fx:controller="com.auction.client.controllers.RegistrationController" 
-      styleClass="login-container">
-    
+<BorderPane xmlns="http://javafx.com/javafx/17"
+    xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.RegistrationController" styleClass="page-shell login-container">
     <stylesheets>
         <URL value="@../css/login.css" />
     </stylesheets>
 
-    <VBox alignment="CENTER" spacing="15">
-        <StackPane styleClass="logo-box">
-            <FontIcon iconLiteral="fas-user-plus" styleClass="logo-icon"/>
-        </StackPane>
-        <Label text="Create Account" styleClass="title-label"/>
-    </VBox>
+    <center>
+        <VBox alignment="CENTER" spacing="18" styleClass="main-stack" maxWidth="440">
+            <VBox alignment="CENTER" spacing="14">
+                <StackPane styleClass="logo-box">
+                    <FontIcon iconLiteral="fas-user-plus" styleClass="logo-icon"/>
+                </StackPane>
+                <VBox alignment="CENTER" spacing="6">
+                    <Label text="Create Account" styleClass="page-title"/>
+                    <Label text="Register once, then enter the application immediately." styleClass="page-subtitle" wrapText="true"/>
+                </VBox>
+            </VBox>
 
-    <VBox styleClass="login-card">
-        <VBox styleClass="form-group">
-            <Label text="Username" styleClass="form-label"/>
-            <TextField fx:id="usernameField" promptText="Choose a username"/>
+            <VBox styleClass="login-card" spacing="14">
+                <VBox spacing="6">
+                    <Label text="Username" styleClass="form-label"/>
+                    <TextField fx:id="usernameField" promptText="Choose a username" styleClass="compact-field"/>
+                </VBox>
+
+                <VBox spacing="6">
+                    <Label text="Password" styleClass="form-label"/>
+                    <PasswordField fx:id="passwordField" promptText="Choose a password" styleClass="compact-field"/>
+                </VBox>
+
+                <Button text="Register" onAction="#handleRegister" maxWidth="Infinity" styleClass="primary-button"/>
+                <Label fx:id="statusLabel" wrapText="true" alignment="CENTER" maxWidth="Infinity" styleClass="section-copy"/>
+            </VBox>
         </VBox>
-
-        <VBox styleClass="form-group">
-            <Label text="Password" styleClass="form-label"/>
-            <PasswordField fx:id="passwordField" promptText="Choose a password"/>
-        </VBox>
-
-        <Button text="Register" onAction="#handleRegister" styleClass="login-button" maxWidth="Infinity"/>
-        <Label fx:id="statusLabel" textFill="red" style="-fx-padding: 10 0 0 0;" wrapText="true" alignment="CENTER" maxWidth="Infinity"/>
-    </VBox>
-
-</VBox>
+    </center>
+</BorderPane>
