@@ -98,8 +98,6 @@ public class DatabaseManager {
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_auction_status_end ON auction_items(status, end_time)");
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_auction_seller ON auction_items(seller_username)");
         }
-
-<<<<<<< HEAD
         migrateUsersSchema();
     }
 

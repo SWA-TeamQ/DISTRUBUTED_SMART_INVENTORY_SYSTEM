@@ -71,20 +71,9 @@ public class AdminPanelController {
             com.auction.client.core.ClientContext context = com.auction.client.core.ClientContext.getInstance();
             context.getRmiProvider().getService().createUser(u, p, r, context.getSessionToken());
             statusLabel.setText("User created successfully");
-<<<<<<< HEAD
-<<<<<<< HEAD
             usernameField.clear();
             passwordField.clear();
             refreshDashboard();
-=======
-            usernameField.clear(); passwordField.clear();
-            loadUsers();
->>>>>>> 2bfbf3b (feat: refactor user roles and simplify user management in auction system)
-=======
-            usernameField.clear();
-            passwordField.clear();
-            refreshDashboard();
->>>>>>> 43771d7 (feat: implement user management models, repository logic, and admin panel UI components)
         } catch (java.rmi.RemoteException e) {
             com.auction.client.core.ClientContext.getInstance().handleConnectionLost();
         } catch (Exception e) {
