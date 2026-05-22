@@ -14,8 +14,7 @@ public class AdminPanelController {
     @FXML
     public void initialize() {
         roleCombo.getItems().addAll(
-            com.auction.shared.Constants.BIDDER, 
-            com.auction.shared.Constants.SELLER, 
+            com.auction.shared.Constants.USER, 
             com.auction.shared.Constants.ADMIN
         );
         roleCombo.getSelectionModel().selectFirst();

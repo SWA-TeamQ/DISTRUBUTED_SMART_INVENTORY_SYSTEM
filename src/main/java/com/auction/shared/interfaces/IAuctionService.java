@@ -18,6 +18,8 @@ public interface IAuctionService extends Remote {
     // --- Authentication ---
     /** Returns a unique session token UUID if login is successful. */
     String login(String username, String password) throws RemoteException, AuctionException;
+        /** Returns the authenticated session role. */
+        String getSessionRole(String token) throws RemoteException, AuctionException;
     /** Registers a new user. */
     void register(String username, String password, String role) throws RemoteException, AuctionException;
     void logout(String token) throws RemoteException;
@@ -33,7 +35,7 @@ public interface IAuctionService extends Remote {
             throws RemoteException, AuctionException;
     List<Bid> getBidHistory(int auctionId) throws RemoteException;
 
-    // --- Auction Management (Seller) ---
+        // --- Auction Management (User) ---
     /** Returns the new auction's ID. image bytes may be null if no image provided. */
     int createAuction(AuctionItem item, byte[] image1, byte[] image2, byte[] image3, String token)
             throws RemoteException, AuctionException;
@@ -42,7 +44,7 @@ public interface IAuctionService extends Remote {
     void relistAuction(int auctionId, String newEndTimeIso, String token)
             throws RemoteException, AuctionException;
 
-    // --- Bidder Activity ---
+        // --- User Activity ---
     List<Bid> getMyBids(String token) throws RemoteException, AuctionException;
     List<AuctionItem> getMyWonAuctions(String token) throws RemoteException, AuctionException;
 

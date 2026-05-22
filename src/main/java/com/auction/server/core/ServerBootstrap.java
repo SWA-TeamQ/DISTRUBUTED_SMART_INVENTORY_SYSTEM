@@ -16,6 +16,7 @@ public class ServerBootstrap {
     private final AuctionServiceImpl service;
     private final UdpBroadcaster broadcaster;
     private final AuctionReaper reaper;
+    private final com.auction.server.repository.DatabaseSyncService dbSyncService;
 
     public ServerBootstrap() throws Exception {
         // Initialize Logging
@@ -50,6 +51,10 @@ public class ServerBootstrap {
         // 6. Init Background Tasks
         this.reaper = new AuctionReaper(lifecycleManager);
         this.broadcaster = new UdpBroadcaster(port, "MainServer");
+
+        // 7. Start DB sync service to keep secondary DB files consistent
+        this.dbSyncService = new com.auction.server.repository.DatabaseSyncService(new DatabaseManager(getDatabaseUrlForSync()));
+        this.dbSyncService.start();
     }
 
     public void start() {
@@ -63,6 +68,17 @@ public class ServerBootstrap {
     public void stop() {
         broadcaster.stop();
         reaper.stop();
+        try { dbSyncService.stop(); } catch (Exception ignored) {}
         System.out.println("[RTDAS] Server components stopped.");
+    }
+
+    // Helper to provide a DatabaseManager configured for the primary DB path
+    private String getDatabaseUrlForSync() {
+        // Use the same path as Constants.DB_PATH (canonicalized by DatabaseManager constructor)
+        try {
+            return "jdbc:sqlite:" + new java.io.File(Constants.DB_PATH).getCanonicalPath();
+        } catch (java.io.IOException e) {
+            return "jdbc:sqlite:" + new java.io.File(Constants.DB_PATH).getAbsolutePath();
+        }
     }
 }

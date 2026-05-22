@@ -2,7 +2,7 @@ package com.auction.client.controllers;
 
 import javafx.fxml.FXML;
 
-public class SellerDashboardController {
+public class UserDashboardController {
 
     @FXML private javafx.scene.control.TableView<com.auction.shared.models.AuctionItem> auctionsTable;
     @FXML private javafx.scene.control.TextField titleField;
@@ -24,10 +24,6 @@ public class SellerDashboardController {
         try {
             com.auction.client.core.ClientContext context = com.auction.client.core.ClientContext.getInstance();
             com.auction.shared.interfaces.IAuctionService service = context.getRmiProvider().getService();
-            // Since there's no getMySellerAuctions, we get all active and filter by sellerUsername
-            // Wait, there might be a getAuctionById, getActiveAuctions, getMyWonAuctions.
-            // Oh, the interface IAuctionService has no "getMyAuctions(String token)".
-            // Let's use getActiveAuctions and filter locally, or just rely on the table.
             java.util.List<com.auction.shared.models.AuctionItem> all = service.getActiveAuctions();
             java.util.List<com.auction.shared.models.AuctionItem> mine = all.stream()
                 .filter(a -> a.getSellerUsername().equals(context.getUsername()))

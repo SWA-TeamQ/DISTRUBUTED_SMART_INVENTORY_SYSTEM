@@ -10,7 +10,8 @@
       fx:controller="com.auction.client.controllers.GalleryController"
       spacing="12" style="-fx-padding: 20;">
     <children>
-        <Label text="Mock Gallery" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+        <fx:include source="header.fxml" />
+        <Label text="Auction Gallery" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
         <Label fx:id="statusLabel" text="Loading auctions..."/>
         <ListView fx:id="auctionListView" VBox.vgrow="ALWAYS" onMouseClicked="#handleDoubleClick"/>
         <HBox spacing="10">

@@ -3,8 +3,6 @@ package com.auction.server.repository;
 import com.auction.shared.Constants;
 import com.auction.shared.models.User;
 import com.auction.shared.models.Admin;
-import com.auction.shared.models.Seller;
-import com.auction.shared.models.Bidder;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -45,8 +43,7 @@ public class UserRepository {
                     String p = rs.getString("password_hash");
                     String r = rs.getString("role");
                     if (Constants.ADMIN.equals(r)) return new Admin(username, p);
-                    if (Constants.SELLER.equals(r)) return new Seller(username, p);
-                    if (Constants.BIDDER.equals(r)) return new Bidder(username, p);
+                    return new User(username, p, Constants.USER);
                 }
             }
         } catch (SQLException e) {
@@ -66,6 +63,64 @@ public class UserRepository {
         } catch (SQLException e) {
             throw new RuntimeException("Failed to insert user", e);
         }
+
+        // Also attempt to insert into the secondary DB file (auction.db.sqlite)
+        String secondaryPath = Constants.DB_PATH + ".sqlite";
+        String secondaryUrl = "jdbc:sqlite:" + secondaryPath;
+        String sqlIgnore = "INSERT OR IGNORE INTO users (username, password_hash, role, created_at) VALUES (?, ?, ?, ?)";
+        try (var secConn = java.sql.DriverManager.getConnection(secondaryUrl)) {
+            try {
+                ensureUsersSchema(secConn);
+            } catch (SQLException e) {
+                System.out.println("[UserRepository] Warning: failed to ensure users schema on secondary DB (" + secondaryPath + "): " + e.getMessage());
+            }
+
+            try (var pstmt2 = secConn.prepareStatement(sqlIgnore)) {
+                pstmt2.setString(1, username);
+                pstmt2.setString(2, passwordHash);
+                pstmt2.setString(3, role);
+                pstmt2.setString(4, java.time.Instant.now().toString());
+                pstmt2.executeUpdate();
+            }
+        } catch (SQLException e) {
+            // Secondary DB may not exist or be locked; log and continue without failing registration
+            System.out.println("[UserRepository] Warning: failed to write user to secondary DB (" + secondaryPath + "): " + e.getMessage());
+        }
+    }
+
+    private void ensureUsersSchema(java.sql.Connection conn) throws SQLException {
+        try (var stmt = conn.createStatement()) {
+            // If users table does not exist, create it with the current schema
+            try (var rs = stmt.executeQuery("SELECT sql FROM sqlite_master WHERE type='table' AND name='users'")) {
+                if (!rs.next()) {
+                    stmt.execute("CREATE TABLE IF NOT EXISTS users (" +
+                            "username TEXT PRIMARY KEY, " +
+                            "password_hash TEXT NOT NULL, " +
+                            "role TEXT NOT NULL, " +
+                            "created_at TEXT NOT NULL")
+                    ;
+                    return;
+                }
+            }
+
+            // Ensure created_at column exists (can be added via ALTER TABLE)
+            try (var rs2 = stmt.executeQuery("PRAGMA table_info(users)")) {
+                boolean hasCreatedAt = false;
+                while (rs2.next()) {
+                    String col = rs2.getString("name");
+                    if ("created_at".equalsIgnoreCase(col)) {
+                        hasCreatedAt = true;
+                        break;
+                    }
+                }
+                if (!hasCreatedAt) {
+                    stmt.executeUpdate("ALTER TABLE users ADD COLUMN created_at TEXT");
+                }
+            }
+
+            // Normalize roles to USER where necessary
+            stmt.executeUpdate("UPDATE users SET role='USER' WHERE role IS NULL OR role NOT IN ('" + Constants.ADMIN + "','" + Constants.USER + "')");
+        }
     }
 
     public List<User> findAllUsers() {
@@ -77,8 +132,7 @@ public class UserRepository {
                 String p = rs.getString("password_hash");
                 String r = rs.getString("role");
                 if (Constants.ADMIN.equals(r)) users.add(new Admin(u, p));
-                else if (Constants.SELLER.equals(r)) users.add(new Seller(u, p));
-                else if (Constants.BIDDER.equals(r)) users.add(new Bidder(u, p));
+                else users.add(new User(u, p, Constants.USER));
             }
         } catch (SQLException e) {
             throw new RuntimeException("Failed to fetch users", e);

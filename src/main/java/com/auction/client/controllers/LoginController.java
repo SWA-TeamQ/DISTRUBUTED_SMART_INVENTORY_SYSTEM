@@ -40,18 +40,14 @@ public class LoginController {
             String token = service.login(username, password);
             context.setSessionToken(token);
             context.setUsername(username);
-            
-            // For now, since user role isn't explicitly returned from login but only the token,
-            // we will fetch all users if ADMIN or just navigate based on some hardcoded logic.
-            // Wait, does the RMI login return role or just token? Interface says: String login(...)
-            // We should just route to Admin if username == default admin, else Seller/Bidder.
-            if (com.auction.shared.Constants.DEFAULT_ADMIN_USERNAME.equals(username)) {
-                context.setUserRole(com.auction.shared.Constants.ADMIN);
+            String role = service.getSessionRole(token);
+            context.setUserRole(role);
+
+            if (com.auction.shared.Constants.ADMIN.equals(role)) {
                 context.getViewLoader().loadView("admin_panel.fxml");
             } else {
-                // Defaulting to seller dashboard for M1 tasks
-                context.setUserRole(com.auction.shared.Constants.SELLER);
-                context.getViewLoader().loadView("seller_dashboard.fxml");
+                // Route non-admin users to the marketplace (gallery) as the primary landing
+                context.getViewLoader().loadView("gallery.fxml");
             }
         } catch (Exception e) {
             if (statusLabel != null) statusLabel.setText("Login failed: " + e.getMessage());

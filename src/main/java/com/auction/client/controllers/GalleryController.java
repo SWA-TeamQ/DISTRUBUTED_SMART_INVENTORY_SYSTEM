@@ -1,7 +1,6 @@
 package com.auction.client.controllers;
 
-import com.auction.client.service.MockAuctionService;
-import com.auction.client.ui.ClientContext;
+import com.auction.client.core.ClientContext;
 import com.auction.client.ui.ClientNavigator;
 import com.auction.shared.interfaces.IAuctionService;
 import com.auction.shared.models.AuctionItem;
@@ -18,12 +17,16 @@ public class GalleryController {
     @FXML private ListView<AuctionItem> auctionListView;
     @FXML private Label statusLabel;
 
-    private final IAuctionService service = ClientContext.getAuctionService();
+    private IAuctionService service;
 
     @FXML
     public void initialize() {
+        service = ClientContext.getInstance().getRmiProvider().getService();
         if (service == null) {
-            ClientContext.setAuctionService(new MockAuctionService());
+            if (statusLabel != null) {
+                statusLabel.setText("Connect to the server first.");
+            }
+            return;
         }
         auctionListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         auctionListView.setCellFactory(list -> new javafx.scene.control.ListCell<>() {
@@ -45,10 +48,10 @@ public class GalleryController {
             auctionListView.getItems().setAll(auctions);
             if (!auctions.isEmpty()) {
                 auctionListView.getSelectionModel().selectFirst();
-                ClientContext.setSelectedAuction(auctions.get(0));
+                com.auction.client.ui.ClientContext.setSelectedAuction(auctions.get(0));
             }
             if (statusLabel != null) {
-                statusLabel.setText("Loaded " + auctions.size() + " mock auctions.");
+                statusLabel.setText("Loaded " + auctions.size() + " auctions.");
             }
         } catch (Exception ex) {
             if (statusLabel != null) {
@@ -66,7 +69,7 @@ public class GalleryController {
             }
             return;
         }
-        ClientContext.setSelectedAuction(selected);
+        com.auction.client.ui.ClientContext.setSelectedAuction(selected);
         try {
             ClientNavigator.loadView("auction_detail.fxml");
         } catch (Exception ex) {

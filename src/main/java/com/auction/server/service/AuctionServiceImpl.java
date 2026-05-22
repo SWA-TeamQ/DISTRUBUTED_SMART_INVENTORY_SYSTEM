@@ -136,19 +136,28 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
     }
 
     @Override
+    public String getSessionRole(String token) throws RemoteException, AuctionException {
+        return validateSession(token).role();
+    }
+
+    @Override
     public void register(String username, String password, String role) throws RemoteException, AuctionException {
         checkRateLimit(getClientIp(), loginAttempts, 5, 10);
         if (userRepo.findUserByUsername(username) != null) {
             throw new AuctionException("Username already exists");
         }
         String hash = SecurityUtil.hashPassword(password);
-        userRepo.insertUser(username, hash, role);
-        AsyncLogger.log(LogCategory.SECURITY, EventType.CREATE_AUCTION, "New User Registered: " + username + " Role=" + role);
+        String normalizedRole = Constants.ADMIN.equals(role) ? Constants.ADMIN : Constants.USER;
+        userRepo.insertUser(username, hash, normalizedRole);
+        AsyncLogger.log(LogCategory.SECURITY, EventType.CREATE_AUCTION, "New User Registered: " + username + " Role=" + normalizedRole);
     }
 
 
     @Override
     public void logout(String token) throws RemoteException {
+        if (token == null || token.isEmpty()) {
+            return;
+        }
         SessionInfo sessionInfo = sessions.remove(token);
         if (sessionInfo != null) {
             AsyncLogger.log(LogCategory.SECURITY, EventType.LOGOUT, "User=" + sessionInfo.context.username());
@@ -178,7 +187,7 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
     public void placeBid(int auctionId, long amountCents, long clientExpectedPriceCents, String token)
             throws RemoteException, AuctionException {
         checkRateLimit(getClientIp(), bidAttempts, 10, 10);
-        SessionContext context = validateRole(token, Constants.BIDDER);
+        SessionContext context = validateRole(token, Constants.USER);
 
         try {
             auctionManager.placeBid(auctionId, context, amountCents, clientExpectedPriceCents);
@@ -194,12 +203,12 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
         return auctionManager.getBidHistory(auctionId);
     }
 
-    // --- Auction Management (Seller) ---
+    // --- Auction Management (User) ---
 
     @Override
     public int createAuction(AuctionItem item, byte[] image1, byte[] image2, byte[] image3, String token)
             throws RemoteException, AuctionException {
-        SessionContext context = validateRole(token, Constants.SELLER);
+        SessionContext context = validateRole(token, Constants.USER);
 
         String[] stagedPaths = null;
         try {
@@ -216,7 +225,7 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
 
     @Override
     public void cancelAuction(int auctionId, String token) throws RemoteException, AuctionException {
-        SessionContext context = validateRole(token, Constants.SELLER, Constants.ADMIN);
+        SessionContext context = validateSession(token);
 
         try {
             auctionManager.cancelAuction(auctionId, context);
@@ -230,7 +239,7 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
     @Override
     public void relistAuction(int auctionId, String newEndTimeIso, String token)
             throws RemoteException, AuctionException {
-        SessionContext context = validateRole(token, Constants.SELLER, Constants.ADMIN);
+        SessionContext context = validateSession(token);
 
         try {
             auctionManager.relistAuction(auctionId, newEndTimeIso, context);
@@ -241,17 +250,17 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
         }
     }
 
-    // --- Bidder Activity ---
+    // --- User Activity ---
 
     @Override
     public List<Bid> getMyBids(String token) throws RemoteException, AuctionException {
-        SessionContext context = validateRole(token, Constants.BIDDER);
+        SessionContext context = validateRole(token, Constants.USER);
         return auctionManager.findBidsByBidder(context.username());
     }
 
     @Override
     public List<AuctionItem> getMyWonAuctions(String token) throws RemoteException, AuctionException {
-        SessionContext context = validateRole(token, Constants.BIDDER);
+        SessionContext context = validateRole(token, Constants.USER);
         return auctionManager.findWonAuctionsByBidder(context.username());
     }
 
@@ -283,10 +292,10 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
         List<AuctionItem> items;
         if (Constants.ADMIN.equals(context.role())) {
             items = auctionManager.getActiveAuctions();
-        } else if (Constants.SELLER.equals(context.role())) {
+        } else if (Constants.USER.equals(context.role())) {
             items = auctionManager.findAuctionsBySeller(context.username());
         } else {
-            throw new UnauthorizedException("Only sellers or admins can export auctions to CSV");
+            throw new UnauthorizedException("Only users or admins can export auctions to CSV");
         }
 
         StringBuilder sb = new StringBuilder();
@@ -324,8 +333,9 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
             throw new AuctionException("Username already exists");
         }
         String hash = SecurityUtil.hashPassword(password);
-        userRepo.insertUser(newUsername, hash, role);
-        AsyncLogger.log(LogCategory.SECURITY, EventType.CREATE_AUCTION, "Admin=" + context.username() + " NewUser=" + newUsername + " Role=" + role);
+        String normalizedRole = Constants.ADMIN.equals(role) ? Constants.ADMIN : Constants.USER;
+        userRepo.insertUser(newUsername, hash, normalizedRole);
+        AsyncLogger.log(LogCategory.SECURITY, EventType.CREATE_AUCTION, "Admin=" + context.username() + " NewUser=" + newUsername + " Role=" + normalizedRole);
     }
 
     @Override

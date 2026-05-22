@@ -1,7 +1,7 @@
 package com.auction.client.controllers;
 
+import com.auction.client.core.ClientContext;
 import com.auction.client.service.PollingService;
-import com.auction.client.ui.ClientContext;
 import com.auction.client.ui.ClientNavigator;
 import com.auction.shared.interfaces.IAuctionService;
 import com.auction.shared.models.AuctionItem;
@@ -28,15 +28,21 @@ public class AuctionDetailController {
     @FXML private ListView<Bid> bidHistoryView;
     @FXML private Button bidButton;
 
-    private final IAuctionService service = ClientContext.getAuctionService();
+    private IAuctionService service;
     private final ObservableList<Bid> bidHistory = FXCollections.observableArrayList();
     private PollingService pollingService;
     private AuctionItem currentAuction;
 
     @FXML
     public void initialize() {
+        service = ClientContext.getInstance().getRmiProvider().getService();
+        if (service == null) {
+            showMessage("Connect to the server first.");
+            bidButton.setDisable(true);
+            return;
+        }
         bidHistoryView.setItems(bidHistory);
-        currentAuction = ClientContext.getSelectedAuction();
+        currentAuction = com.auction.client.ui.ClientContext.getSelectedAuction();
         if (currentAuction == null) {
             loadFallbackAuction();
         } else {
@@ -61,7 +67,7 @@ public class AuctionDetailController {
         }
         try {
             long amountCents = Math.round(Double.parseDouble(bidField.getText().trim()) * 100.0);
-            service.placeBid(currentAuction.getId(), amountCents, currentAuction.getCurrentBidCents(), "mock-bidder");
+            service.placeBid(currentAuction.getId(), amountCents, currentAuction.getCurrentBidCents(), ClientContext.getInstance().getSessionToken());
             showMessage("Bid placed successfully.");
             refreshAuctionData();
         } catch (Exception ex) {
@@ -110,7 +116,7 @@ public class AuctionDetailController {
             List<AuctionItem> auctions = service.getActiveAuctions();
             if (!auctions.isEmpty()) {
                 currentAuction = auctions.get(0);
-                ClientContext.setSelectedAuction(currentAuction);
+                com.auction.client.ui.ClientContext.setSelectedAuction(currentAuction);
                 refreshView(currentAuction);
             }
         } catch (Exception ex) {

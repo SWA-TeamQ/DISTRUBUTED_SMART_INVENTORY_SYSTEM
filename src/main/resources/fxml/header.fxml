@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+
+<HBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.auction.client.ui.HeaderController"
+      spacing="12" style="-fx-padding:10; -fx-background-color:#1f1f1f;" alignment="CENTER_LEFT">
+    <children>
+        <Label text="RTDAS" style="-fx-font-size:18px; -fx-font-weight:bold; -fx-text-fill: #c9d1d9;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Browse" onAction="#goToGallery"/>
+        <Button text="My Listings" onAction="#goToMyListings"/>
+        <Button text="Logout" onAction="#handleLogout" styleClass="danger"/>
+    </children>
+</HBox>

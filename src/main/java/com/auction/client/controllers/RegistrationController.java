@@ -15,7 +15,6 @@ public class RegistrationController {
     private void handleRegister() {
         String username = usernameField.getText();
         String password = passwordField.getText();
-        String role = Constants.USER;
 
         if (username.isEmpty() || password.isEmpty()) {
             statusLabel.setText("Please fill in all fields.");
@@ -24,10 +23,9 @@ public class RegistrationController {
 
         try {
             ClientContext context = ClientContext.getInstance();
-            context.getRmiProvider().getService().register(username, password, role);
+            context.getRmiProvider().getService().register(username, password, Constants.USER);
             statusLabel.setStyle("-fx-text-fill: green;");
             statusLabel.setText("Registration successful!");
-            // Optionally navigate back to login
             context.getViewLoader().loadView("login.fxml");
         } catch (Exception e) {
             statusLabel.setStyle("-fx-text-fill: red;");

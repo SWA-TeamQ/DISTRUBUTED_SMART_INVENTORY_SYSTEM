@@ -22,8 +22,8 @@ class AuctionRepositoryTest {
         userRepo = new UserRepository(dbManager.getConnection());
         auctionRepo = new AuctionRepository(dbManager.getConnection());
         
-        // Ensure a seller exists
-        userRepo.insertUser("seller1", "hash", Constants.SELLER);
+        // Ensure a user exists for seller-owned auction data
+        userRepo.insertUser("seller1", "hash", Constants.USER);
     }
 
     @AfterEach

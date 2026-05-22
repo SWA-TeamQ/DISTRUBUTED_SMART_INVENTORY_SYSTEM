@@ -4,6 +4,8 @@ Comprehensive specification for every screen, component, interaction, and visual
 
 ---
 
+Design prototype : [UI DESIGN PROTOTYPE LINK](https://stitch.withgoogle.com/projects/1655058041394247664)
+
 ## 1. Design Philosophy & "The Vibe"
 
 | Principle | Detail |

@@ -21,13 +21,8 @@ public class ClientApp extends Application {
         ClientNavigator.setViewLoader(loader);
         com.auction.client.core.ClientContext.getInstance().setViewLoader(loader);
 
-        // Smart startup: if running in mock mode, start at the gallery; otherwise
-        // start at the connect screen which continues the normal flow to login.
-        if (Boolean.parseBoolean(System.getProperty("rtdas.mockMode", "true"))) {
-            loader.loadView("gallery.fxml");
-        } else {
-            loader.loadView("connect.fxml");
-        }
+        // Start with the real connection flow.
+        loader.loadView("connect.fxml");
         primaryStage.setTitle("RTDAS - Real-Time Distributed Auction System");
         primaryStage.setWidth(800);
         primaryStage.setHeight(600);
