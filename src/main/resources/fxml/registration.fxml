@@ -11,10 +11,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/17"
     xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.RegistrationController" styleClass="page-shell login-container">
-    <stylesheets>
-        <URL value="@../css/login.css" />
-        <URL value="@../css/style.css" />
-    </stylesheets>
+    
 
     <center>
         <VBox alignment="CENTER" spacing="18" styleClass="main-stack" maxWidth="440">

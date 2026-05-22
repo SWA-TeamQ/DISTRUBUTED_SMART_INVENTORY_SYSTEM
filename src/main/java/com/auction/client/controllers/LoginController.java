@@ -34,23 +34,40 @@ public class LoginController {
             return;
         }
         
+        com.auction.client.core.ClientContext context = com.auction.client.core.ClientContext.getInstance();
+        com.auction.shared.interfaces.IAuctionService service = context.getRmiProvider().getService();
+        String token;
         try {
-            com.auction.client.core.ClientContext context = com.auction.client.core.ClientContext.getInstance();
-            com.auction.shared.interfaces.IAuctionService service = context.getRmiProvider().getService();
-            String token = service.login(username, password);
+            token = service.login(username, password);
             context.setSessionToken(token);
             context.setUsername(username);
-
             String role = service.getMyRole(token);
             context.setUserRole(role);
+        } catch (com.auction.shared.exceptions.AuctionException ae) {
+            if (statusLabel != null) statusLabel.setText("Authentication failed: " + ae.getMessage());
+            return;
+        } catch (java.rmi.RemoteException re) {
+            if (statusLabel != null) statusLabel.setText("Connection error: " + re.getMessage());
+            re.printStackTrace();
+            return;
+        } catch (Exception e) {
+            if (statusLabel != null) statusLabel.setText("Unexpected error: " + e.getMessage());
+            e.printStackTrace();
+            return;
+        }
 
-            if (com.auction.shared.Constants.ADMIN.equals(role)) {
+        // Load UI in a separate try so view-loading errors don't look like authentication failures
+        try {
+            if (com.auction.shared.Constants.ADMIN.equals(context.getUserRole())) {
                 context.getViewLoader().loadView("admin_panel.fxml");
             } else {
                 context.getViewLoader().loadView("seller_dashboard.fxml");
             }
+        } catch (IOException ioe) {
+            if (statusLabel != null) statusLabel.setText("Login succeeded but failed to load UI: " + ioe.getMessage());
+            ioe.printStackTrace();
         } catch (Exception e) {
-            if (statusLabel != null) statusLabel.setText("Login failed. Please try again.");
+            if (statusLabel != null) statusLabel.setText("Failed to open dashboard: " + e.getMessage());
             e.printStackTrace();
         }
     }
