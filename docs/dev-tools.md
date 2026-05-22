@@ -24,3 +24,9 @@ QueryUsers
 
 Notes
 - These tools are for developer/diagnostic use only and are not part of normal production operations.
+
+Related code
+------------
+- `TestRegisterLogin`: src/main/java/com/auction/tools/TestRegisterLogin.java — RMI-based test that registers and logs in a temporary user.
+- `QueryUsers`: src/main/java/com/auction/tools/QueryUsers.java — inspects a local SQLite file and prints user rows.
+

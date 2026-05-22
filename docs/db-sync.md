@@ -36,3 +36,10 @@ Quick checks
 Notes
 -----
 - The service is intentionally narrow in scope and is NOT a substitute for a proper replication solution. It was implemented to resolve historic issues caused by different working directories and multiple DB copies.
+
+Related code
+------------
+- `DatabaseManager`: src/main/java/com/auction/server/repository/DatabaseManager.java — canonicalizes the DB path at startup and runs migrations.
+- `UserRepository`: src/main/java/com/auction/server/repository/UserRepository.java — performs primary inserts and best-effort secondary writes to `data/auction.db.sqlite`.
+- `DatabaseSyncService`: src/main/java/com/auction/server/repository/DatabaseSyncService.java — background reconcile service started by `ServerBootstrap`.
+

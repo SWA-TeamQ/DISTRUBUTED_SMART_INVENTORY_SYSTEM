@@ -15,6 +15,12 @@ A distributed, multi-user English auction platform demonstrating advanced Java c
 # Terminal 1 - Start the server
 mvn exec:java
 
+# NOTE: The server will print the absolute DB path on startup. Check the console for a line like:
+#   [RTDAS] Using database file: D:\Real Time Distributed Auction System\data\auction.db
+
+# Optional: run a quick programmatic test to register/login a test user (useful for automated checks):
+# java -cp target/classes com.auction.tools.TestRegisterLogin
+
 # Terminal 2 - Launch a client
 mvn javafx:run
 ```
@@ -29,6 +35,15 @@ mvn javafx:run
 | [docs/architecture.md](docs/architecture.md) | System architecture (Deep Modules), RMI contract |
 | [docs/database.md](docs/database.md) | Database schema, constraints, backup strategy |
 | [docs/demo-runbook.md](docs/demo-runbook.md) | Demo day setup and troubleshooting guide |
+
+## Server documentation
+
+- See recent operational docs in `docs/` for server and database changes:
+	- [docs/architecture-auth.md](docs/architecture-auth.md) — RMI contract and authentication semantics.
+	- [docs/db-sync.md](docs/db-sync.md) — DatabaseSyncService behavior, backups, and verification steps.
+	- [docs/dev-tools.md](docs/dev-tools.md) — Developer utilities: `TestRegisterLogin` and `QueryUsers`.
+	- [docs/demo-server-notes.md](docs/demo-server-notes.md) — Server lifecycle & verification notes.
+
 
 ## Tech Stack
 

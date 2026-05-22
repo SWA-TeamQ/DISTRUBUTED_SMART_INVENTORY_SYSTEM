@@ -22,3 +22,10 @@ Server lifecycle interactions
 
 Rate limiting & safety
 - Login/register endpoints include basic rate limiting to defend against brute force; monitor logs for repeated failures.
+
+Related code
+------------
+- `AuctionServiceImpl`: src/main/java/com/auction/server/service/AuctionServiceImpl.java — implements `login`, `register`, `getSessionRole`, and session token handling.
+- `ServerBootstrap`: src/main/java/com/auction/server/core/ServerBootstrap.java — starts RMI, repositories, and the `DatabaseSyncService` during server lifecycle.
+- `SecurityUtil`: src/main/java/com/auction/server/util/SecurityUtil.java — password hashing helper (SHA-256).
+

@@ -24,3 +24,9 @@ Quick reproduction steps
 1. Start server.
 2. Run `TestRegisterLogin` to create a test user and obtain a token.
 3. Use `QueryUsers` or a SQLite client to confirm the user exists in the canonical DB path printed at startup.
+
+Related code
+------------
+- `ServerBootstrap`: src/main/java/com/auction/server/core/ServerBootstrap.java — starts/stops `DatabaseSyncService` and RMI components.
+- `DatabaseSyncService`: src/main/java/com/auction/server/repository/DatabaseSyncService.java — background sync implementation.
+

@@ -26,8 +26,10 @@ SQLite schema, repository architecture, backup strategy, and security measures.
 |--------|------|-------------|-------|
 | `username` | `TEXT` | `PRIMARY KEY` | Unique login name |
 | `password_hash` | `TEXT` | `NOT NULL` | SHA-256 hex string |
-| `role` | `TEXT` | `NOT NULL` | `ADMIN`, `SELLER`, or `BIDDER` |
-| `created_at` | `TEXT` | `NOT NULL` | ISO-8601 UTC |
+| `role` | `TEXT` | `NOT NULL` | `ADMIN` or `USER` (legacy `SELLER`/`BIDDER` values are migrated to `USER`) |
+| `created_at` | `TEXT` | `NOT NULL` | ISO-8601 UTC (added in schema migration) |
+
+Note: The system previously used `SELLER`/`BIDDER` roles. A migration step normalizes legacy roles to a single `USER` role. See "Migration & Multi-DB Sync" below.
 
 ### auction_items Table
 
@@ -118,7 +120,7 @@ try {
 // SQLite VACUUM INTO is atomic and non-blocking
 String backupPath = "data/backup-" + timestamp + ".db";
 try (Statement stmt = connection.createStatement()) {
-    stmt.execute("VACUUM INTO '" + backupPath + "'");
+        stmt.execute("VACUUM INTO '" + backupPath + "'");
 }
 // Read file as bytes, return over RMI
 ```
@@ -129,6 +131,26 @@ try (Statement stmt = connection.createStatement()) {
 | Location | `data/auction_backup_YYYYMMDD.db` |
 | Format | Full `.db` file (binary) |
 | Transfer | Returned as `byte[]` over RMI, saved via `FileChooser` |
+
+### Migration & Multi-DB Sync
+
+- Historically the project had multiple DB files appearing in the workspace (for example `data/auction.db` and `data/auction.db.sqlite`). This led to confusion where different JVM working directories read/write different files.
+- Changes implemented:
+    - The server now canonicalizes and logs the absolute DB path at startup (`DatabaseManager`). Check the server console for: `[RTDAS] Using database file: <absolute-path>`.
+    - `UserRepository` performs a best-effort secondary write to `data/auction.db.sqlite` (ensures schema compatibility and logs warnings on failure).
+    - A background `DatabaseSyncService` periodically (every 60s) synchronizes the `users` table from the primary DB into `data/auction.db` and `data/auction.db.sqlite`, using `INSERT OR REPLACE`.
+
+**Operational notes:**
+
+- Backups are created automatically by debug/migration scripts during maintenance; check `data/` for `*.bak*` files before making further schema changes.
+- If you prefer a single canonical DB, update `Constants.DB_PATH` and remove legacy DB files; the sync service can be disabled.
+
+Related code
+------------
+- `DatabaseManager`: src/main/java/com/auction/server/repository/DatabaseManager.java — bootstrap, canonical DB path, and migrations.
+- `UserRepository`: src/main/java/com/auction/server/repository/UserRepository.java — user persistence and secondary-write logic.
+- `DatabaseSyncService`: src/main/java/com/auction/server/repository/DatabaseSyncService.java — periodic reconciliation for `users`.
+
 
 ---
 
