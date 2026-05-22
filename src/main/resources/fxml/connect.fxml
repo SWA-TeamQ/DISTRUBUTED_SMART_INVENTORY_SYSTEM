@@ -1,26 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import java.net.URL?>
 
-<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.ConnectController" spacing="15" alignment="CENTER">
-    <padding>
-        <Insets top="20" right="20" bottom="20" left="20"/>
-    </padding>
-
-    <Label text="Connect to Server" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
-
-    <Label text="Discovered Servers (UDP):"/>
-    <ListView fx:id="serverListView" prefHeight="200" prefWidth="400"/>
-
-    <HBox spacing="10" alignment="CENTER">
-        <Label text="Manual IP:"/>
-        <TextField fx:id="ipField" promptText="localhost"/>
-        <Label text="Port:"/>
-        <TextField fx:id="portField" promptText="1099" prefWidth="80"/>
-    </HBox>
-
-    <Button text="Connect" onAction="#handleConnect" defaultButton="true" prefWidth="200" styleClass="accent"/>
+<BorderPane xmlns="http://javafx.com/javafx/17"
+    xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.ConnectController" styleClass="page-shell">
+    <stylesheets>
+        <URL value="@../css/style.css" />
+    </stylesheets>
     
-    <Label fx:id="statusLabel" textFill="red"/>
-</VBox>
+    <top>
+        <HBox spacing="16" alignment="CENTER_LEFT" styleClass="page-header">
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Connect to RTDAS" styleClass="page-title"/>
+                <Label text="Discover a server on the network or connect manually." styleClass="page-subtitle"/>
+            </VBox>
+            <Label text="Discovery enabled" styleClass="status-chip status-chip-success"/>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox spacing="16" alignment="CENTER" styleClass="main-stack">
+            <VBox spacing="12" styleClass="hero-card" maxWidth="760">
+                <Label text="Discovered Servers" styleClass="section-title"/>
+                <Label text="Select a server from the list below or use manual entry." styleClass="section-copy" wrapText="true"/>
+                <ListView fx:id="serverListView" prefHeight="260" styleClass="audit-list"/>
+            </VBox>
+
+            <VBox spacing="12" styleClass="panel-card" maxWidth="760">
+                <Label text="Manual Connection" styleClass="section-title"/>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <VBox spacing="4" HBox.hgrow="ALWAYS">
+                        <Label text="IP Address" styleClass="section-copy"/>
+                        <TextField fx:id="ipField" promptText="localhost" styleClass="compact-field"/>
+                    </VBox>
+                    <VBox spacing="4" prefWidth="140">
+                        <Label text="Port" styleClass="section-copy"/>
+                        <TextField fx:id="portField" promptText="1099" styleClass="compact-field"/>
+                    </VBox>
+                </HBox>
+
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Button text="Connect" onAction="#handleConnect" defaultButton="true" styleClass="primary-button"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="statusLabel" wrapText="true" styleClass="section-copy"/>
+                </HBox>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>

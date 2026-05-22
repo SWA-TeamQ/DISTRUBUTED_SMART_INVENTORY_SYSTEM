@@ -1,67 +1,267 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.Region?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
-<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.SellerDashboardController">
+<BorderPane xmlns="http://javafx.com/javafx/17"
+    xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.SellerDashboardController" styleClass="dashboard-shell page-shell">
+    <stylesheets>
+        <URL value="@../css/style.css" />
+    </stylesheets>
+    
     <top>
-        <HBox spacing="20" alignment="CENTER_LEFT" style="-fx-padding: 10; -fx-background-color: #2b2b2b;">
-            <Label text="Seller Dashboard" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
-            <Region HBox.hgrow="ALWAYS"/>
-            <Button text="Logout" onAction="#handleLogout" styleClass="danger"/>
+        <HBox spacing="16" alignment="CENTER_LEFT" styleClass="page-header">
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="User Dashboard" styleClass="page-title"/>
+                <Label text="Browse auctions, manage listings, review bids, and keep selling in one workspace." styleClass="page-subtitle" wrapText="true"/>
+            </VBox>
+            <Label fx:id="statusLabel" text="Ready" styleClass="status-chip status-chip-success"/>
+            <Button text="Refresh" onAction="#handleRefreshDashboard" styleClass="secondary-button"/>
+            <Button text="Logout" onAction="#handleLogout" styleClass="secondary-button"/>
         </HBox>
     </top>
-    
+
     <center>
-        <SplitPane dividerPositions="0.4">
-            <!-- Create Auction Form -->
-            <VBox spacing="10" style="-fx-padding: 15;">
-                <Label text="Create New Auction" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
-                <TextField fx:id="titleField" promptText="Title"/>
-                <TextArea fx:id="descArea" promptText="Description" prefRowCount="3"/>
-                <TextField fx:id="categoryField" promptText="Category"/>
-                <TextField fx:id="priceField" promptText="Starting Price (e.g. 10.50)"/>
-                <TextField fx:id="endTimeField" promptText="Duration in minutes (e.g. 60)"/>
-                
-                <Label text="Images (Max 3):"/>
-                <HBox spacing="5">
-                    <Button text="Img 1" onAction="#handlePickImg1"/>
-                    <Button text="Img 2" onAction="#handlePickImg2"/>
-                    <Button text="Img 3" onAction="#handlePickImg3"/>
-                </HBox>
-                <Label fx:id="imagesLabel" text="No images selected"/>
-                
-                <Button text="Create Auction" onAction="#handleCreateAuction" defaultButton="true" maxWidth="Infinity"/>
-                <Label fx:id="statusLabel" textFill="red" wrapText="true"/>
-            </VBox>
-            
-            <!-- Auction List -->
-            <VBox spacing="10" style="-fx-padding: 15;">
-                <Label text="My Auctions" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
-                <TableView fx:id="auctionsTable" VBox.vgrow="ALWAYS">
-                    <columns>
-                        <TableColumn text="ID" prefWidth="50">
-                            <cellValueFactory><PropertyValueFactory property="id"/></cellValueFactory>
-                        </TableColumn>
-                        <TableColumn text="Title" prefWidth="150">
-                            <cellValueFactory><PropertyValueFactory property="title"/></cellValueFactory>
-                        </TableColumn>
-                        <TableColumn text="Status" prefWidth="100">
-                            <cellValueFactory><PropertyValueFactory property="status"/></cellValueFactory>
-                        </TableColumn>
-                        <TableColumn text="Current Bid" prefWidth="100">
-                            <cellValueFactory><PropertyValueFactory property="currentBidCents"/></cellValueFactory>
-                        </TableColumn>
-                    </columns>
-                </TableView>
-                <HBox spacing="10">
-                    <Button text="Cancel Auction" onAction="#handleCancelAuction"/>
-                    <Button text="Relist Auction" onAction="#handleRelistAuction"/>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Button text="Export to CSV" onAction="#handleExportCSV"/>
-                </HBox>
-            </VBox>
-        </SplitPane>
+        <BorderPane styleClass="dashboard-main">
+            <top>
+                <VBox spacing="14" styleClass="main-stack">
+                    <FlowPane hgap="14" vgap="14" prefWrapLength="1200">
+                        <VBox styleClass="metric-card" prefWidth="220" maxWidth="Infinity">
+                            <Label text="Market Auctions" styleClass="metric-label"/>
+                            <Label fx:id="marketCountLabel" text="0" styleClass="metric-value"/>
+                        </VBox>
+                        <VBox styleClass="metric-card" prefWidth="220" maxWidth="Infinity">
+                            <Label text="My Listings" styleClass="metric-label"/>
+                            <Label fx:id="listingsCountLabel" text="0" styleClass="metric-value"/>
+                        </VBox>
+                        <VBox styleClass="metric-card metric-card-accent" prefWidth="220" maxWidth="Infinity">
+                            <Label text="My Bids" styleClass="metric-label"/>
+                            <Label fx:id="bidsCountLabel" text="0" styleClass="metric-value"/>
+                        </VBox>
+                        <VBox styleClass="metric-card metric-card-warm" prefWidth="220" maxWidth="Infinity">
+                            <Label text="Won Auctions" styleClass="metric-label"/>
+                            <Label fx:id="winsCountLabel" text="0" styleClass="metric-value"/>
+                        </VBox>
+                    </FlowPane>
+                </VBox>
+            </top>
+
+            <left>
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="content-scroll" prefWidth="410" maxWidth="460">
+                    <content>
+                        <VBox spacing="16" styleClass="sidebar-stack">
+                            <VBox spacing="10" styleClass="hero-card">
+                                <Label text="Create New Auction" styleClass="section-title"/>
+                                <Label text="Use this form when the current user is selling an item." styleClass="section-copy" wrapText="true"/>
+                                <TextField fx:id="titleField" promptText="Title" styleClass="compact-field"/>
+                                <TextArea fx:id="descArea" promptText="Description" prefRowCount="4" styleClass="compact-field"/>
+                                <TextField fx:id="categoryField" promptText="Category" styleClass="compact-field"/>
+                                <TextField fx:id="priceField" promptText="Starting Price (e.g. 10.50)" styleClass="compact-field"/>
+                                <TextField fx:id="endTimeField" promptText="Duration in minutes (e.g. 60)" styleClass="compact-field"/>
+
+                                <Label text="Images (Max 3)" styleClass="section-copy"/>
+                                <HBox spacing="8">
+                                    <Button text="Img 1" onAction="#handlePickImg1" styleClass="ghost-button"/>
+                                    <Button text="Img 2" onAction="#handlePickImg2" styleClass="ghost-button"/>
+                                    <Button text="Img 3" onAction="#handlePickImg3" styleClass="ghost-button"/>
+                                </HBox>
+                                <Label fx:id="imagesLabel" text="No images selected" styleClass="section-copy"/>
+
+                                <Button text="Create Auction" onAction="#handleCreateAuction" defaultButton="true" maxWidth="Infinity" styleClass="primary-button"/>
+                            </VBox>
+
+                            <VBox spacing="10" styleClass="panel-card">
+                                <Label text="Actions" styleClass="section-title"/>
+                                <Button text="Open Gallery" onAction="#handleOpenGallery" maxWidth="Infinity" styleClass="secondary-button"/>
+                                <Button text="Open Auction Detail" onAction="#handleOpenAuctionDetail" maxWidth="Infinity" styleClass="secondary-button"/>
+                                <Button text="Export to CSV" onAction="#handleExportCSV" maxWidth="Infinity" styleClass="secondary-button"/>
+                                <Button text="Refresh Dashboard" onAction="#handleRefreshDashboard" maxWidth="Infinity" styleClass="secondary-button"/>
+                                <Button text="Cancel Selected Listing" onAction="#handleCancelAuction" maxWidth="Infinity" styleClass="secondary-button"/>
+                                <Button text="Relist Selected Listing" onAction="#handleRelistAuction" maxWidth="Infinity" styleClass="secondary-button"/>
+                            </VBox>
+                        </VBox>
+                    </content>
+                </ScrollPane>
+            </left>
+
+            <center>
+                <TabPane tabClosingPolicy="UNAVAILABLE" styleClass="tab-bar">
+                    <tabs>
+                        <Tab text="Browse Auctions">
+                            <content>
+                                <VBox spacing="12" styleClass="main-stack">
+                                    <VBox spacing="4">
+                                        <Label text="Marketplace" styleClass="section-title"/>
+                                        <Label text="Active auctions currently visible to the signed-in user." styleClass="section-copy" wrapText="true"/>
+                                    </VBox>
+                                    <TableView fx:id="marketTable" VBox.vgrow="ALWAYS" styleClass="auction-table">
+                                        <placeholder>
+                                            <Label text="No active auctions" styleClass="empty-state"/>
+                                        </placeholder>
+                                        <columns>
+                                            <TableColumn text="ID" prefWidth="60">
+                                                <cellValueFactory>
+                                                    <PropertyValueFactory property="id"/>
+                                                </cellValueFactory>
+                                            </TableColumn>
+                                            <TableColumn text="Title" prefWidth="180">
+                                                <cellValueFactory>
+                                                    <PropertyValueFactory property="title"/>
+                                                </cellValueFactory>
+                                            </TableColumn>
+                                            <TableColumn text="Category" prefWidth="120">
+                                                <cellValueFactory>
+                                                    <PropertyValueFactory property="category"/>
+                                                </cellValueFactory>
+                                            </TableColumn>
+                                            <TableColumn text="Status" prefWidth="110">
+                                                <cellValueFactory>
+                                                    <PropertyValueFactory property="status"/>
+                                                </cellValueFactory>
+                                            </TableColumn>
+                                            <TableColumn text="Current Bid" prefWidth="120">
+                                                <cellValueFactory>
+                                                    <PropertyValueFactory property="currentBidCents"/>
+                                                </cellValueFactory>
+                                            </TableColumn>
+                                        </columns>
+                                    </TableView>
+                                </VBox>
+                            </content>
+                        </Tab>
+                        <Tab text="My Listings">
+                            <content>
+                                <VBox spacing="12" styleClass="main-stack">
+                                    <VBox spacing="4">
+                                        <Label text="My Listings" styleClass="section-title"/>
+                                        <Label text="Auctions owned by the current user." styleClass="section-copy" wrapText="true"/>
+                                    </VBox>
+                                    <TableView fx:id="myListingsTable" VBox.vgrow="ALWAYS" styleClass="auction-table">
+                                        <placeholder>
+                                            <Label text="No listings yet" styleClass="empty-state"/>
+                                        </placeholder>
+                                        <columns>
+                                            <TableColumn text="ID" prefWidth="60">
+                                                <cellValueFactory>
+                                                    <PropertyValueFactory property="id"/>
+                                                </cellValueFactory>
+                                            </TableColumn>
+                                            <TableColumn text="Title" prefWidth="180">
+                                                <cellValueFactory>
+                                                    <PropertyValueFactory property="title"/>
+                                                </cellValueFactory>
+                                            </TableColumn>
+                                            <TableColumn text="Status" prefWidth="110">
+                                                <cellValueFactory>
+                                                    <PropertyValueFactory property="status"/>
+                                                </cellValueFactory>
+                                            </TableColumn>
+                                            <TableColumn text="Current Bid" prefWidth="120">
+                                                <cellValueFactory>
+                                                    <PropertyValueFactory property="currentBidCents"/>
+                                                </cellValueFactory>
+                                            </TableColumn>
+                                        </columns>
+                                    </TableView>
+                                </VBox>
+                            </content>
+                        </Tab>
+                        <Tab text="My Bids">
+                            <content>
+                                <VBox spacing="12" styleClass="main-stack">
+                                    <VBox spacing="4">
+                                        <Label text="My Bids" styleClass="section-title"/>
+                                        <Label text="Recent bid activity by the current user." styleClass="section-copy" wrapText="true"/>
+                                    </VBox>
+                                    <TableView fx:id="myBidsTable" VBox.vgrow="ALWAYS" styleClass="data-table">
+                                        <placeholder>
+                                            <Label text="No bids yet" styleClass="empty-state"/>
+                                        </placeholder>
+                                        <columns>
+                                            <TableColumn text="ID" prefWidth="60">
+                                                <cellValueFactory>
+                                                    <PropertyValueFactory property="id"/>
+                                                </cellValueFactory>
+                                            </TableColumn>
+                                            <TableColumn text="Auction" prefWidth="100">
+                                                <cellValueFactory>
+                                                    <PropertyValueFactory property="auctionItemId"/>
+                                                </cellValueFactory>
+                                            </TableColumn>
+                                            <TableColumn text="Bidder" prefWidth="130">
+                                                <cellValueFactory>
+                                                    <PropertyValueFactory property="bidderUsername"/>
+                                                </cellValueFactory>
+                                            </TableColumn>
+                                            <TableColumn text="Amount" prefWidth="120">
+                                                <cellValueFactory>
+                                                    <PropertyValueFactory property="amountCents"/>
+                                                </cellValueFactory>
+                                            </TableColumn>
+                                            <TableColumn text="Timestamp" prefWidth="220">
+                                                <cellValueFactory>
+                                                    <PropertyValueFactory property="timestamp"/>
+                                                </cellValueFactory>
+                                            </TableColumn>
+                                        </columns>
+                                    </TableView>
+                                </VBox>
+                            </content>
+                        </Tab>
+                        <Tab text="Won Auctions">
+                            <content>
+                                <VBox spacing="12" styleClass="main-stack">
+                                    <VBox spacing="4">
+                                        <Label text="Won Auctions" styleClass="section-title"/>
+                                        <Label text="Items the current user has won." styleClass="section-copy" wrapText="true"/>
+                                    </VBox>
+                                    <TableView fx:id="wonAuctionsTable" VBox.vgrow="ALWAYS" styleClass="auction-table">
+                                        <placeholder>
+                                            <Label text="No won auctions yet" styleClass="empty-state"/>
+                                        </placeholder>
+                                        <columns>
+                                            <TableColumn text="ID" prefWidth="60">
+                                                <cellValueFactory>
+                                                    <PropertyValueFactory property="id"/>
+                                                </cellValueFactory>
+                                            </TableColumn>
+                                            <TableColumn text="Title" prefWidth="180">
+                                                <cellValueFactory>
+                                                    <PropertyValueFactory property="title"/>
+                                                </cellValueFactory>
+                                            </TableColumn>
+                                            <TableColumn text="Status" prefWidth="110">
+                                                <cellValueFactory>
+                                                    <PropertyValueFactory property="status"/>
+                                                </cellValueFactory>
+                                            </TableColumn>
+                                            <TableColumn text="Current Bid" prefWidth="120">
+                                                <cellValueFactory>
+                                                    <PropertyValueFactory property="currentBidCents"/>
+                                                </cellValueFactory>
+                                            </TableColumn>
+                                        </columns>
+                                    </TableView>
+                                </VBox>
+                            </content>
+                        </Tab>
+                    </tabs>
+                </TabPane>
+            </center>
+        </BorderPane>
     </center>
 </BorderPane>

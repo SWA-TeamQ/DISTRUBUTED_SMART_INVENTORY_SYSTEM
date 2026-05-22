@@ -5,12 +5,12 @@
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 <?import java.net.URL?>
 
-<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" 
-      fx:controller="com.auction.client.controllers.LoginController" 
-      styleClass="login-container">
-    
+<VBox xmlns="http://javafx.com/javafx/17"
+    xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.LoginController" styleClass="page-shell login-container">
+
     <stylesheets>
         <URL value="@../css/login.css" />
+        <URL value="@../css/style.css" />
     </stylesheets>
 
     <!-- Logo Section -->
@@ -31,8 +31,7 @@
             <Label text="Terminal ID" styleClass="form-label"/>
             <HBox alignment="CENTER_LEFT" spacing="10" styleClass="input-field">
                 <FontIcon iconLiteral="fas-user" styleClass="input-icon"/>
-                <TextField fx:id="usernameField" promptText="Enter your ID" HBox.hgrow="ALWAYS" 
-                           style="-fx-background-color: transparent; -fx-padding: 0;"/>
+                <TextField fx:id="usernameField" promptText="Enter your ID" HBox.hgrow="ALWAYS" style="-fx-background-color: transparent; -fx-padding: 0;"/>
             </HBox>
         </VBox>
 
@@ -43,8 +42,7 @@
             </HBox>
             <HBox alignment="CENTER_LEFT" spacing="10" styleClass="input-field">
                 <FontIcon iconLiteral="fas-lock" styleClass="input-icon"/>
-                <PasswordField fx:id="passwordField" promptText="••••••••" HBox.hgrow="ALWAYS" 
-                               style="-fx-background-color: transparent; -fx-padding: 0;"/>
+                <PasswordField fx:id="passwordField" promptText="••••••••" HBox.hgrow="ALWAYS" style="-fx-background-color: transparent; -fx-padding: 0;"/>
             </HBox>
         </VBox>
 
@@ -52,7 +50,7 @@
 
         <!-- Action Button -->
         <Button text="Enter the Auction" onAction="#handleLogin" styleClass="login-button"/>
-        <Label fx:id="statusLabel" textFill="red" style="-fx-padding: 10 0 0 0;" wrapText="true" alignment="CENTER" maxWidth="Infinity"/>
+        <Label fx:id="statusLabel" styleClass="status-line" wrapText="true" alignment="CENTER" maxWidth="Infinity"/>
     </VBox>
 
     <!-- Footer -->
