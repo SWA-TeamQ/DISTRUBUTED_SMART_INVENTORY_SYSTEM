@@ -30,6 +30,12 @@ mvn clean package -DskipTests
 java -Djava.rmi.server.hostname=<YOUR_IP> \
      -cp target/rtdas-1.0.jar \
      com.auction.server.core.ServerLauncher
+
+# Notes about DB files and verification
+# - The server now resolves and logs the absolute DB path on startup. Look for a line similar to:
+#     [RTDAS] Using database file: D:\Real Time Distributed Auction System\data\auction.db
+# - The application maintains multiple files for historical reasons (`data/auction.db`, `data/auction.db.sqlite`, and the project-local `data/auction.db`). A background sync keeps `users` consistent across the common files.
+# - Before destructive operations, backup the DB or restore from the backups in `data/` (files with `.bak` or `.bak.sync` suffixes).
 ```
 
 ### What Happens on First Run
@@ -39,6 +45,12 @@ java -Djava.rmi.server.hostname=<YOUR_IP> \
 3. Inserts default admin: `admin` / `admin`
 4. Starts UDP broadcast on port 9999
 5. Starts `AuctionReaper` thread
+
+See also
+--------
+- `docs/db-sync.md` — explains the `DatabaseSyncService` used to reconcile `users` across `data/` DB files.
+- `docs/architecture-auth.md` — RMI and authentication behavior (useful to understand session tokens used during demo).
+
 
 ---
 
@@ -141,6 +153,11 @@ Ctrl+C
 
 # Delete database to start fresh
 rm data/auction.db
+rm data/auction.db.sqlite
+
+# If you have backups and want to restore a previous state, copy the backup over the live DB:
+# cp data/auction.db.bak.sync.20260522170350 data/auction.db
+# cp data/auction.db.sqlite.bak.sync.20260522170350 data/auction.db.sqlite
 
 # Restart server
 java -Djava.rmi.server.hostname=<YOUR_IP> \

@@ -108,3 +108,9 @@ Full contract in `shared/interfaces/IAuctionService.java`.
 - RMI callbacks (clients must poll).
 - Salted password hashing (using SHA-256 for demo simplicity).
 - Horizontal scaling.
+
+See also (operational/server docs)
+---------------------------------
+- `docs/architecture-auth.md` — RMI contract and authentication semantics (login/register, tokens, roles).
+- `docs/db-sync.md` — `DatabaseSyncService` behavior, backups, and verification steps for multi-DB situations.
+- `docs/demo-server-notes.md` — server lifecycle and quick verification steps for demo runs.
