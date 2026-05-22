@@ -21,6 +21,7 @@
 <BorderPane xmlns="http://javafx.com/javafx/17"
     xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.AdminPanelController" styleClass="page-shell admin-shell">
     <stylesheets>
+        <URL value="@../css/style.css"/>
         <URL value="@../css/admin-panel.css"/>
     </stylesheets>
 

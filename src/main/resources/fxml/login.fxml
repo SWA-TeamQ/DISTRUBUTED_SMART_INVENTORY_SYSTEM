@@ -10,6 +10,7 @@
 
     <stylesheets>
         <URL value="@../css/login.css" />
+        <URL value="@../css/style.css" />
     </stylesheets>
 
     <!-- Logo Section -->
@@ -49,7 +50,7 @@
 
         <!-- Action Button -->
         <Button text="Enter the Auction" onAction="#handleLogin" styleClass="login-button"/>
-        <Label fx:id="statusLabel" textFill="red" style="-fx-padding: 10 0 0 0;" wrapText="true" alignment="CENTER" maxWidth="Infinity"/>
+        <Label fx:id="statusLabel" styleClass="status-line" wrapText="true" alignment="CENTER" maxWidth="Infinity"/>
     </VBox>
 
     <!-- Footer -->

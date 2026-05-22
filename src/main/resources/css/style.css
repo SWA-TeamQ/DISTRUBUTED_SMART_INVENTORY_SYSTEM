@@ -233,6 +233,39 @@
     -fx-padding: 12px;
 }
 
+.tab-pane {
+    -fx-background-color: transparent;
+}
+
+.tab-pane .tab-header-background {
+    -fx-background-color: transparent;
+}
+
+.tab-pane:top .tab-header-area {
+    -fx-padding: 0 0 12px 0;
+    -fx-background-color: transparent;
+}
+
+.tab {
+    -fx-background-color: transparent;
+    -fx-text-fill: #c9d1d9;
+    -fx-padding: 10px 16px;
+    -fx-font-family: "Inter";
+    -fx-font-weight: 600;
+    -fx-font-size: 13px;
+}
+
+.tab:selected {
+    -fx-background-color: rgba(88, 166, 255, 0.12);
+    -fx-text-fill: #58a6ff;
+    -fx-border-color: #58a6ff;
+    -fx-border-width: 0 0 2 0;
+}
+
+.tab:hover {
+    -fx-background-color: rgba(88, 166, 255, 0.06);
+}
+
 .nav-tab {
     -fx-background-color: transparent;
     -fx-text-fill: #c9d1d9;
@@ -363,4 +396,56 @@
 .form-stack {
     -fx-spacing: 16px;
     -fx-padding: 18px;
+}
+
+/* Metric Card Variants */
+.metric-card-accent {
+    -fx-border-color: rgba(88, 166, 255, 0.42);
+}
+
+.metric-card-warm {
+    -fx-border-color: rgba(248, 81, 73, 0.28);
+}
+
+/* Status Line for error messages */
+.status-line {
+    -fx-text-fill: #f85149;
+    -fx-font-size: 12px;
+    -fx-font-family: "Inter";
+    -fx-padding: 6px 0;
+}
+
+/* Footer Elements */
+.footer-box {
+    -fx-alignment: center;
+    -fx-spacing: 6px;
+    -fx-padding: 0 0 10px 0;
+}
+
+.footer-text {
+    -fx-text-fill: #484f58;
+    -fx-font-size: 13px;
+    -fx-font-family: "Inter";
+}
+
+.footer-link {
+    -fx-text-fill: #58a6ff;
+    -fx-font-size: 13px;
+    -fx-font-family: "Inter";
+    -fx-cursor: hand;
+}
+
+.footer-link:hover {
+    -fx-text-fill: #79b8ff;
+    -fx-underline: true;
+}
+
+/* Login-specific Input Icon */
+.input-icon {
+    -fx-icon-size: 16px;
+    -fx-icon-color: #8b949e;
+}
+
+.input-field:focused-within .input-icon {
+    -fx-icon-color: #58a6ff;
 }

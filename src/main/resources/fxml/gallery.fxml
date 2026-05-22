@@ -10,9 +10,14 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
+<?import java.net.URL?>
 
 <BorderPane xmlns="http://javafx.com/javafx/17"
     xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.GalleryController" styleClass="page-shell">
+    <stylesheets>
+        <URL value="@../css/style.css" />
+    </stylesheets>
+    
     <top>
         <HBox spacing="16" alignment="CENTER_LEFT" styleClass="page-header">
             <VBox spacing="4" HBox.hgrow="ALWAYS">

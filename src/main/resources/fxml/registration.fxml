@@ -13,6 +13,7 @@
     xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.RegistrationController" styleClass="page-shell login-container">
     <stylesheets>
         <URL value="@../css/login.css" />
+        <URL value="@../css/style.css" />
     </stylesheets>
 
     <center>

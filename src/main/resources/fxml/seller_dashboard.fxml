@@ -19,6 +19,10 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/17"
     xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.SellerDashboardController" styleClass="dashboard-shell page-shell">
+    <stylesheets>
+        <URL value="@../css/style.css" />
+    </stylesheets>
+    
     <top>
         <HBox spacing="16" alignment="CENTER_LEFT" styleClass="page-header">
             <VBox spacing="4" HBox.hgrow="ALWAYS">

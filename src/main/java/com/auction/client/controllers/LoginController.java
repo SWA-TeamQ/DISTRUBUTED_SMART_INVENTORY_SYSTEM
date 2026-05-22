@@ -50,7 +50,7 @@ public class LoginController {
                 context.getViewLoader().loadView("seller_dashboard.fxml");
             }
         } catch (Exception e) {
-            if (statusLabel != null) statusLabel.setText("Login failed: " + e.getMessage());
+            if (statusLabel != null) statusLabel.setText("Login failed. Please try again.");
             e.printStackTrace();
         }
     }
