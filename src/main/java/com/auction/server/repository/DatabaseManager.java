@@ -99,6 +99,7 @@ public class DatabaseManager {
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_auction_seller ON auction_items(seller_username)");
         }
 
+<<<<<<< HEAD
         migrateUsersSchema();
     }
 

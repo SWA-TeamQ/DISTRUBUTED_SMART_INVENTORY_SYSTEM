@@ -20,10 +20,13 @@ public class User implements Serializable {
         this.passwordHash = passwordHash;
         this.roleType = roleType;
         this.createdAt = createdAt;
+<<<<<<< HEAD
     }
 
     public User(String username, String passwordHash, String roleType) {
         this(username, passwordHash, roleType, java.time.Instant.now().toString());
+=======
+>>>>>>> 43771d7 (feat: implement user management models, repository logic, and admin panel UI components)
     }
 
     public String getUsername() { return username; }

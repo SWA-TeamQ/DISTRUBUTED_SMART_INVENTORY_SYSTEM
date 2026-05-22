@@ -18,10 +18,17 @@
 <?import javafx.scene.layout.VBox?>
 <?import java.net.URL?>
 
+<<<<<<< HEAD
 <BorderPane xmlns="http://javafx.com/javafx/17"
     xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.AdminPanelController" styleClass="page-shell admin-shell">
     <stylesheets>
         <URL value="@../css/style.css"/>
+=======
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.auction.client.controllers.AdminPanelController"
+            styleClass="admin-shell">
+    <stylesheets>
+>>>>>>> 43771d7 (feat: implement user management models, repository logic, and admin panel UI components)
         <URL value="@../css/admin-panel.css"/>
     </stylesheets>
 
@@ -43,6 +50,9 @@
 
     <center>
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 43771d7 (feat: implement user management models, repository logic, and admin panel UI components)
         <SplitPane dividerPositions="0.31" styleClass="admin-split">
             <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="panel-scroll">
                 <content>
@@ -72,6 +82,80 @@
                             <Separator/>
                             <Label text="Use Refresh after seeding or deleting sample data." styleClass="panel-copy" wrapText="true"/>
                         </VBox>
+<<<<<<< HEAD
+=======
+                    </VBox>
+                </content>
+            </ScrollPane>
+
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="panel-scroll">
+                <content>
+                    <VBox spacing="18" styleClass="main-stack">
+                        <FlowPane hgap="14" vgap="14" prefWrapLength="1000">
+                            <VBox styleClass="metric-card" HBox.hgrow="ALWAYS" prefWidth="200" maxWidth="Infinity">
+                                <Label text="Total Users" styleClass="metric-label"/>
+                                <Label fx:id="totalUsersLabel" text="0" styleClass="metric-value"/>
+                            </VBox>
+                            <VBox styleClass="metric-card metric-card-accent" HBox.hgrow="ALWAYS" prefWidth="200" maxWidth="Infinity">
+                                <Label text="Admins" styleClass="metric-label"/>
+                                <Label fx:id="adminUsersLabel" text="0" styleClass="metric-value"/>
+                            </VBox>
+                            <VBox styleClass="metric-card" HBox.hgrow="ALWAYS" prefWidth="200" maxWidth="Infinity">
+                                <Label text="Users" styleClass="metric-label"/>
+                                <Label fx:id="standardUsersLabel" text="0" styleClass="metric-value"/>
+                            </VBox>
+                            <VBox styleClass="metric-card metric-card-warm" HBox.hgrow="ALWAYS" prefWidth="200" maxWidth="Infinity">
+                                <Label text="Audit Entries" styleClass="metric-label"/>
+                                <Label fx:id="auditCountLabel" text="0" styleClass="metric-value"/>
+                            </VBox>
+                        </FlowPane>
+
+                        <VBox spacing="12" styleClass="panel-card">
+                            <HBox spacing="12" alignment="CENTER_LEFT">
+                                <VBox spacing="2" HBox.hgrow="ALWAYS">
+                                    <Label text="All Users" styleClass="panel-title"/>
+                                    <Label text="Sorted by whatever the table decides; usernames, roles, and created timestamps are visible." styleClass="panel-copy" wrapText="true"/>
+                                </VBox>
+                                <Button text="Refresh" onAction="#handleRefreshDashboard" styleClass="secondary-button"/>
+                            </HBox>
+
+                            <TableView fx:id="usersTable" VBox.vgrow="ALWAYS" styleClass="users-table">
+                                <placeholder>
+                                    <Label text="No users loaded yet"/>
+                                </placeholder>
+                                <columns>
+                                    <TableColumn text="Username" prefWidth="180">
+                                        <cellValueFactory><PropertyValueFactory property="username"/></cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn text="Role" prefWidth="110">
+                                        <cellValueFactory><PropertyValueFactory property="roleType"/></cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn text="Created At" prefWidth="220">
+                                        <cellValueFactory><PropertyValueFactory property="createdAt"/></cellValueFactory>
+                                    </TableColumn>
+                                </columns>
+                            </TableView>
+                        </VBox>
+
+                        <VBox spacing="12" styleClass="panel-card">
+                            <HBox spacing="12" alignment="CENTER_LEFT">
+                                <VBox spacing="2" HBox.hgrow="ALWAYS">
+                                    <Label text="Audit Logs" styleClass="panel-title"/>
+                                    <Label text="Recent system actions and security events." styleClass="panel-copy" wrapText="true"/>
+                                </VBox>
+                                <Button text="Refresh" onAction="#handleRefreshDashboard" styleClass="secondary-button"/>
+                            </HBox>
+
+                            <ListView fx:id="auditListView" VBox.vgrow="ALWAYS" styleClass="audit-list">
+                                <placeholder>
+                                    <Label text="No audit events yet"/>
+                                </placeholder>
+                            </ListView>
+                        </VBox>
+                    </VBox>
+                </content>
+            </ScrollPane>
+>>>>>>> 43771d7 (feat: implement user management models, repository logic, and admin panel UI components)
         </SplitPane>
     </center>
 </BorderPane>
