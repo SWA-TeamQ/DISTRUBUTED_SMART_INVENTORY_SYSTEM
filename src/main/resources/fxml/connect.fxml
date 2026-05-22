@@ -8,6 +8,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
+<<<<<<< HEAD
 <?import java.net.URL?>
 
 <BorderPane xmlns="http://javafx.com/javafx/17"
@@ -15,7 +16,7 @@
     <stylesheets>
         <URL value="@../css/style.css" />
     </stylesheets>
-    
+>>>>>>> bca3d73 (Refactor UI components and styles across multiple FXML files to enhance visual consistency and usability)
     <top>
         <HBox spacing="16" alignment="CENTER_LEFT" styleClass="page-header">
             <VBox spacing="4" HBox.hgrow="ALWAYS">

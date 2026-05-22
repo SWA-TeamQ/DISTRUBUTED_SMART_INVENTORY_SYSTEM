@@ -19,6 +19,7 @@
 <?import java.net.URL?>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 <BorderPane xmlns="http://javafx.com/javafx/17"
     xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.AdminPanelController" styleClass="page-shell admin-shell">
     <stylesheets>
@@ -27,6 +28,10 @@
 <BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.auction.client.controllers.AdminPanelController"
             styleClass="admin-shell">
+=======
+<BorderPane xmlns="http://javafx.com/javafx/17"
+    xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.AdminPanelController" styleClass="page-shell admin-shell">
+>>>>>>> bca3d73 (Refactor UI components and styles across multiple FXML files to enhance visual consistency and usability)
     <stylesheets>
 >>>>>>> 43771d7 (feat: implement user management models, repository logic, and admin panel UI components)
         <URL value="@../css/admin-panel.css"/>
@@ -125,13 +130,19 @@
                                 </placeholder>
                                 <columns>
                                     <TableColumn text="Username" prefWidth="180">
-                                        <cellValueFactory><PropertyValueFactory property="username"/></cellValueFactory>
+                                        <cellValueFactory>
+                                            <PropertyValueFactory property="username"/>
+                                        </cellValueFactory>
                                     </TableColumn>
                                     <TableColumn text="Role" prefWidth="110">
-                                        <cellValueFactory><PropertyValueFactory property="roleType"/></cellValueFactory>
+                                        <cellValueFactory>
+                                            <PropertyValueFactory property="roleType"/>
+                                        </cellValueFactory>
                                     </TableColumn>
                                     <TableColumn text="Created At" prefWidth="220">
-                                        <cellValueFactory><PropertyValueFactory property="createdAt"/></cellValueFactory>
+                                        <cellValueFactory>
+                                            <PropertyValueFactory property="createdAt"/>
+                                        </cellValueFactory>
                                     </TableColumn>
                                 </columns>
                             </TableView>

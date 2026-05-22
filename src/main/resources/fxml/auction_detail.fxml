@@ -1,32 +1,208 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.auction.client.controllers.AuctionDetailController"
-      spacing="12" style="-fx-padding: 20;">
-    <children>
-        <Label fx:id="titleLabel" text="Auction Title" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
-        <Label fx:id="statusLabel" text="Status: Unknown"/>
-        <Label fx:id="currentBidLabel" text="Current Bid: --"/>
-        <Label fx:id="bidderLabel" text="Highest Bidder: --"/>
-        <HBox spacing="10">
-            <children>
-                <TextField fx:id="bidField" promptText="Enter bid amount in dollars" HBox.hgrow="ALWAYS"/>
-                <Button fx:id="bidButton" text="Place Bid" onAction="#handleBid"/>
-            </children>
+<BorderPane xmlns="http://javafx.com/javafx/17"
+    xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.AuctionDetailController" styleClass="page-shell">
+    <top>
+        <HBox spacing="16" alignment="CENTER_LEFT" styleClass="page-header">
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Auction Detail" styleClass="page-title"/>
+                <Label text="Bid context, image focus, and live auction actions belong here." styleClass="page-subtitle" wrapText="true"/>
+            </VBox>
+            <Button text="Back to Gallery" onAction="#handleBackToGallery" styleClass="secondary-button"/>
         </HBox>
-        <Label fx:id="messageLabel" text="" style="-fx-text-fill: #ffb86c;"/>
-        <Label text="Bid History" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
-        <ListView fx:id="bidHistoryView" VBox.vgrow="ALWAYS"/>
-        <Button text="Back to Gallery" onAction="#goBackToGallery"/>
-    </children>
-    <padding>
-        <Insets top="20" right="20" bottom="20" left="20"/>
-    </padding>
-</VBox>
+    </top>
+
+    <center>
+        <VBox spacing="16" styleClass="main-stack">
+            <FlowPane hgap="14" vgap="14" prefWrapLength="1200">
+                <VBox styleClass="metric-card" prefWidth="220">
+                    <Label text="Current Bid" styleClass="metric-label"/>
+                    <Label text="$0.00" styleClass="metric-value"/>
+                </VBox>
+                <VBox styleClass="metric-card metric-card-accent" prefWidth="220">
+                    <Label text="Time Left" styleClass="metric-label"/>
+                    <Label text="--:--" styleClass="metric-value"/>
+                </VBox>
+                <VBox styleClass="metric-card metric-card-warm" prefWidth="220">
+                    <Label text="Highest Bidder" styleClass="metric-label"/>
+                    <Label text="N/A" styleClass="metric-value"/>
+                </VBox>
+            </FlowPane>
+
+            <HBox spacing="16" VBox.vgrow="ALWAYS">
+                <VBox spacing="12" styleClass="panel-card" HBox.hgrow="ALWAYS">
+                    <Label text="Images" styleClass="section-title"/>
+                    <Label text="Primary image placeholder with thumbnail rail below." styleClass="section-copy" wrapText="true"/>
+                    <VBox styleClass="hero-card" prefHeight="320">
+                        <Label text="Main image area" styleClass="empty-state"/>
+                    </VBox>
+                    <HBox spacing="10">
+                        <VBox styleClass="metric-card" prefWidth="120">
+                            <Label text="Thumb 1" styleClass="section-copy"/>
+                        </VBox>
+                        <VBox styleClass="metric-card" prefWidth="120">
+                            <Label text="Thumb 2" styleClass="section-copy"/>
+                        </VBox>
+                        <VBox styleClass="metric-card" prefWidth="120">
+                            <Label text="Thumb 3" styleClass="section-copy"/>
+                        </VBox>
+                    </HBox>
+                </VBox>
+
+                <VBox spacing="12" styleClass="panel-card" prefWidth="420">
+                    <Label text="Bid Controls" styleClass="section-title"/>
+                    <Label text="This panel is ready for the future bid form and status checks." styleClass="section-copy" wrapText="true"/>
+                    <VBox styleClass="hero-card" spacing="10">
+                        <Label text="Place bid" styleClass="section-title"/>
+                        <Button text="Bid action placeholder" styleClass="primary-button" maxWidth="Infinity"/>
+                    </VBox>
+                </VBox>
+            </HBox>
+
+            <VBox spacing="10" styleClass="panel-card">
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <VBox spacing="2" HBox.hgrow="ALWAYS">
+                        <Label text="Bid History" styleClass="section-title"/>
+                        <Label text="Chronological history for the selected auction." styleClass="section-copy" wrapText="true"/>
+                    </VBox>
+                    <Label text="Live context" styleClass="status-chip status-chip-success"/>
+                </HBox>
+                <TableView VBox.vgrow="ALWAYS" styleClass="data-table">
+                    <placeholder>
+                        <Label text="No bid history loaded" styleClass="empty-state"/>
+                    </placeholder>
+                    <columns>
+                        <TableColumn text="Time" prefWidth="220">
+                            <cellValueFactory>
+                                <PropertyValueFactory property="timestamp"/>
+                            </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn text="Bidder" prefWidth="150">
+                            <cellValueFactory>
+                                <PropertyValueFactory property="bidderUsername"/>
+                            </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn text="Amount" prefWidth="120">
+                            <cellValueFactory>
+                                <PropertyValueFactory property="amountCents"/>
+                            </cellValueFactory>
+                        </TableColumn>
+                    </columns>
+                </TableView>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+    xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.AuctionDetailController" styleClass="page-shell">
+    <top>
+        <HBox spacing="16" alignment="CENTER_LEFT" styleClass="page-header">
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Auction Detail" styleClass="page-title"/>
+                <Label text="Bid context, image focus, and live auction actions belong here." styleClass="page-subtitle" wrapText="true"/>
+            </VBox>
+            <Button text="Back to Gallery" onAction="#handleBackToGallery" styleClass="secondary-button"/>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox spacing="16" styleClass="main-stack">
+            <FlowPane hgap="14" vgap="14" prefWrapLength="1200">
+                <VBox styleClass="metric-card" prefWidth="220">
+                    <Label text="Current Bid" styleClass="metric-label"/>
+                    <Label text="$0.00" styleClass="metric-value"/>
+                </VBox>
+                <VBox styleClass="metric-card metric-card-accent" prefWidth="220">
+                    <Label text="Time Left" styleClass="metric-label"/>
+                    <Label text="--:--" styleClass="metric-value"/>
+                </VBox>
+                <VBox styleClass="metric-card metric-card-warm" prefWidth="220">
+                    <Label text="Highest Bidder" styleClass="metric-label"/>
+                    <Label text="N/A" styleClass="metric-value"/>
+                </VBox>
+            </FlowPane>
+
+            <HBox spacing="16" VBox.vgrow="ALWAYS">
+                <VBox spacing="12" styleClass="panel-card" HBox.hgrow="ALWAYS">
+                    <Label text="Images" styleClass="section-title"/>
+                    <Label text="Primary image placeholder with thumbnail rail below." styleClass="section-copy" wrapText="true"/>
+                    <VBox styleClass="hero-card" prefHeight="320">
+                        <Label text="Main image area" styleClass="empty-state"/>
+                    </VBox>
+                    <HBox spacing="10">
+                        <VBox styleClass="metric-card" prefWidth="120">
+                            <Label text="Thumb 1" styleClass="section-copy"/>
+                        </VBox>
+                        <VBox styleClass="metric-card" prefWidth="120">
+                            <Label text="Thumb 2" styleClass="section-copy"/>
+                        </VBox>
+                        <VBox styleClass="metric-card" prefWidth="120">
+                            <Label text="Thumb 3" styleClass="section-copy"/>
+                        </VBox>
+                    </HBox>
+                </VBox>
+
+                <VBox spacing="12" styleClass="panel-card" prefWidth="420">
+                    <Label text="Bid Controls" styleClass="section-title"/>
+                    <Label text="This panel is ready for the future bid form and status checks." styleClass="section-copy" wrapText="true"/>
+                    <VBox styleClass="hero-card" spacing="10">
+                        <Label text="Place bid" styleClass="section-title"/>
+                        <Button text="Bid action placeholder" styleClass="primary-button" maxWidth="Infinity"/>
+                    </VBox>
+                </VBox>
+            </HBox>
+
+            <VBox spacing="10" styleClass="panel-card">
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <VBox spacing="2" HBox.hgrow="ALWAYS">
+                        <Label text="Bid History" styleClass="section-title"/>
+                        <Label text="Chronological history for the selected auction." styleClass="section-copy" wrapText="true"/>
+                    </VBox>
+                    <Label text="Live context" styleClass="status-chip status-chip-success"/>
+                </HBox>
+                <TableView VBox.vgrow="ALWAYS" styleClass="data-table">
+                    <placeholder>
+                        <Label text="No bid history loaded" styleClass="empty-state"/>
+                    </placeholder>
+                    <columns>
+                        <TableColumn text="Time" prefWidth="220">
+                            <cellValueFactory>
+                                <PropertyValueFactory property="timestamp"/>
+                            </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn text="Bidder" prefWidth="150">
+                            <cellValueFactory>
+                                <PropertyValueFactory property="bidderUsername"/>
+                            </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn text="Amount" prefWidth="120">
+                            <cellValueFactory>
+                                <PropertyValueFactory property="amountCents"/>
+                            </cellValueFactory>
+                        </TableColumn>
+                    </columns>
+                </TableView>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>
+>>>>>>> bca3d73 (Refactor UI components and styles across multiple FXML files to enhance visual consistency and usability)

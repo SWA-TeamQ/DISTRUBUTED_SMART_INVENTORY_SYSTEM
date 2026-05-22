@@ -138,4 +138,13 @@ public class AuctionDetailController {
             throw new RuntimeException(e);
         }
     }
+
+    @FXML
+    private void handleBackToGallery() {
+        try {
+            com.auction.client.core.ClientContext.getInstance().getViewLoader().loadView("gallery.fxml");
+        } catch (java.io.IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
