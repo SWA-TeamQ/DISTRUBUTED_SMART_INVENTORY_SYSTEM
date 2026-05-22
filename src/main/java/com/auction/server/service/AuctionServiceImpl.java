@@ -157,6 +157,11 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
         return validateSession(token).role();
     }
 
+    @Override
+    public String getMyRole(String token) throws RemoteException, AuctionException {
+        return validateSession(token).role();
+    }
+
 
     @Override
     public void logout(String token) throws RemoteException {
