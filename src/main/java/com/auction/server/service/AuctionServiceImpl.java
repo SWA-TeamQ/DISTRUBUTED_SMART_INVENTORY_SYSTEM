@@ -152,6 +152,11 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
         AsyncLogger.log(LogCategory.SECURITY, EventType.CREATE_AUCTION, "New User Registered: " + username + " Role=" + normalizedRole);
     }
 
+    @Override
+    public String getMyRole(String token) throws RemoteException, AuctionException {
+        return validateSession(token).role();
+    }
+
 
     @Override
     public void logout(String token) throws RemoteException {
@@ -174,6 +179,12 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
     @Override
     public List<AuctionItem> getActiveAuctions() throws RemoteException {
         return auctionManager.getActiveAuctions();
+    }
+
+    @Override
+    public List<AuctionItem> getActiveAuctionsBySeller(String sellerUsername, String token) throws RemoteException, AuctionException {
+        validateSession(token);
+        return auctionManager.findActiveAuctionsBySeller(sellerUsername);
     }
 
     @Override
@@ -225,7 +236,7 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
 
     @Override
     public void cancelAuction(int auctionId, String token) throws RemoteException, AuctionException {
-        SessionContext context = validateSession(token);
+        SessionContext context = validateRole(token, Constants.USER, Constants.ADMIN);
 
         try {
             auctionManager.cancelAuction(auctionId, context);
@@ -239,7 +250,7 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
     @Override
     public void relistAuction(int auctionId, String newEndTimeIso, String token)
             throws RemoteException, AuctionException {
-        SessionContext context = validateSession(token);
+        SessionContext context = validateRole(token, Constants.USER, Constants.ADMIN);
 
         try {
             auctionManager.relistAuction(auctionId, newEndTimeIso, context);
@@ -297,6 +308,7 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
         } else {
             throw new UnauthorizedException("Only users or admins can export auctions to CSV");
         }
+
 
         StringBuilder sb = new StringBuilder();
         sb.append("AuctionID,Title,Category,StartingPrice,FinalPrice,Winner,Status,StartTime,EndTime\n");

@@ -17,6 +17,7 @@
         <HBox spacing="10">
             <children>
                 <Button text="Open Selected Auction" onAction="#openSelectedAuction"/>
+                <Button text="Back to Dashboard" onAction="#handleBackToDashboard"/>
             </children>
         </HBox>
     </children>

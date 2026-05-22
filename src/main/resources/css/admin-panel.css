@@ -1,0 +1,272 @@
+/* RTDAS Admin Dashboard Theme */
+
+.admin-shell {
+    -fx-background-color: linear-gradient(to bottom right, #060b12, #0b1220 55%, #070a10);
+}
+
+.admin-header {
+    -fx-padding: 18px 22px;
+    -fx-background-color: rgba(13, 17, 23, 0.92);
+    -fx-border-color: rgba(48, 54, 61, 0.9);
+    -fx-border-width: 0 0 1 0;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.45), 24, 0, 0, 8);
+}
+
+.page-title {
+    -fx-font-size: 26px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #f0f6fc;
+    -fx-font-family: 'Inter';
+}
+
+.page-subtitle {
+    -fx-font-size: 13px;
+    -fx-text-fill: #8b949e;
+    -fx-font-family: 'Inter';
+}
+
+.status-chip {
+    -fx-background-radius: 999px;
+    -fx-border-radius: 999px;
+    -fx-padding: 6px 12px;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-font-family: 'Inter';
+}
+
+.status-chip-success {
+    -fx-background-color: rgba(46, 160, 67, 0.16);
+    -fx-text-fill: #7ee787;
+    -fx-border-color: rgba(46, 160, 67, 0.25);
+}
+
+.status-chip-accent {
+    -fx-background-color: rgba(88, 166, 255, 0.15);
+    -fx-text-fill: #79c0ff;
+    -fx-border-color: rgba(88, 166, 255, 0.28);
+}
+
+.admin-split {
+    -fx-background-color: transparent;
+}
+
+.admin-split .split-pane-divider {
+    -fx-background-color: rgba(48, 54, 61, 0.8);
+    -fx-padding: 0 1px;
+}
+
+.panel-scroll {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.panel-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.sidebar-stack,
+.main-stack {
+    -fx-padding: 18px;
+    -fx-spacing: 16px;
+}
+
+.panel-card {
+    -fx-background-color: rgba(13, 17, 23, 0.92);
+    -fx-background-radius: 18px;
+    -fx-border-color: rgba(48, 54, 61, 0.95);
+    -fx-border-radius: 18px;
+    -fx-border-width: 1px;
+    -fx-padding: 18px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.42), 26, 0, 0, 8);
+}
+
+.panel-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #f0f6fc;
+    -fx-font-family: 'Inter';
+}
+
+.panel-copy {
+    -fx-font-size: 12px;
+    -fx-text-fill: #8b949e;
+    -fx-font-family: 'Inter';
+}
+
+.compact-field {
+    -fx-background-color: #0b0f15;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-border-color: #30363d;
+    -fx-border-width: 1.25px;
+    -fx-text-fill: #f0f6fc;
+    -fx-prompt-text-fill: #5b6570;
+    -fx-padding: 11px 12px;
+    -fx-font-size: 13px;
+    -fx-font-family: 'Inter';
+}
+
+.compact-field:focused {
+    -fx-border-color: #58a6ff;
+    -fx-effect: dropshadow(gaussian, rgba(88, 166, 255, 0.22), 14, 0, 0, 0);
+}
+
+.primary-button,
+.secondary-button {
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-padding: 11px 14px;
+    -fx-font-family: 'Inter';
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-cursor: hand;
+}
+
+.primary-button {
+    -fx-background-color: #1f6feb;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(31, 111, 235, 0.28), 10, 0, 0, 2);
+}
+
+.primary-button:hover {
+    -fx-background-color: #388bfd;
+}
+
+.primary-button:pressed {
+    -fx-background-color: #1a5cc7;
+    -fx-translate-y: 1px;
+}
+
+.secondary-button {
+    -fx-background-color: #161b22;
+    -fx-text-fill: #c9d1d9;
+    -fx-border-color: #30363d;
+    -fx-border-width: 1px;
+}
+
+.secondary-button:hover {
+    -fx-background-color: #21262d;
+    -fx-border-color: #58a6ff;
+}
+
+.secondary-button:pressed {
+    -fx-background-color: #0f1318;
+    -fx-translate-y: 1px;
+}
+
+.metric-card {
+    -fx-background-color: linear-gradient(to bottom right, rgba(13, 17, 23, 0.98), rgba(17, 24, 39, 0.92));
+    -fx-background-radius: 18px;
+    -fx-border-color: rgba(48, 54, 61, 0.92);
+    -fx-border-radius: 18px;
+    -fx-border-width: 1px;
+    -fx-padding: 16px 18px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.32), 22, 0, 0, 7);
+}
+
+.metric-card-accent {
+    -fx-border-color: rgba(88, 166, 255, 0.42);
+}
+
+.metric-card-warm {
+    -fx-border-color: rgba(248, 81, 73, 0.28);
+}
+
+.metric-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #8b949e;
+    -fx-font-family: 'Inter';
+    -fx-font-weight: 600;
+}
+
+.metric-value {
+    -fx-font-size: 28px;
+    -fx-text-fill: #f0f6fc;
+    -fx-font-family: 'Inter';
+    -fx-font-weight: 800;
+}
+
+.fact-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #8b949e;
+    -fx-font-family: 'Inter';
+}
+
+.fact-value {
+    -fx-font-size: 13px;
+    -fx-text-fill: #f0f6fc;
+    -fx-font-family: 'Inter';
+    -fx-font-weight: 700;
+}
+
+.status-line {
+    -fx-text-fill: #8b949e;
+    -fx-font-size: 12px;
+    -fx-font-family: 'Inter';
+}
+
+.users-table,
+.audit-list {
+    -fx-background-color: #0b0f15;
+    -fx-background-radius: 14px;
+    -fx-border-color: #30363d;
+    -fx-border-radius: 14px;
+    -fx-border-width: 1px;
+}
+
+.users-table .column-header-background {
+    -fx-background-color: linear-gradient(to bottom, #161b22, #0f1318);
+    -fx-background-radius: 14px 14px 0 0;
+}
+
+.users-table .column-header,
+.users-table .filler {
+    -fx-background-color: transparent;
+    -fx-border-color: rgba(48, 54, 61, 0.8);
+    -fx-border-width: 0 0 1 0;
+}
+
+.users-table .column-header .label,
+.audit-list .label {
+    -fx-text-fill: #c9d1d9;
+    -fx-font-weight: 700;
+    -fx-font-family: 'Inter';
+}
+
+.users-table .table-row-cell {
+    -fx-background-color: #0b0f15;
+    -fx-border-color: rgba(48, 54, 61, 0.55);
+}
+
+.users-table .table-row-cell:filled:hover {
+    -fx-background-color: rgba(88, 166, 255, 0.08);
+}
+
+.users-table .table-row-cell:filled:selected {
+    -fx-background-color: rgba(88, 166, 255, 0.16);
+}
+
+.users-table .table-cell {
+    -fx-text-fill: #c9d1d9;
+    -fx-font-family: 'Inter';
+    -fx-border-color: rgba(48, 54, 61, 0.35);
+}
+
+.audit-list .list-cell {
+    -fx-background-color: #0b0f15;
+    -fx-text-fill: #c9d1d9;
+    -fx-font-family: 'JetBrains Mono', 'Consolas', monospace;
+    -fx-padding: 8px 10px;
+}
+
+.audit-list .list-cell:filled:hover {
+    -fx-background-color: rgba(88, 166, 255, 0.08);
+}
+
+.audit-list .list-cell:filled:selected {
+    -fx-background-color: rgba(88, 166, 255, 0.16);
+}
+
+.scroll-pane .corner {
+    -fx-background-color: transparent;
+}

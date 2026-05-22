@@ -46,11 +46,10 @@ public class LoginController {
             if (com.auction.shared.Constants.ADMIN.equals(role)) {
                 context.getViewLoader().loadView("admin_panel.fxml");
             } else {
-                // Route non-admin users to the marketplace (gallery) as the primary landing
                 context.getViewLoader().loadView("gallery.fxml");
             }
         } catch (Exception e) {
-            if (statusLabel != null) statusLabel.setText("Login failed: " + e.getMessage());
+            if (statusLabel != null) statusLabel.setText("Login failed. Please try again.");
             e.printStackTrace();
         }
     }

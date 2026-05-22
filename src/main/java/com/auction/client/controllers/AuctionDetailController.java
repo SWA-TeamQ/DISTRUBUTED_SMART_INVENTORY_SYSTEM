@@ -129,4 +129,13 @@ public class AuctionDetailController {
             messageLabel.setText(message);
         }
     }
+
+    @FXML
+    private void handleBackToGallery() {
+        try {
+            com.auction.client.core.ClientContext.getInstance().getViewLoader().loadView("gallery.fxml");
+        } catch (java.io.IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

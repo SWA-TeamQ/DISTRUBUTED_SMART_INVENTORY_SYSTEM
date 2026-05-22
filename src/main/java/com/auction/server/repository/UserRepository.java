@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.Instant;
 
 public class UserRepository {
     private final Connection connection;
@@ -35,15 +36,16 @@ public class UserRepository {
     }
 
     public User findUserByUsername(String username) {
-        String sql = "SELECT password_hash, role FROM users WHERE username = ?";
+        String sql = "SELECT password_hash, role, created_at FROM users WHERE username = ?";
         try (var pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, username);
             try (var rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     String p = rs.getString("password_hash");
                     String r = rs.getString("role");
-                    if (Constants.ADMIN.equals(r)) return new Admin(username, p);
-                    return new User(username, p, Constants.USER);
+                    String createdAt = rs.getString("created_at");
+                    if (Constants.ADMIN.equals(r)) return new Admin(username, p, createdAt);
+                    return new User(username, p, Constants.USER, createdAt);
                 }
             }
         } catch (SQLException e) {
@@ -58,7 +60,7 @@ public class UserRepository {
             pstmt.setString(1, username);
             pstmt.setString(2, passwordHash);
             pstmt.setString(3, role);
-            pstmt.setString(4, java.time.Instant.now().toString());
+            pstmt.setString(4, Instant.now().toString());
             pstmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Failed to insert user", e);
@@ -126,13 +128,14 @@ public class UserRepository {
     public List<User> findAllUsers() {
         List<User> users = new ArrayList<>();
         try (var stmt = connection.createStatement();
-             var rs = stmt.executeQuery("SELECT username, password_hash, role FROM users")) {
+             var rs = stmt.executeQuery("SELECT username, password_hash, role, created_at FROM users")) {
             while (rs.next()) {
                 String u = rs.getString("username");
                 String p = rs.getString("password_hash");
                 String r = rs.getString("role");
-                if (Constants.ADMIN.equals(r)) users.add(new Admin(u, p));
-                else users.add(new User(u, p, Constants.USER));
+                String createdAt = rs.getString("created_at");
+                if (Constants.ADMIN.equals(r)) users.add(new Admin(u, p, createdAt));
+                else users.add(new User(u, p, Constants.USER, createdAt));
             }
         } catch (SQLException e) {
             throw new RuntimeException("Failed to fetch users", e);
