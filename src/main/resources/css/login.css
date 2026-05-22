@@ -16,8 +16,14 @@
 .login-container {
     -fx-background-color: #010409;          /* Deepest black for max contrast */
     -fx-alignment: center;
+    -fx-padding: 32px;
+}
+
+.login-stack {
+    -fx-alignment: center;
     -fx-spacing: 28px;
-    -fx-padding: 40px;
+    -fx-padding: 32px;
+    -fx-max-width: 520px;
 }
 
 /* --- Logo Section --- */

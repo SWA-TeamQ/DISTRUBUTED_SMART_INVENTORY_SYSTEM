@@ -9,7 +9,7 @@ import java.time.Instant;
 public class TestRegisterLogin {
     public static void main(String[] args) throws Exception {
         String host = "localhost";
-        int port = 1099;
+        int port = 1999;
         IAuctionService service = (IAuctionService) LocateRegistry.getRegistry(host, port).lookup(Constants.RMI_SERVICE_NAME);
         String username = "auto_user_" + Instant.now().toEpochMilli();
         String password = "pass123";

@@ -37,7 +37,7 @@ public class UserRepository {
 
     public User findUserByUsername(String username) {
         String sql = "SELECT password_hash, role, created_at FROM users WHERE username = ?";
-            try (var pstmt = connection.prepareStatement(sql)) {
+        try (var pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, username);
             try (var rs = pstmt.executeQuery()) {
                 if (rs.next()) {
@@ -47,7 +47,6 @@ public class UserRepository {
                     if (Constants.ADMIN.equals(r)) return new Admin(username, p, createdAt);
                     if (Constants.USER.equals(r)) return new User(username, p, Constants.USER, createdAt);
                 }
-            }
             }
         } catch (SQLException e) {
             throw new RuntimeException("Failed to find user", e);

@@ -38,14 +38,16 @@ public class DatabaseSyncService {
 
     public void stop() {
         try { scheduler.shutdownNow(); } catch (Exception ignored) {}
+        try { dbManager.close(); } catch (Exception ignored) {}
     }
 
     private void syncOnce() {
-        try (Connection primary = dbManager.getConnection()) {
+        try {
+            Connection primary = dbManager.getConnection();
             List<UserRow> users = readUsers(primary);
 
             // Destinations: workspace root data files
-            String[] dests = new String[] { "data/auction.db", "data/auction.db.sqlite" };
+            String[] dests = new String[] { Constants.DB_PATH, Constants.DB_PATH + ".sqlite" };
 
             for (String dest : dests) {
                 try {

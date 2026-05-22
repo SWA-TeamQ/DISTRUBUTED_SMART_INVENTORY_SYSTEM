@@ -48,8 +48,14 @@ public class LoginController {
             } else {
                 context.getViewLoader().loadView("user_dashboard.fxml");
             }
+            if (statusLabel != null) statusLabel.setText("Login successful.");
+        } catch (com.auction.shared.exceptions.AuctionException e) {
+            if (statusLabel != null) statusLabel.setText(e.getMessage());
+        } catch (java.io.IOException e) {
+            if (statusLabel != null) statusLabel.setText("Login succeeded, but the dashboard could not open: " + e.getMessage());
+            e.printStackTrace();
         } catch (Exception e) {
-            if (statusLabel != null) statusLabel.setText("Login failed. Please try again.");
+            if (statusLabel != null) statusLabel.setText("Login failed: " + e.getMessage());
             e.printStackTrace();
         }
     }

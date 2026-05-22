@@ -1,5 +1,9 @@
 package com.auction.shared;
 
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 /**
  * Application-wide constants. Single source of truth for all magic values.
  */
@@ -12,7 +16,7 @@ public final class Constants {
 
     // --- RMI ---
     public static final String RMI_SERVICE_NAME = "AuctionService";
-    public static final int DEFAULT_RMI_PORT = 1099;
+    public static final int DEFAULT_RMI_PORT = 1999;
     public static final int SESSION_TTL_MINUTES = 30;
 
     // --- UDP Discovery ---
@@ -35,10 +39,10 @@ public final class Constants {
     public static final int THUMBNAIL_SIZE = 40;
 
     // --- Paths ---
-    public static final String DB_PATH = "data/auction.db";
-    public static final String IMAGES_DIR = "resources/images";
-    public static final String THUMBS_DIR = "resources/thumbs";
-    public static final String AUDIT_LOG_PATH = "logs/audit.log";
+    public static final String DB_PATH = resolveProjectPath("data", "auction.db");
+    public static final String IMAGES_DIR = resolveProjectPath("resources", "images");
+    public static final String THUMBS_DIR = resolveProjectPath("resources", "thumbs");
+    public static final String AUDIT_LOG_PATH = resolveProjectPath("logs", "audit.log");
 
     // --- Default Admin ---
     public static final String DEFAULT_ADMIN_USERNAME = "admin";
@@ -53,5 +57,23 @@ public final class Constants {
     // --- Money Helper ---
     public static String formatCents(long cents) {
         return String.format("$%.2f", cents / 100.0);
+    }
+
+    private static String resolveProjectPath(String first, String... more) {
+        try {
+            Path codeSource = Paths.get(Constants.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toAbsolutePath();
+            Path root = codeSource;
+            if (root.getFileName() != null && "classes".equalsIgnoreCase(root.getFileName().toString())) {
+                root = root.getParent() != null ? root.getParent().getParent() : root;
+            } else if (root.toString().endsWith(".jar")) {
+                root = root.getParent();
+            }
+            if (root == null) {
+                root = Paths.get("").toAbsolutePath();
+            }
+            return root.resolve(Paths.get(first, more)).toAbsolutePath().toString();
+        } catch (URISyntaxException e) {
+            return Paths.get("").toAbsolutePath().resolve(Paths.get(first, more)).toString();
+        }
     }
 }

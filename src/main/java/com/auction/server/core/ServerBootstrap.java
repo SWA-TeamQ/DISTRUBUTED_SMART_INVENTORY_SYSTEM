@@ -17,10 +17,13 @@ public class ServerBootstrap {
     private final UdpBroadcaster broadcaster;
     private final AuctionReaper reaper;
     private final com.auction.server.repository.DatabaseSyncService dbSyncService;
+    private final String advertisedHost;
 
     public ServerBootstrap() throws Exception {
         // Initialize Logging
         com.auction.server.core.logging.AsyncLogger.initialize();
+
+        this.advertisedHost = configureRmiHostname();
 
         // 1. Init Database
         DatabaseManager dbManager = new DatabaseManager();
@@ -50,11 +53,24 @@ public class ServerBootstrap {
 
         // 6. Init Background Tasks
         this.reaper = new AuctionReaper(lifecycleManager);
-        this.broadcaster = new UdpBroadcaster(port, "MainServer");
+        this.broadcaster = new UdpBroadcaster(advertisedHost, port, "MainServer");
 
         // 7. Start DB sync service to keep secondary DB files consistent
         this.dbSyncService = new com.auction.server.repository.DatabaseSyncService(new DatabaseManager(getDatabaseUrlForSync()));
         this.dbSyncService.start();
+    }
+
+    private String configureRmiHostname() {
+        String configuredHost = System.getProperty("auction.rmi.hostname");
+        if (configuredHost == null || configuredHost.isBlank()) {
+            configuredHost = System.getenv("AUCTION_RMI_HOSTNAME");
+        }
+        if (configuredHost == null || configuredHost.isBlank()) {
+            configuredHost = "localhost";
+        }
+        System.setProperty("java.rmi.server.hostname", configuredHost);
+        System.out.println("[RTDAS] RMI hostname set to: " + configuredHost);
+        return configuredHost;
     }
 
     public void start() {
@@ -74,11 +90,6 @@ public class ServerBootstrap {
 
     // Helper to provide a DatabaseManager configured for the primary DB path
     private String getDatabaseUrlForSync() {
-        // Use the same path as Constants.DB_PATH (canonicalized by DatabaseManager constructor)
-        try {
-            return "jdbc:sqlite:" + new java.io.File(Constants.DB_PATH).getCanonicalPath();
-        } catch (java.io.IOException e) {
-            return "jdbc:sqlite:" + new java.io.File(Constants.DB_PATH).getAbsolutePath();
-        }
+        return "jdbc:sqlite:" + Constants.DB_PATH;
     }
 }

@@ -89,16 +89,12 @@ public class GalleryController {
     @FXML
     private void handleBackToDashboard() {
         try {
-            com.auction.client.core.ClientContext.getInstance().getViewLoader().loadView("user_dashboard.fxml");
-        } catch (java.io.IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @FXML
-    private void handleBackToDashboard() {
-        try {
-            com.auction.client.core.ClientContext.getInstance().getViewLoader().loadView("seller_dashboard.fxml");
+            String role = com.auction.client.core.ClientContext.getInstance().getUserRole();
+            if (com.auction.shared.Constants.ADMIN.equals(role)) {
+                com.auction.client.core.ClientContext.getInstance().getViewLoader().loadView("admin_panel.fxml");
+            } else {
+                com.auction.client.core.ClientContext.getInstance().getViewLoader().loadView("user_dashboard.fxml");
+            }
         } catch (java.io.IOException e) {
             throw new RuntimeException(e);
         }

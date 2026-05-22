@@ -45,7 +45,7 @@ public class ConnectController {
         if (host == null || host.trim().isEmpty()) {
             host = "localhost";
         }
-        int port = 1099;
+        int port = 1999;
         try {
             String portStr = portField.getText();
             if (portStr != null && !portStr.trim().isEmpty()) {

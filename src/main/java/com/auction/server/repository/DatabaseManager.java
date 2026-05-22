@@ -48,10 +48,10 @@ public class DatabaseManager {
     }
 
     private void bootstrapDirectories() {
-        new java.io.File("data").mkdirs();
-        new java.io.File("logs").mkdirs();
-        new java.io.File("resources/images").mkdirs();
-        new java.io.File("resources/thumbs").mkdirs();
+        new java.io.File(com.auction.shared.Constants.DB_PATH).getParentFile().mkdirs();
+        new java.io.File(com.auction.shared.Constants.AUDIT_LOG_PATH).getParentFile().mkdirs();
+        new java.io.File(com.auction.shared.Constants.IMAGES_DIR).mkdirs();
+        new java.io.File(com.auction.shared.Constants.THUMBS_DIR).mkdirs();
         new java.io.File("exports").mkdirs();
     }
 

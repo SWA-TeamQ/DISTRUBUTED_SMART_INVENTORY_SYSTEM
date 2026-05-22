@@ -8,10 +8,6 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> f6e24f6 (feat: enhance UI consistency by updating styles and error messages across multiple FXML files)
 <?import java.net.URL?>
 
 <BorderPane xmlns="http://javafx.com/javafx/17"
@@ -19,11 +15,6 @@
     <stylesheets>
         <URL value="@../css/style.css" />
     </stylesheets>
-<<<<<<< HEAD
->>>>>>> bca3d73 (Refactor UI components and styles across multiple FXML files to enhance visual consistency and usability)
-=======
-    
->>>>>>> f6e24f6 (feat: enhance UI consistency by updating styles and error messages across multiple FXML files)
     <top>
         <HBox spacing="16" alignment="CENTER_LEFT" styleClass="page-header">
             <VBox spacing="4" HBox.hgrow="ALWAYS">

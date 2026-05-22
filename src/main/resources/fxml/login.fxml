@@ -5,7 +5,7 @@
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 <?import java.net.URL?>
 
-<VBox xmlns="http://javafx.com/javafx/17"
+<StackPane xmlns="http://javafx.com/javafx/17"
     xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.LoginController" styleClass="page-shell login-container">
 
     <stylesheets>
@@ -13,50 +13,52 @@
         <URL value="@../css/style.css" />
     </stylesheets>
 
-    <!-- Logo Section -->
-    <VBox alignment="CENTER" spacing="15">
-        <StackPane styleClass="logo-box">
-            <FontIcon iconLiteral="fas-gavel" styleClass="logo-icon"/>
-        </StackPane>
-        <VBox alignment="CENTER" spacing="5">
-            <Label text="RTDAS" styleClass="title-label"/>
-            <Label text="Real-Time Distributed Auction System" styleClass="subtitle-label"/>
+    <VBox alignment="CENTER" spacing="28" maxWidth="520" StackPane.alignment="CENTER" styleClass="login-stack">
+        <!-- Logo Section -->
+        <VBox alignment="CENTER" spacing="15">
+            <StackPane styleClass="logo-box">
+                <FontIcon iconLiteral="fas-gavel" styleClass="logo-icon"/>
+            </StackPane>
+            <VBox alignment="CENTER" spacing="5">
+                <Label text="RTDAS" styleClass="title-label"/>
+                <Label text="Real-Time Distributed Auction System" styleClass="subtitle-label"/>
+            </VBox>
         </VBox>
+
+        <!-- Login Card -->
+        <VBox styleClass="login-card">
+            <!-- Terminal ID Field -->
+            <VBox styleClass="form-group">
+                <Label text="Terminal ID" styleClass="form-label"/>
+                <HBox alignment="CENTER_LEFT" spacing="10" styleClass="input-field">
+                    <FontIcon iconLiteral="fas-user" styleClass="input-icon"/>
+                    <TextField fx:id="usernameField" promptText="Enter your ID" HBox.hgrow="ALWAYS" style="-fx-background-color: transparent; -fx-padding: 0;"/>
+                </HBox>
+            </VBox>
+
+            <!-- Passkey Field -->
+            <VBox styleClass="form-group">
+                <HBox alignment="CENTER_LEFT">
+                    <Label text="Passkey" styleClass="form-label"/>
+                </HBox>
+                <HBox alignment="CENTER_LEFT" spacing="10" styleClass="input-field">
+                    <FontIcon iconLiteral="fas-lock" styleClass="input-icon"/>
+                    <PasswordField fx:id="passwordField" promptText="••••••••" HBox.hgrow="ALWAYS" style="-fx-background-color: transparent; -fx-padding: 0;"/>
+                </HBox>
+            </VBox>
+
+            <Region minHeight="10"/>
+
+            <!-- Action Button -->
+            <Button text="Enter the Auction" onAction="#handleLogin" styleClass="login-button"/>
+            <Label fx:id="statusLabel" styleClass="status-line" wrapText="true" alignment="CENTER" maxWidth="Infinity"/>
+        </VBox>
+
+        <!-- Footer -->
+        <HBox styleClass="footer-box">
+            <Label text="Unregistered Node?" styleClass="footer-text"/>
+            <Label text="Request Access" styleClass="footer-link" onMouseClicked="#handleNavigateToRegister"/>
+        </HBox>
     </VBox>
 
-    <!-- Login Card -->
-    <VBox styleClass="login-card">
-        <!-- Terminal ID Field -->
-        <VBox styleClass="form-group">
-            <Label text="Terminal ID" styleClass="form-label"/>
-            <HBox alignment="CENTER_LEFT" spacing="10" styleClass="input-field">
-                <FontIcon iconLiteral="fas-user" styleClass="input-icon"/>
-                <TextField fx:id="usernameField" promptText="Enter your ID" HBox.hgrow="ALWAYS" style="-fx-background-color: transparent; -fx-padding: 0;"/>
-            </HBox>
-        </VBox>
-
-        <!-- Passkey Field -->
-        <VBox styleClass="form-group">
-            <HBox alignment="CENTER_LEFT">
-                <Label text="Passkey" styleClass="form-label"/>
-            </HBox>
-            <HBox alignment="CENTER_LEFT" spacing="10" styleClass="input-field">
-                <FontIcon iconLiteral="fas-lock" styleClass="input-icon"/>
-                <PasswordField fx:id="passwordField" promptText="••••••••" HBox.hgrow="ALWAYS" style="-fx-background-color: transparent; -fx-padding: 0;"/>
-            </HBox>
-        </VBox>
-
-        <Region minHeight="10"/>
-
-        <!-- Action Button -->
-        <Button text="Enter the Auction" onAction="#handleLogin" styleClass="login-button"/>
-        <Label fx:id="statusLabel" styleClass="status-line" wrapText="true" alignment="CENTER" maxWidth="Infinity"/>
-    </VBox>
-
-    <!-- Footer -->
-    <HBox styleClass="footer-box">
-        <Label text="Unregistered Node?" styleClass="footer-text"/>
-        <Label text="Request Access" styleClass="footer-link" onMouseClicked="#handleNavigateToRegister"/>
-    </HBox>
-
-</VBox>
+</StackPane>

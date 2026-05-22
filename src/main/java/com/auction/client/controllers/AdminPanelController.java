@@ -28,37 +28,50 @@ public class AdminPanelController {
         );
         roleCombo.getSelectionModel().selectFirst();
 
-        refreshDashboard();
+        if (statusLabel != null) {
+            statusLabel.setText("Loading dashboard...");
+        }
+        refreshDashboardAsync();
     }
 
-    private void refreshDashboard() {
-        try {
-            com.auction.client.core.ClientContext context = com.auction.client.core.ClientContext.getInstance();
-            var service = context.getRmiProvider().getService();
+    private void refreshDashboardAsync() {
+        Thread loader = new Thread(() -> {
+            try {
+                com.auction.client.core.ClientContext context = com.auction.client.core.ClientContext.getInstance();
+                var service = context.getRmiProvider().getService();
 
-            java.util.List<com.auction.shared.models.User> users = service.getAllUsers(context.getSessionToken());
-            usersTable.getItems().setAll(users);
+                java.util.List<com.auction.shared.models.User> users = service.getAllUsers(context.getSessionToken());
+                java.util.List<String> logs = service.getAuditLogs(100, context.getSessionToken());
 
-            java.util.List<String> logs = service.getAuditLogs(100, context.getSessionToken());
-            auditListView.getItems().setAll(logs);
+                javafx.application.Platform.runLater(() -> {
+                    usersTable.getItems().setAll(users);
+                    auditListView.getItems().setAll(logs);
 
-            long adminCount = users.stream()
-                .filter(user -> com.auction.shared.Constants.ADMIN.equals(user.getRoleType()))
-                .count();
-            long userCount = users.size() - adminCount;
+                    long adminCount = users.stream()
+                        .filter(user -> com.auction.shared.Constants.ADMIN.equals(user.getRoleType()))
+                        .count();
+                    long userCount = users.size() - adminCount;
 
-            totalUsersLabel.setText(String.valueOf(users.size()));
-            adminUsersLabel.setText(String.valueOf(adminCount));
-            standardUsersLabel.setText(String.valueOf(userCount));
-            auditCountLabel.setText(String.valueOf(logs.size()));
-            lastUpdatedLabel.setText("Updated " + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
+                    totalUsersLabel.setText(String.valueOf(users.size()));
+                    adminUsersLabel.setText(String.valueOf(adminCount));
+                    standardUsersLabel.setText(String.valueOf(userCount));
+                    auditCountLabel.setText(String.valueOf(logs.size()));
+                    lastUpdatedLabel.setText("Updated " + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
 
-            statusLabel.setText("Dashboard refreshed successfully.");
-        } catch (java.rmi.RemoteException e) {
-            com.auction.client.core.ClientContext.getInstance().handleConnectionLost();
-        } catch (Exception e) {
-            statusLabel.setText("Refresh failed: " + e.getMessage());
-        }
+                    statusLabel.setText("Dashboard refreshed successfully.");
+                });
+            } catch (java.rmi.RemoteException e) {
+                javafx.application.Platform.runLater(() -> com.auction.client.core.ClientContext.getInstance().handleConnectionLost());
+            } catch (Exception e) {
+                javafx.application.Platform.runLater(() -> {
+                    if (statusLabel != null) {
+                        statusLabel.setText("Refresh failed: " + e.getMessage());
+                    }
+                });
+            }
+        }, "AdminDashboardLoader");
+        loader.setDaemon(true);
+        loader.start();
     }
 
     @FXML
@@ -73,7 +86,7 @@ public class AdminPanelController {
             statusLabel.setText("User created successfully");
             usernameField.clear();
             passwordField.clear();
-            refreshDashboard();
+            refreshDashboardAsync();
         } catch (java.rmi.RemoteException e) {
             com.auction.client.core.ClientContext.getInstance().handleConnectionLost();
         } catch (Exception e) {
@@ -96,12 +109,12 @@ public class AdminPanelController {
 
     @FXML
     private void handleRefreshLogs() {
-        refreshDashboard();
+            refreshDashboardAsync();
     }
 
     @FXML
     private void handleRefreshDashboard() {
-        refreshDashboard();
+        refreshDashboardAsync();
     }
 
     @FXML

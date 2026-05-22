@@ -12,16 +12,18 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Broadcasts server presence via UDP every 2 seconds.
- * Packet format: "RTDAS|<rmiPort>|<serverName>"
+ * Packet format: "RTDAS|<serverName>|<host>|<rmiPort>"
  * Clients listen on UDP_BROADCAST_PORT to auto-discover.
  */
 public class UdpBroadcaster {
 
+    private final String host;
     private final int rmiPort;
     private final String serverName;
     private ScheduledExecutorService scheduler;
 
-    public UdpBroadcaster(int rmiPort, String serverName) {
+    public UdpBroadcaster(String host, int rmiPort, String serverName) {
+        this.host = host;
         this.rmiPort = rmiPort;
         this.serverName = serverName;
     }
@@ -31,7 +33,7 @@ public class UdpBroadcaster {
         if (scheduler != null) return;
         
         scheduler = Executors.newSingleThreadScheduledExecutor();
-        String message = Constants.UDP_PREFIX + "|" + serverName + "|" + rmiPort;
+        String message = Constants.UDP_PREFIX + "|" + serverName + "|" + host + "|" + rmiPort;
         byte[] data = message.getBytes();
 
         scheduler.scheduleAtFixedRate(() -> {

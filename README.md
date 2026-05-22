@@ -57,3 +57,14 @@ mvn javafx:run
 ## License
 
 See [LICENSE](LICENSE).
+
+## Recent updates (branch: features/member2)
+
+A set of integration and stability improvements were merged in `features/member2`. See the full changelog for details:
+
+- Changelog: [docs/CHANGELOG.md](docs/CHANGELOG.md)
+
+Quick notes for developers:
+- Default RMI registry port is `1999`. Override advertised host with `-Dauction.rmi.hostname=<host>` when running the server.
+- To run locally (recommended): build with `mvn -DskipTests compile` and run the server with the provided VSCode task `Run RTDAS Server` or run `com.auction.server.core.ServerLauncher` directly.
+- The runtime DB (`data/auction.db`) is canonicalized at runtime; consider adding it to `.gitignore` to avoid committing transient state.

@@ -157,11 +157,6 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
         return validateSession(token).role();
     }
 
-    @Override
-    public String getMyRole(String token) throws RemoteException, AuctionException {
-        return validateSession(token).role();
-    }
-
 
     @Override
     public void logout(String token) throws RemoteException {
@@ -182,9 +177,8 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
     // --- Auction Browsing ---
 
     @Override
-    public List<AuctionItem> getActiveAuctionsBySeller(String sellerUsername, String token) throws RemoteException, AuctionException {
-        validateSession(token);
-        return auctionManager.findActiveAuctionsBySeller(sellerUsername);
+    public List<AuctionItem> getActiveAuctions() throws RemoteException {
+        return auctionManager.getActiveAuctions();
     }
 
     @Override

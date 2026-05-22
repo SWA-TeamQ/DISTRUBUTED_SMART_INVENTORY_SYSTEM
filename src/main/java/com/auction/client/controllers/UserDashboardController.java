@@ -62,55 +62,68 @@ public class UserDashboardController {
 
   @FXML
   public void initialize() {
-    refreshDashboard();
+    if (statusLabel != null) {
+      statusLabel.setText("Loading dashboard...");
+    }
+    refreshDashboardAsync();
   }
 
-  private void refreshDashboard() {
-    try {
-      com.auction.client.core.ClientContext context =
-        com.auction.client.core.ClientContext.getInstance();
-      com.auction.shared.interfaces.IAuctionService service = context
-        .getRmiProvider()
-        .getService();
-      java.util.List<com.auction.shared.models.AuctionItem> activeAuctions =
-        service.getActiveAuctions();
-      java.util.List<com.auction.shared.models.AuctionItem> mine =
-        service.getActiveAuctionsBySeller(
-          context.getUsername(),
+  private void refreshDashboardAsync() {
+    Thread loader = new Thread(() -> {
+      try {
+        com.auction.client.core.ClientContext context =
+          com.auction.client.core.ClientContext.getInstance();
+        com.auction.shared.interfaces.IAuctionService service = context
+          .getRmiProvider()
+          .getService();
+        java.util.List<com.auction.shared.models.AuctionItem> activeAuctions =
+          service.getActiveAuctions();
+        java.util.List<com.auction.shared.models.AuctionItem> mine =
+          service.getActiveAuctionsBySeller(
+            context.getUsername(),
+            context.getSessionToken()
+          );
+        java.util.List<com.auction.shared.models.Bid> bids = service.getMyBids(
           context.getSessionToken()
         );
-      java.util.List<com.auction.shared.models.Bid> bids = service.getMyBids(
-        context.getSessionToken()
-      );
-      java.util.List<com.auction.shared.models.AuctionItem> won =
-        service.getMyWonAuctions(context.getSessionToken());
+        java.util.List<com.auction.shared.models.AuctionItem> won =
+          service.getMyWonAuctions(context.getSessionToken());
 
-      marketTable.getItems().setAll(activeAuctions);
-      myListingsTable.getItems().setAll(mine);
-      myBidsTable.getItems().setAll(bids);
-      wonAuctionsTable.getItems().setAll(won);
+        javafx.application.Platform.runLater(() -> {
+          marketTable.getItems().setAll(activeAuctions);
+          myListingsTable.getItems().setAll(mine);
+          myBidsTable.getItems().setAll(bids);
+          wonAuctionsTable.getItems().setAll(won);
 
-      if (marketCountLabel != null) marketCountLabel.setText(
-        String.valueOf(activeAuctions.size())
-      );
-      if (listingsCountLabel != null) listingsCountLabel.setText(
-        String.valueOf(mine.size())
-      );
-      if (bidsCountLabel != null) bidsCountLabel.setText(
-        String.valueOf(bids.size())
-      );
-      if (winsCountLabel != null) winsCountLabel.setText(
-        String.valueOf(won.size())
-      );
-      statusLabel.setText("Dashboard refreshed successfully.");
-    } catch (Exception e) {
-      statusLabel.setText("Failed to load dashboard: " + e.getMessage());
-    }
+          if (marketCountLabel != null) marketCountLabel.setText(
+            String.valueOf(activeAuctions.size())
+          );
+          if (listingsCountLabel != null) listingsCountLabel.setText(
+            String.valueOf(mine.size())
+          );
+          if (bidsCountLabel != null) bidsCountLabel.setText(
+            String.valueOf(bids.size())
+          );
+          if (winsCountLabel != null) winsCountLabel.setText(
+            String.valueOf(won.size())
+          );
+          statusLabel.setText("Dashboard refreshed successfully.");
+        });
+      } catch (Exception e) {
+        javafx.application.Platform.runLater(() -> {
+          if (statusLabel != null) {
+            statusLabel.setText("Failed to load dashboard: " + e.getMessage());
+          }
+        });
+      }
+    }, "UserDashboardLoader");
+    loader.setDaemon(true);
+    loader.start();
   }
 
   @FXML
   private void handleRefreshDashboard() {
-    refreshDashboard();
+    refreshDashboardAsync();
   }
 
   @FXML
@@ -170,7 +183,7 @@ public class UserDashboardController {
           context.getSessionToken()
         );
       statusLabel.setText("Created auction #" + id);
-      refreshDashboard();
+        refreshDashboardAsync();
 
       titleField.clear();
       descArea.clear();
@@ -197,7 +210,7 @@ public class UserDashboardController {
           .getRmiProvider()
           .getService()
           .cancelAuction(selected.getId(), context.getSessionToken());
-        refreshDashboard();
+        refreshDashboardAsync();
       } catch (Exception e) {
         statusLabel.setText("Cancel failed: " + e.getMessage());
       }
@@ -224,7 +237,7 @@ public class UserDashboardController {
             newEnd.toString(),
             context.getSessionToken()
           );
-        refreshDashboard();
+        refreshDashboardAsync();
       } catch (Exception e) {
         statusLabel.setText("Relist failed: " + e.getMessage());
       }
