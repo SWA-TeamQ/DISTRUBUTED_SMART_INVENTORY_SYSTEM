@@ -28,6 +28,8 @@
     -fx-border-radius: 16px;
     -fx-min-width: 64px;
     -fx-min-height: 64px;
+    -fx-max-width: 64px;
+    -fx-max-height: 64px;
     -fx-alignment: center;
     -fx-effect: dropshadow(gaussian, rgba(88, 166, 255, 0.2), 20, 0, 0, 8);
     /* Increased glow opacity for better contrast */

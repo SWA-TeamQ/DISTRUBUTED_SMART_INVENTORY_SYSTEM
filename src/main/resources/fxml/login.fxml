@@ -6,7 +6,7 @@
 <?import java.net.URL?>
 
 <VBox xmlns="http://javafx.com/javafx/17"
-    xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.LoginController" styleClass="page-shell login-container">
+    xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.LoginController" styleClass="page-shell login-container" alignment="CENTER">
 
     <stylesheets>
         <URL value="@../css/login.css" />
