@@ -5,6 +5,9 @@ import com.auction.shared.Constants;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 /**
  * Manages SQLite connection and schema lifecycle.
@@ -19,6 +22,7 @@ public class DatabaseManager {
 
     public DatabaseManager(String dbUrl) {
         bootstrapDirectories();
+        migrateLegacyDatabaseIfNeeded(dbUrl);
         try {
             connection = DriverManager.getConnection(dbUrl);
             try (var stmt = connection.createStatement()) {
@@ -27,6 +31,28 @@ public class DatabaseManager {
             initSchema();
         } catch (SQLException e) {
             throw new RuntimeException("Failed to initialize database", e);
+        }
+    }
+
+    private void migrateLegacyDatabaseIfNeeded(String dbUrl) {
+        String sqlitePrefix = "jdbc:sqlite:";
+        if (!dbUrl.startsWith(sqlitePrefix)) {
+            return;
+        }
+
+        String configuredPath = dbUrl.substring(sqlitePrefix.length());
+        Path configuredDbPath = Path.of(configuredPath);
+        Path legacyDbPath = configuredDbPath.resolveSibling("auction.db");
+
+        if (Files.exists(configuredDbPath) || !Files.exists(legacyDbPath)) {
+            return;
+        }
+
+        try {
+            Files.copy(legacyDbPath, configuredDbPath, StandardCopyOption.COPY_ATTRIBUTES);
+            System.out.println("[RTDAS] Migrated legacy database from " + legacyDbPath + " to " + configuredDbPath);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to migrate legacy database", e);
         }
     }
 

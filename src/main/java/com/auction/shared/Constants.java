@@ -35,7 +35,7 @@ public final class Constants {
     public static final int THUMBNAIL_SIZE = 40;
 
     // --- Paths ---
-    public static final String DB_PATH = "data/auction.db";
+    public static final String DB_PATH = "data/auction.db.sqlite";
     public static final String IMAGES_DIR = "resources/images";
     public static final String THUMBS_DIR = "resources/thumbs";
     public static final String AUDIT_LOG_PATH = "logs/audit.log";

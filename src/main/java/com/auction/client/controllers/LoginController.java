@@ -21,8 +21,15 @@ public class LoginController {
     }
 
     @FXML
-    private void handleNavigateToRegister() throws IOException {
-        com.auction.client.core.ClientContext.getInstance().getViewLoader().loadView("registration.fxml");
+    private void handleNavigateToRegister(javafx.scene.input.MouseEvent event) {
+        try {
+            com.auction.client.core.ClientContext.getInstance().getViewLoader().loadView("registration.fxml");
+        } catch (IOException e) {
+            if (statusLabel != null) {
+                statusLabel.setText("Unable to open registration page: " + e.getMessage());
+            }
+            e.printStackTrace();
+        }
     }
 
     @FXML
