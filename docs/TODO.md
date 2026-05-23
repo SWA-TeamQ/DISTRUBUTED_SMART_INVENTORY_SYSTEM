@@ -79,7 +79,7 @@ Each item lists **file → exact change**. This is the master "nothing missed" l
 - [ ] **`server/core/ServerLauncher.java`** — directory bootstrap; `java.rmi.server.hostname` reminder; reaper startup sweep.
 - [ ] **`client/network/UdpDiscoveryClient.java`** — parse v1 payload; tolerate unknown future fields.
 - [ ] **`client/network/RmiClientProvider.java`** — health-check via `serverTime()` on connect; persist last server; offset-based clock.
-- [ ] **`client/controllers/*`** — add Bidder dashboard (`bidder_dashboard.fxml` + controller); cleanup polling on view exit; shake/red animation on stale-price exception; "Timer Extended" toast on snipe.
+- [ ] **`client/controllers/*`** — improve user dashboard (`user_dashboard.fxml` + controller); cleanup polling on view exit; shake/red animation on stale-price exception; "Timer Extended" toast on snipe.
 - [ ] **`client/service/PollingService.java`** — also used by gallery, not only detail. Backoff + reconnect banner after 3 failures.
 - [ ] **`pom.xml`** — confirm AtlantaFX dependency; pin Java 17; `maven-compiler-plugin` source/target; `maven-shade-plugin` (already present?) verified.
 
@@ -175,8 +175,8 @@ Goal: lock the data shape so nothing has to be re-typed later.
 - Login → role-routing.
 - Gallery (filter + sort, polling, no search per D24).
 - Auction detail (countdown using server-time offset, bid input, history).
-- Seller dashboard (status tabs, create/cancel/relist, CSV save dialog).
-- **Bidder dashboard** (D14): My Bids / Won / Outbid.
+- User Dashboard (status tabs, create/cancel/relist, CSV save dialog).
+- **User Dashboard** (D14): My Bids / Won / Outbid.
 - Admin panel (create user, list users, backup, last-N audit logs).
 - Stale-price shake animation, snipe "Timer Extended" toast.
 - **Exit criterion:** full role-based flows work in a 2-client demo.

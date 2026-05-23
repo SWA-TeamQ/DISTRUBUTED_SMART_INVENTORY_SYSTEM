@@ -10,10 +10,9 @@ This document provides a concise overview. For full UI/UX specification, see `do
 |--------|------------|-------|
 | `connect.fxml` | `ConnectController` | All (pre-login) |
 | `login.fxml` | `LoginController` | All |
-| `gallery.fxml` | `GalleryController` | Bidder, Seller |
-| `auction_detail.fxml` | `AuctionDetailController` | Bidder, Seller |
-| `bidder_dashboard.fxml` | `BidderDashboardController` | Bidder |
-| `seller_dashboard.fxml` | `SellerDashboardController` | Seller |
+| `gallery.fxml` | `GalleryController` | Authenticated users |
+| `auction_detail.fxml` | `AuctionDetailController` | Authenticated users |
+| `user_dashboard.fxml` | `UserDashboardController` | Authenticated users |
 | `admin_panel.fxml` | `AdminPanelController` | Admin |
 
 ## Key Interactions

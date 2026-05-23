@@ -51,6 +51,12 @@
         <!-- Action Button -->
         <Button text="Enter the Auction" onAction="#handleLogin" styleClass="login-button"/>
         <Label fx:id="statusLabel" styleClass="status-line" wrapText="true" alignment="CENTER" maxWidth="Infinity"/>
+
+        <TitledPane fx:id="adminErrorPanel" text="Admin Troubleshooting Details" expanded="false" styleClass="admin-error-pane" animated="true">
+            <content>
+                <TextArea fx:id="adminErrorDetails" editable="false" wrapText="true" prefRowCount="7" styleClass="admin-error-area"/>
+            </content>
+        </TitledPane>
     </VBox>
 
     <!-- Footer -->

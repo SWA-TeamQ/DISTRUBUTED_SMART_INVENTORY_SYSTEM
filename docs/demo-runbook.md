@@ -72,8 +72,7 @@ mvn exec:java -Dexec.mainClass="com.auction.DemoSeeder"
 ```
 
 Creates:
-- 2 Sellers (`seller1`, `seller2`)
-- 3 Bidders (`bidder1`, `bidder2`, `bidder3`)
+- 5 Standard users (usable in creator or participant context per auction)
 - 5 sample auctions with placeholder images
 
 ### Manual Creation
@@ -81,7 +80,7 @@ Creates:
 If no seeder:
 1. Login as Admin
 2. Admin Panel → Create Users
-3. Logout, login as Seller
+3. Logout, login as a standard user
 4. Create Auction with test images
 
 ---
@@ -106,7 +105,7 @@ If no seeder:
 3. Highlight snipe protection (timer extends)
 4. Show countdown colors (green → yellow → red)
 
-### Scene 4: Seller Dashboard (2 min)
+### Scene 4: User Dashboard (2 min)
 
 1. Sell items after winning bid
 2. Cancel auction (only if zero bids)

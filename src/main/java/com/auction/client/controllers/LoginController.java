@@ -1,6 +1,8 @@
 package com.auction.client.controllers;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.PasswordField;
@@ -12,11 +14,27 @@ public class LoginController {
     @FXML private PasswordField passwordField;
 
     @FXML private javafx.scene.control.Label statusLabel;
+    @FXML private javafx.scene.control.TitledPane adminErrorPanel;
+    @FXML private javafx.scene.control.TextArea adminErrorDetails;
 
     @FXML
     public void initialize() {
         if (!com.auction.client.core.ClientContext.getInstance().getRmiProvider().isConnected()) {
             System.err.println("Not connected to RMI server.");
+        }
+        // Hide status label when empty and show only on errors/messages
+        if (statusLabel != null) {
+            statusLabel.setVisible(false);
+            statusLabel.managedProperty().bind(statusLabel.visibleProperty());
+            statusLabel.textProperty().addListener((obs, oldText, newText) -> {
+                statusLabel.setVisible(newText != null && !newText.trim().isEmpty());
+            });
+        }
+
+        if (adminErrorPanel != null) {
+            adminErrorPanel.setVisible(false);
+            adminErrorPanel.setManaged(false);
+            adminErrorPanel.setExpanded(false);
         }
     }
 
@@ -29,6 +47,13 @@ public class LoginController {
     private void handleLogin() {
         String username = usernameField.getText();
         String password = passwordField.getText();
+
+        if (adminErrorPanel != null) {
+            adminErrorPanel.setVisible(false);
+            adminErrorPanel.setManaged(false);
+            adminErrorPanel.setExpanded(false);
+        }
+
         if (username.isEmpty() || password.isEmpty()) {
             if (statusLabel != null) statusLabel.setText("Please enter credentials.");
             return;
@@ -47,10 +72,20 @@ public class LoginController {
             if (com.auction.shared.Constants.ADMIN.equals(role)) {
                 context.getViewLoader().loadView("admin_panel.fxml");
             } else {
-                context.getViewLoader().loadView("seller_dashboard.fxml");
+                context.getViewLoader().loadView("user_dashboard.fxml");
             }
         } catch (Exception e) {
             if (statusLabel != null) statusLabel.setText("Login failed. Please try again.");
+
+            boolean isAdminAttempt = com.auction.shared.Constants.DEFAULT_ADMIN_USERNAME.equalsIgnoreCase(username);
+            if (isAdminAttempt && adminErrorPanel != null && adminErrorDetails != null) {
+                StringWriter sw = new StringWriter();
+                e.printStackTrace(new PrintWriter(sw));
+                adminErrorDetails.setText(sw.toString());
+                adminErrorPanel.setVisible(true);
+                adminErrorPanel.setManaged(true);
+            }
+
             e.printStackTrace();
         }
     }

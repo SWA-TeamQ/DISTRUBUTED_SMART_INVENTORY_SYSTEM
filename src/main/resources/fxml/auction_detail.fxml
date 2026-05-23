@@ -38,7 +38,7 @@
                     <Label text="--:--" styleClass="metric-value"/>
                 </VBox>
                 <VBox styleClass="metric-card metric-card-warm" prefWidth="220">
-                    <Label text="Highest Bidder" styleClass="metric-label"/>
+                    <Label text="Highest Participant" styleClass="metric-label"/>
                     <Label text="N/A" styleClass="metric-value"/>
                 </VBox>
             </FlowPane>
@@ -91,7 +91,7 @@
                                 <PropertyValueFactory property="timestamp"/>
                             </cellValueFactory>
                         </TableColumn>
-                        <TableColumn text="Bidder" prefWidth="150">
+                        <TableColumn text="User" prefWidth="150">
                             <cellValueFactory>
                                 <PropertyValueFactory property="bidderUsername"/>
                             </cellValueFactory>

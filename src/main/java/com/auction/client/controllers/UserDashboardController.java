@@ -3,7 +3,7 @@ package com.auction.client.controllers;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 
-public class SellerDashboardController {
+public class UserDashboardController {
 
   @FXML
   private javafx.scene.control.TableView<

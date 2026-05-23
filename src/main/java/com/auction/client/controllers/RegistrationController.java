@@ -12,12 +12,24 @@ public class RegistrationController {
     @FXML private Label statusLabel;
 
     @FXML
+    public void initialize() {
+        if (statusLabel != null) {
+            statusLabel.setVisible(false);
+            statusLabel.managedProperty().bind(statusLabel.visibleProperty());
+            statusLabel.textProperty().addListener((obs, oldText, newText) ->
+                statusLabel.setVisible(newText != null && !newText.trim().isEmpty())
+            );
+        }
+    }
+
+    @FXML
     private void handleRegister() {
         String username = usernameField.getText();
         String password = passwordField.getText();
         String role = Constants.USER;
 
         if (username.isEmpty() || password.isEmpty()) {
+            statusLabel.setStyle("-fx-text-fill: #f85149;");
             statusLabel.setText("Please fill in all fields.");
             return;
         }
@@ -30,12 +42,12 @@ public class RegistrationController {
             context.setSessionToken(token);
             context.setUsername(username);
             context.setUserRole(service.getMyRole(token));
-            statusLabel.setStyle("-fx-text-fill: green;");
+            statusLabel.setStyle("-fx-text-fill: #3fb950;");
             statusLabel.setText("Registration successful! Entering the application...");
-            context.getViewLoader().loadView("seller_dashboard.fxml");
+            context.getViewLoader().loadView("user_dashboard.fxml");
         } catch (Exception e) {
-            statusLabel.setStyle("-fx-text-fill: red;");
-            statusLabel.setText("Registration failed: " + e.getMessage());
+            statusLabel.setStyle("-fx-text-fill: #f85149;");
+            statusLabel.setText("Registration failed. Please try again.");
             e.printStackTrace();
         }
     }

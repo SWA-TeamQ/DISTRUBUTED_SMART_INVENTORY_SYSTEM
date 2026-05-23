@@ -6,6 +6,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.net.URL;
 
 /**
  * Loads FXML views and switches scenes on the primary stage.
@@ -25,7 +26,21 @@ public class ViewLoader {
      * @return the controller instance for the loaded view
      */
     public <T> T loadView(String fxmlFile) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/" + fxmlFile));
+        URL viewUrl = getClass().getResource("/fxml/" + fxmlFile);
+
+        // Tolerate dash/underscore naming mismatches for safer runtime navigation.
+        if (viewUrl == null) {
+            String alternate = fxmlFile.contains("_")
+                ? fxmlFile.replace('_', '-')
+                : fxmlFile.replace('-', '_');
+            viewUrl = getClass().getResource("/fxml/" + alternate);
+        }
+
+        if (viewUrl == null) {
+            throw new IOException("View not found: " + fxmlFile);
+        }
+
+        FXMLLoader loader = new FXMLLoader(viewUrl);
         Parent root = loader.load();
         Scene scene = new Scene(root);
         scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());

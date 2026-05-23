@@ -80,7 +80,7 @@ The RTDAS UI should feel **professional, high-performance, and "Dark-Mode Native
 *   **Fields:** Standard Username/Password with icon prefixes.
 *   **Action:** Large "Enter the Auction" button (Primary Blue).
 
-### 3. Bidder Gallery (The Marketplace)
+### 3. Auction Gallery (The Marketplace)
 *   **Layout:** Sidebar (Left) + Grid (Right).
 *   **Sidebar:** Search bar, Category checkboxes, Sort dropdown.
 *   **Grid:** Responsive tiles of Auction Cards.
@@ -94,7 +94,7 @@ The RTDAS UI should feel **professional, high-performance, and "Dark-Mode Native
     *   Input Field: "Place Bid (Min Increment: +5%)".
     *   Action: Heavyweight "PLACE BID" button.
 
-### 6. Seller Dashboard
+### 6. User Dashboard
 *   **Layout:** Tabbed View (Active, Sold, Expired).
 *   **Stats:** Summary cards at the top (Total Sales, Active Listings).
 *   **Action:** Fixed "Floating Action Button" (FAB) for "Create New Auction."
