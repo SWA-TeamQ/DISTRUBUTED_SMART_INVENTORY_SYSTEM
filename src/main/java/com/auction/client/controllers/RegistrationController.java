@@ -2,6 +2,7 @@ package com.auction.client.controllers;
 
 import com.auction.client.core.ClientContext;
 import com.auction.shared.Constants;
+import java.io.IOException;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
@@ -10,6 +11,17 @@ public class RegistrationController {
     @FXML private TextField usernameField;
     @FXML private PasswordField passwordField;
     @FXML private Label statusLabel;
+
+    @FXML
+    private void handleNavigateToLogin(javafx.scene.input.MouseEvent event) {
+        try {
+            ClientContext.getInstance().getViewLoader().loadView("login.fxml");
+        } catch (IOException e) {
+            statusLabel.setStyle("-fx-text-fill: red;");
+            statusLabel.setText("Unable to open login page: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 
     @FXML
     private void handleRegister() {
@@ -26,13 +38,10 @@ public class RegistrationController {
             ClientContext context = ClientContext.getInstance();
             com.auction.shared.interfaces.IAuctionService service = context.getRmiProvider().getService();
             service.register(username, password, role);
-            String token = service.login(username, password);
-            context.setSessionToken(token);
-            context.setUsername(username);
-            context.setUserRole(service.getMyRole(token));
-            statusLabel.setStyle("-fx-text-fill: green;");
-            statusLabel.setText("Registration successful! Entering the application...");
-            context.getViewLoader().loadView("seller_dashboard.fxml");
+            context.setSessionToken(null);
+            context.setUserRole(null);
+            context.setUsername(null);
+            context.getViewLoader().loadView("login.fxml");
         } catch (Exception e) {
             statusLabel.setStyle("-fx-text-fill: red;");
             statusLabel.setText("Registration failed: " + e.getMessage());
