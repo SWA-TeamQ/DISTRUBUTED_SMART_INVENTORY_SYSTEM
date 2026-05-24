@@ -35,7 +35,7 @@ java -Djava.rmi.server.hostname=<YOUR_IP> \
 ### What Happens on First Run
 
 1. Creates directories: `data/`, `logs/`, `resources/images/`, `resources/thumbs/`
-2. Creates `data/auction.db` with schema
+2. Creates `data/auction.db.sqlite` with schema
 3. Inserts default admin: `admin` / `admin`
 4. Starts UDP broadcast on port 9999
 5. Starts `AuctionReaper` thread
@@ -139,7 +139,7 @@ If no seeder:
 Ctrl+C
 
 # Delete database to start fresh
-rm data/auction.db
+rm data/auction.db.sqlite
 
 # Restart server
 java -Djava.rmi.server.hostname=<YOUR_IP> \

@@ -6,7 +6,7 @@ SQLite schema, repository architecture, backup strategy, and security measures.
 
 ## 1. Database Overview
 
-- **Engine:** SQLite (single file: `data/auction.db`)
+- **Engine:** SQLite (single file: `data/auction.db.sqlite`)
 - **Connection:** Single shared `Connection` in `DatabaseManager`
 - **Pattern:** Repository pattern with dedicated classes per table
 
