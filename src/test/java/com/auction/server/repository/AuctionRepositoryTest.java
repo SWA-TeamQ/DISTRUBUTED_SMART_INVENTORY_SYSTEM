@@ -23,7 +23,7 @@ class AuctionRepositoryTest {
         auctionRepo = new AuctionRepository(dbManager.getConnection());
         
         // Ensure a seller exists
-        userRepo.insertUser("seller1", "hash", Constants.SELLER);
+        userRepo.insertUser("seller1", "hash", Constants.USER);
     }
 
     @AfterEach
