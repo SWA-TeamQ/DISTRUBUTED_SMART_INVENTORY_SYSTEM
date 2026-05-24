@@ -18,16 +18,18 @@ class BidRepositoryTest {
     private AuctionRepository auctionRepo;
     private BidRepository bidRepo;
     private int testAuctionId;
+    private java.nio.file.Path tempDbPath;
 
     @BeforeEach
-    void setUp() {
-        dbManager = new DatabaseManager("jdbc:sqlite::memory:");
+    void setUp() throws Exception {
+        tempDbPath = java.nio.file.Files.createTempFile("rtdas-bid-repo-", ".sqlite");
+        dbManager = new DatabaseManager("jdbc:sqlite:" + tempDbPath.toAbsolutePath());
         userRepo = new UserRepository(dbManager.getConnection());
         auctionRepo = new AuctionRepository(dbManager.getConnection());
         bidRepo = new BidRepository(dbManager.getConnection());
         
-        userRepo.insertUser("seller1", "hash", Constants.SELLER);
-        userRepo.insertUser("bidder1", "hash", Constants.BIDDER);
+        userRepo.insertUser("seller1", "hash", Constants.USER);
+        userRepo.insertUser("bidder1", "hash", Constants.USER);
         
         AuctionItem item = new AuctionItem();
         item.setTitle("Test Item");
@@ -45,7 +47,15 @@ class BidRepositoryTest {
 
     @AfterEach
     void tearDown() {
-        dbManager.close();
+        if (dbManager != null) {
+            dbManager.close();
+        }
+        if (tempDbPath != null) {
+            try {
+                java.nio.file.Files.deleteIfExists(tempDbPath);
+            } catch (Exception ignored) {
+            }
+        }
     }
 
     @Test

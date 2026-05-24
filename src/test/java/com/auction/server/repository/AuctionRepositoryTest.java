@@ -15,20 +15,30 @@ class AuctionRepositoryTest {
     private DatabaseManager dbManager;
     private UserRepository userRepo;
     private AuctionRepository auctionRepo;
+    private java.nio.file.Path tempDbPath;
 
     @BeforeEach
-    void setUp() {
-        dbManager = new DatabaseManager("jdbc:sqlite::memory:");
+    void setUp() throws Exception {
+        tempDbPath = java.nio.file.Files.createTempFile("rtdas-auction-repo-", ".sqlite");
+        dbManager = new DatabaseManager("jdbc:sqlite:" + tempDbPath.toAbsolutePath());
         userRepo = new UserRepository(dbManager.getConnection());
         auctionRepo = new AuctionRepository(dbManager.getConnection());
         
         // Ensure a seller exists
-        userRepo.insertUser("seller1", "hash", Constants.SELLER);
+        userRepo.insertUser("seller1", "hash", Constants.USER);
     }
 
     @AfterEach
     void tearDown() {
-        dbManager.close();
+        if (dbManager != null) {
+            dbManager.close();
+        }
+        if (tempDbPath != null) {
+            try {
+                java.nio.file.Files.deleteIfExists(tempDbPath);
+            } catch (Exception ignored) {
+            }
+        }
     }
 
     @Test

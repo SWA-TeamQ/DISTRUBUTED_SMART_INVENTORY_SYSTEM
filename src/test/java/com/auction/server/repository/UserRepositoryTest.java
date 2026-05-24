@@ -12,16 +12,26 @@ class UserRepositoryTest {
 
     private DatabaseManager dbManager;
     private UserRepository userRepo;
+    private java.nio.file.Path tempDbPath;
 
     @BeforeEach
-    void setUp() {
-        dbManager = new DatabaseManager("jdbc:sqlite::memory:");
+    void setUp() throws Exception {
+        tempDbPath = java.nio.file.Files.createTempFile("rtdas-user-repo-", ".sqlite");
+        dbManager = new DatabaseManager("jdbc:sqlite:" + tempDbPath.toAbsolutePath());
         userRepo = new UserRepository(dbManager.getConnection());
     }
 
     @AfterEach
     void tearDown() {
-        dbManager.close();
+        if (dbManager != null) {
+            dbManager.close();
+        }
+        if (tempDbPath != null) {
+            try {
+                java.nio.file.Files.deleteIfExists(tempDbPath);
+            } catch (Exception ignored) {
+            }
+        }
     }
 
     @Test

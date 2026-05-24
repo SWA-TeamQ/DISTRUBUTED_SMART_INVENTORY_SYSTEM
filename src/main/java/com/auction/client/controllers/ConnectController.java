@@ -14,6 +14,8 @@ public class ConnectController {
         com.auction.client.core.ClientContext context = com.auction.client.core.ClientContext.getInstance();
         context.getUdpClient().startListening();
 
+        javafx.application.Platform.runLater(() -> statusLabel.setText("Waiting for discovered servers. You can edit IP and port manually."));
+
         // Start a background thread to update the list view
         Thread updateThread = new Thread(() -> {
             while (true) {
@@ -21,7 +23,19 @@ public class ConnectController {
                     Thread.sleep(1000);
                     java.util.List<com.auction.client.network.UdpDiscoveryClient.ServerInfo> servers = context.getUdpClient().getDiscoveredServers();
                     javafx.application.Platform.runLater(() -> {
-                        serverListView.getItems().setAll(servers);
+                        if (servers == null || servers.isEmpty()) {
+                            serverListView.getItems().clear();
+                            if (ipField.getText() == null || ipField.getText().isBlank()) {
+                                ipField.setText("localhost");
+                            }
+                            if (portField.getText() == null || portField.getText().isBlank()) {
+                                portField.setText("1099");
+                            }
+                            statusLabel.setText("No discovered server yet. Localhost is prefilled and can be edited.");
+                        } else {
+                            serverListView.getItems().setAll(servers);
+                            statusLabel.setText("Discovered " + servers.size() + " server(s).");
+                        }
                     });
                 } catch (InterruptedException e) {
                     break;

@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
@@ -17,8 +20,8 @@
     <top>
         <HBox spacing="16" alignment="CENTER_LEFT" styleClass="page-header">
             <VBox spacing="4" HBox.hgrow="ALWAYS">
-                <Label text="Auction Detail" styleClass="page-title"/>
-                <Label text="Bid context, image focus, and live auction actions belong here." styleClass="page-subtitle" wrapText="true"/>
+                <Label fx:id="auctionTitleLabel" text="Auction Detail" styleClass="page-title"/>
+                <Label fx:id="auctionDescriptionLabel" text="Bid context, image focus, and live auction actions belong here." styleClass="page-subtitle" wrapText="true"/>
             </VBox>
             <Button text="Back to Gallery" onAction="#handleBackToGallery" styleClass="secondary-button"/>
         </HBox>
@@ -29,15 +32,15 @@
             <FlowPane hgap="14" vgap="14" prefWrapLength="1200">
                 <VBox styleClass="metric-card" prefWidth="220">
                     <Label text="Current Bid" styleClass="metric-label"/>
-                    <Label text="$0.00" styleClass="metric-value"/>
+                    <Label fx:id="currentBidLabel" text="$0.00" styleClass="metric-value"/>
                 </VBox>
                 <VBox styleClass="metric-card metric-card-accent" prefWidth="220">
                     <Label text="Time Left" styleClass="metric-label"/>
-                    <Label text="--:--" styleClass="metric-value"/>
+                    <Label fx:id="timeLeftLabel" text="--:--" styleClass="metric-value"/>
                 </VBox>
                 <VBox styleClass="metric-card metric-card-warm" prefWidth="220">
                     <Label text="Highest Bidder" styleClass="metric-label"/>
-                    <Label text="N/A" styleClass="metric-value"/>
+                    <Label fx:id="highestBidderLabel" text="N/A" styleClass="metric-value"/>
                 </VBox>
             </FlowPane>
 
@@ -46,18 +49,12 @@
                     <Label text="Images" styleClass="section-title"/>
                     <Label text="Primary image placeholder with thumbnail rail below." styleClass="section-copy" wrapText="true"/>
                     <VBox styleClass="hero-card" prefHeight="320">
-                        <Label text="Main image area" styleClass="empty-state"/>
+                        <ImageView fx:id="heroImageView" fitWidth="560" fitHeight="320" preserveRatio="true" pickOnBounds="true"/>
                     </VBox>
                     <HBox spacing="10">
-                        <VBox styleClass="metric-card" prefWidth="120">
-                            <Label text="Thumb 1" styleClass="section-copy"/>
-                        </VBox>
-                        <VBox styleClass="metric-card" prefWidth="120">
-                            <Label text="Thumb 2" styleClass="section-copy"/>
-                        </VBox>
-                        <VBox styleClass="metric-card" prefWidth="120">
-                            <Label text="Thumb 3" styleClass="section-copy"/>
-                        </VBox>
+                        <ImageView fx:id="thumb1View" fitWidth="120" fitHeight="80" preserveRatio="true" onMouseClicked="#handleThumb1Click"/>
+                        <ImageView fx:id="thumb2View" fitWidth="120" fitHeight="80" preserveRatio="true" onMouseClicked="#handleThumb2Click"/>
+                        <ImageView fx:id="thumb3View" fitWidth="120" fitHeight="80" preserveRatio="true" onMouseClicked="#handleThumb3Click"/>
                     </HBox>
                 </VBox>
 
@@ -66,7 +63,12 @@
                     <Label text="This panel is ready for the future bid form and status checks." styleClass="section-copy" wrapText="true"/>
                     <VBox styleClass="hero-card" spacing="10">
                         <Label text="Place bid" styleClass="section-title"/>
-                        <Button text="Bid action placeholder" styleClass="primary-button" maxWidth="Infinity"/>
+                        <TextField fx:id="bidAmountField" promptText="Amount (e.g. 12.50)"/>
+                        <HBox spacing="8">
+                            <Button fx:id="placeBidButton" text="Place Bid" styleClass="primary-button" maxWidth="Infinity" onAction="#handlePlaceBid"/>
+                            <ProgressIndicator fx:id="bidSpinner" visible="false" prefWidth="24" prefHeight="24"/>
+                        </HBox>
+                        <Label fx:id="bidStatusLabel" text="" styleClass="section-copy"/>
                     </VBox>
                 </VBox>
             </HBox>
