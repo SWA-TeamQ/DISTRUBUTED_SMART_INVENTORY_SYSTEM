@@ -119,7 +119,7 @@ Comprehensive specification for every screen, component, interaction, and visual
 
 ---
 
-### 3. Bidder Gallery (The Marketplace)
+### 3. Auction Gallery (The Marketplace)
 
 **Path:** `gallery.fxml` → `GalleryController.java`
 
@@ -169,9 +169,9 @@ Comprehensive specification for every screen, component, interaction, and visual
 
 ---
 
-### 5. Bidder "My Activity" Dashboard
+### 5. User "My Activity" Dashboard
 
-**Path:** `bidder_dashboard.fxml` → `BidderDashboardController.java`
+**Path:** `user_dashboard.fxml` → `UserDashboardController.java`
 
 | Component | Requirement |
 |-----------|-------------|
@@ -187,9 +187,9 @@ Comprehensive specification for every screen, component, interaction, and visual
 
 ---
 
-### 6. Seller Dashboard
+### 6. User Auction Management Dashboard
 
-**Path:** `seller_dashboard.fxml` → `SellerDashboardController.java`
+**Path:** `user_dashboard.fxml` → `UserDashboardController.java`
 
 | Component | Requirement |
 |-----------|-------------|
@@ -202,7 +202,7 @@ Comprehensive specification for every screen, component, interaction, and visual
 **Must-Have Functionality:**
 - `cancelAuction()` only if `status=ACTIVE` AND `bids=0`
 - `relistAuction()` creates new row with `relisted_from` FK
-- CSV export includes ALL statuses for seller
+- CSV export includes ALL statuses for the current user-owned auctions
 
 ---
 

@@ -10,8 +10,8 @@ This document classifies all **remaining** project tasks by category, priority, 
 ## Revised Module-Based Ownership
 
 ### 🔵 BLUE - Authentication, Admin & Seller Module (Member 1)
-- Login flow, server connection, admin operations, seller dashboard, CSV export, backups
-- Owns: `LoginController`, `ConnectController`, `SellerDashboardController`, `AdminPanelController`, auth/admin/seller/service methods
+- Login flow, server connection, admin operations, User Dashboard, CSV export, backups
+- Owns: `LoginController`, `ConnectController`, `UserDashboardController`, `AdminPanelController`, auth/admin/seller/service methods
 
 ### 🟢 GREEN - Auction Bidding, Gallery & Real-Time Module (Member 2)  
 - Auction browsing, bidding, polling updates, auction detail view, deployment docs
@@ -88,11 +88,11 @@ This document classifies all **remaining** project tasks by category, priority, 
 
 ---
 
-### 5. Seller Dashboard & Auction Creation (M1)
+### 5. User Dashboard & Auction Creation (M1)
 
 | ID | Task | Category | Priority | Owner | Est. Hours | Dependencies |
 |----|------|----------|----------|-------|------------|--------------|
-| SELL-01 | Implement `SellerDashboardController` structure | 🔵 BLUE | High | M1 | 2 | AUTH-06 |
+| SELL-01 | Implement `UserDashboardController` structure | 🔵 BLUE | High | M1 | 2 | AUTH-06 |
 | SELL-02 | Load seller's auctions via RMI | 🔵 BLUE | High | M1 | 2 | SELL-01 |
 | SELL-03 | Display auctions in table with status | 🔵 BLUE | High | M1 | 2 | SELL-02 |
 | SELL-04 | Create auction form UI | 🔵 BLUE | High | M1 | 3 | SELL-03 |
@@ -173,7 +173,7 @@ This document classifies all **remaining** project tasks by category, priority, 
 | Category | Tasks | Exclusive Hours | Integration Hours |
 |----------|-------|-----------------|-------------------|
 | Auth Controllers | AUTH-01 to AUTH-08 | 11 | - |
-| Seller Dashboard | SELL-01 to SELL-11 | 19 | 2 |
+| User Dashboard | SELL-01 to SELL-11 | 19 | 2 |
 | Admin Panel | ADM-01 to ADM-09 | 11 | 2 |
 | Service TODOs | SVC-01 to SVC-05 | 8 | 2 |
 | Documentation | DOC-01, DOC-02, DOC-05, DOC-06 | 4 | - |
@@ -261,11 +261,11 @@ feature/m2-bidding-gallery-module
 ### M1 Files (Auth, Seller, Admin)
 - `src/main/java/com/auction/client/controllers/LoginController.java`
 - `src/main/java/com/auction/client/controllers/ConnectController.java`
-- `src/main/java/com/auction/client/controllers/SellerDashboardController.java`
+- `src/main/java/com/auction/client/controllers/UserDashboardController.java`
 - `src/main/java/com/auction/client/controllers/AdminPanelController.java`
 - `src/main/resources/fxml/login.fxml`
 - `src/main/resources/fxml/connect.fxml`
-- `src/main/resources/fxml/seller_dashboard.fxml`
+- `src/main/resources/fxml/user_dashboard.fxml`
 - `src/main/resources/fxml/admin_panel.fxml`
 
 ### M2 Files (Gallery, Bidding, Real-Time)

@@ -12,7 +12,7 @@ public class GalleryController {
     @FXML
     private void handleBackToDashboard() {
         try {
-            com.auction.client.core.ClientContext.getInstance().getViewLoader().loadView("seller_dashboard.fxml");
+            com.auction.client.core.ClientContext.getInstance().getViewLoader().loadView("user_dashboard.fxml");
         } catch (java.io.IOException e) {
             throw new RuntimeException(e);
         }

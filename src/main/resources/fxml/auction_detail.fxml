@@ -36,7 +36,7 @@
                     <Label text="--:--" styleClass="metric-value"/>
                 </VBox>
                 <VBox styleClass="metric-card metric-card-warm" prefWidth="220">
-                    <Label text="Highest Bidder" styleClass="metric-label"/>
+                    <Label text="Highest Participant" styleClass="metric-label"/>
                     <Label text="N/A" styleClass="metric-value"/>
                 </VBox>
             </FlowPane>
@@ -62,11 +62,18 @@
                 </VBox>
 
                 <VBox spacing="12" styleClass="panel-card" prefWidth="420">
-                    <Label text="Bid Controls" styleClass="section-title"/>
-                    <Label text="This panel is ready for the future bid form and status checks." styleClass="section-copy" wrapText="true"/>
-                    <VBox styleClass="hero-card" spacing="10">
+                    <Label fx:id="controlsTitleLabel" text="Auction Controls" styleClass="section-title"/>
+                    <Label fx:id="controlsDescLabel" text="Action panel based on your role." styleClass="section-copy" wrapText="true"/>
+                    
+                    <VBox fx:id="bidderControls" styleClass="hero-card" spacing="10">
                         <Label text="Place bid" styleClass="section-title"/>
                         <Button text="Bid action placeholder" styleClass="primary-button" maxWidth="Infinity"/>
+                    </VBox>
+
+                    <VBox fx:id="sellerControls" styleClass="hero-card" spacing="10" managed="false" visible="false">
+                        <Label text="Management Settings" styleClass="section-title"/>
+                        <Button text="Cancel Auction" onAction="#handleCancelAuction" styleClass="secondary-button" maxWidth="Infinity"/>
+                        <Button text="Relist Auction" onAction="#handleRelistAuction" styleClass="secondary-button" maxWidth="Infinity"/>
                     </VBox>
                 </VBox>
             </HBox>
@@ -89,7 +96,7 @@
                                 <PropertyValueFactory property="timestamp"/>
                             </cellValueFactory>
                         </TableColumn>
-                        <TableColumn text="Bidder" prefWidth="150">
+                        <TableColumn text="User" prefWidth="150">
                             <cellValueFactory>
                                 <PropertyValueFactory property="bidderUsername"/>
                             </cellValueFactory>
