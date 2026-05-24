@@ -12,9 +12,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/17"
     xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.ConnectController" styleClass="page-shell">
-    <stylesheets>
-        <URL value="@../css/style.css" />
-    </stylesheets>
+    
     
     <top>
         <HBox spacing="16" alignment="CENTER_LEFT" styleClass="page-header">

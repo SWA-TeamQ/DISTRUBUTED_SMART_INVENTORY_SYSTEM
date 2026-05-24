@@ -157,7 +157,7 @@ All mutating methods require a session token from `login()`.
 
 ### 4. Database — SQLite via JDBC
 
-- Single file: `data/auction.db`.
+- Single file: `data/auction.db.sqlite`.
 - Three tables: `users`, `auction_items`, `bids`.
 - **All monetary values are INTEGER cents** (see rationale below).
 - **All timestamps are ISO-8601 UTC strings with Z suffix.**

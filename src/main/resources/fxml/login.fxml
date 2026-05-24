@@ -1,26 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
-<?import java.net.URL?>
 
 <VBox xmlns="http://javafx.com/javafx/17"
     xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.LoginController" styleClass="page-shell login-container" alignment="CENTER">
 
-    <stylesheets>
-        <URL value="@../css/login.css" />
-        <URL value="@../css/style.css" />
-    </stylesheets>
+    <center>
+        <VBox alignment="CENTER" spacing="18" styleClass="main-stack" maxWidth="440">
+            <VBox alignment="CENTER" spacing="14">
+                <StackPane styleClass="logo-box">
+                    <FontIcon iconLiteral="fas-gavel" styleClass="logo-icon"/>
+                </StackPane>
+                <VBox alignment="CENTER" spacing="6">
+                    <Label text="RTDAS" styleClass="page-title"/>
+                    <Label text="Real-Time Distributed Auction System" styleClass="page-subtitle" wrapText="true"/>
+                </VBox>
+            </VBox>
 
-    <!-- Logo Section -->
-    <VBox alignment="CENTER" spacing="15">
-        <StackPane styleClass="logo-box">
-            <FontIcon iconLiteral="fas-gavel" styleClass="logo-icon"/>
-        </StackPane>
-        <VBox alignment="CENTER" spacing="5">
-            <Label text="RTDAS" styleClass="title-label"/>
-            <Label text="Real-Time Distributed Auction System" styleClass="subtitle-label"/>
+            <VBox styleClass="login-card" spacing="14">
+                <VBox spacing="6">
+                    <Label text="Terminal ID" styleClass="form-label"/>
+                    <TextField fx:id="usernameField" promptText="Enter your ID" styleClass="compact-field"/>
+                </VBox>
+
+                <VBox spacing="6">
+                    <Label text="Passkey" styleClass="form-label"/>
+                    <PasswordField fx:id="passwordField" promptText="••••••••" styleClass="compact-field"/>
+                </VBox>
+
+                <Button text="Enter the Auction" onAction="#handleLogin" maxWidth="Infinity" styleClass="primary-button"/>
+                <Label fx:id="statusLabel" wrapText="true" alignment="CENTER" maxWidth="Infinity" styleClass="status-line"/>
+
+                <HBox styleClass="auth-switch-row">
+                    <Label text="Unregistered Node?" styleClass="auth-switch-text"/>
+                    <Label text="Request Access" styleClass="auth-switch-link" onMouseClicked="#handleNavigateToRegister"/>
+                </HBox>
+            </VBox>
         </VBox>
     </VBox>
 

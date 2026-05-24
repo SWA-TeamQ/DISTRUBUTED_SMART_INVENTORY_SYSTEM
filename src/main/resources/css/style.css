@@ -433,6 +433,9 @@
     -fx-font-size: 13px;
     -fx-font-family: "Inter";
     -fx-cursor: hand;
+    -fx-border-color: transparent;
+    -fx-background-color: transparent;
+    -fx-padding: 0;
 }
 
 .footer-link:hover {
@@ -449,3 +452,134 @@
 .input-field:focused-within .input-icon {
     -fx-icon-color: #58a6ff;
 }
+
+/* Login layout adjustments */
+.login-container {
+    -fx-padding: 48px 0;
+}
+
+.login-card {
+    -fx-background-color: rgba(13, 17, 23, 0.96);
+    -fx-background-radius: 14px;
+    -fx-border-color: rgba(48, 54, 61, 0.85);
+    -fx-border-width: 1px;
+    -fx-padding: 22px;
+    -fx-spacing: 12px;
+    -fx-max-width: 520px;
+    -fx-min-width: 360px;
+}
+
+.logo-box {
+    -fx-background-color: rgba(2,6,10,0.4);
+    -fx-background-radius: 12px;
+    -fx-padding: 18px;
+}
+
+.title-label {
+    -fx-font-size: 28px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #9fb9ff;
+}
+
+.subtitle-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #8b949e;
+}
+
+/* Final refinements to match reference image more closely */
+
+/* Increase top spacing so logo sits higher and card feels centered vertically */
+.login-container {
+    -fx-padding: 140px 0 56px 0;
+}
+
+/* Make the card wider and with softer outer glow */
+.login-card {
+    -fx-max-width: 760px;
+    -fx-min-width: 480px;
+    -fx-padding: 32px;
+    -fx-background-radius: 18px;
+    -fx-effect: dropshadow(gaussian, rgba(2,8,20,0.7), 46, 0, 0, 16);
+}
+
+/* Logo: larger and stronger glow */
+.logo-icon {
+    -fx-icon-size: 52px;
+    -fx-icon-color: #82c0ff;
+}
+.logo-box {
+    -fx-background-color: rgba(6,12,20,0.5);
+    -fx-background-radius: 16px;
+    -fx-effect: dropshadow(gaussian, rgba(40,100,180,0.12), 48, 0, 0, 18), dropshadow(gaussian, rgba(0,0,0,0.45), 20, 0, 0, 6);
+}
+
+/* Inputs: subtle inner shadow on focus instead of thick outline */
+.input-field {
+    -fx-background-color: rgba(6,9,12,0.35);
+}
+.text-field:focused, .password-field:focused, .input-field:focused-within {
+    -fx-effect: innershadow(gaussian, rgba(63,142,245,0.14), 12, 0.4, 0, 0);
+    -fx-border-color: rgba(63,142,245,0.26);
+}
+
+/* Make placeholder/prompt text lighter */
+.text-field, .password-field {
+    -fx-prompt-text-fill: rgba(140,160,180,0.45);
+}
+
+/* CTA: full-width, bold dark text, prominent gradient and glow on hover */
+.login-button {
+    -fx-max-width: 9999px; /* allow to fully expand */
+    -fx-background-color: linear-gradient(to bottom, #8fc9ff 0%, #4fa8ff 100%);
+    -fx-text-fill: #041826;
+    -fx-font-weight: 800;
+    -fx-font-size: 16px;
+    -fx-padding: 16px 22px;
+    -fx-background-radius: 14px;
+}
+.login-button:hover {
+    -fx-background-color: linear-gradient(to bottom, #9bd3ff 0%, #5aaeff 100%);
+    -fx-effect: dropshadow(gaussian, rgba(68,140,240,0.28), 20, 0, 0, 8);
+}
+
+/* Footer placement & style */
+.footer-box {
+    -fx-alignment: center;
+    -fx-padding: 18px 0 12px 0;
+}
+
+/* Slightly increase status-line visibility when errors occur */
+.status-line {
+    -fx-text-fill: #ff6b6b;
+    -fx-font-size: 13px;
+}
+
+/* Registration auth-switch row */
+.auth-switch-row {
+    -fx-alignment: center;
+    -fx-spacing: 6px;
+    -fx-padding: 6px 0 0 0;
+}
+
+.auth-switch-text {
+    -fx-text-fill: #7b8591;
+    -fx-font-size: 13px;
+    -fx-font-family: "Inter";
+}
+
+.auth-switch-link {
+    -fx-text-fill: #8fc3ff;
+    -fx-font-size: 13px;
+    -fx-font-family: "Inter";
+    -fx-font-weight: 700;
+    -fx-cursor: hand;
+    -fx-border-color: transparent;
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.auth-switch-link:hover {
+    -fx-text-fill: #b3d8ff;
+    -fx-underline: true;
+}
+

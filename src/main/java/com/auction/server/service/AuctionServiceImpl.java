@@ -165,6 +165,11 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
         return Instant.now().toString();
     }
 
+    @Override
+    public List<AuctionItem> getActiveAuctions() throws RemoteException {
+        return auctionManager.getActiveAuctions();
+    }
+
     // --- Auction Browsing ---
 
     @Override
