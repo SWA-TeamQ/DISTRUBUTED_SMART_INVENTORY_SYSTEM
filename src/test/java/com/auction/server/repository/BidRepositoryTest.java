@@ -26,8 +26,8 @@ class BidRepositoryTest {
         auctionRepo = new AuctionRepository(dbManager.getConnection());
         bidRepo = new BidRepository(dbManager.getConnection());
         
-        userRepo.insertUser("seller1", "hash", Constants.SELLER);
-        userRepo.insertUser("bidder1", "hash", Constants.BIDDER);
+        userRepo.insertUser("seller1", "hash", Constants.USER);
+        userRepo.insertUser("bidder1", "hash", Constants.USER);
         
         AuctionItem item = new AuctionItem();
         item.setTitle("Test Item");
