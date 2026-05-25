@@ -25,6 +25,21 @@ public class RmiClientProvider {
     public IAuctionService connect(String host, int port) throws RemoteException, NotBoundException {
         Registry registry = LocateRegistry.getRegistry(host, port);
         service = (IAuctionService) registry.lookup(Constants.RMI_SERVICE_NAME);
+        
+        // Health check
+        service.serverTime();
+        
+        // Persist last server
+        try {
+            java.nio.file.Path dir = java.nio.file.Paths.get(System.getProperty("user.home"), ".rtdas");
+            if (!java.nio.file.Files.exists(dir)) {
+                java.nio.file.Files.createDirectories(dir);
+            }
+            java.nio.file.Files.writeString(dir.resolve("last_server"), host + ":" + port);
+        } catch (java.io.IOException e) {
+            System.err.println("Failed to persist last_server: " + e.getMessage());
+        }
+        
         return service;
     }
 

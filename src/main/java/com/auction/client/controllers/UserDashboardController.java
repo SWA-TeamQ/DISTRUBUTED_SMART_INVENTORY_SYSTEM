@@ -60,8 +60,14 @@ public class UserDashboardController {
 
   private byte[] img1Bytes, img2Bytes, img3Bytes;
 
+  private com.auction.client.service.PollingService pollingService;
+
   @FXML
   public void initialize() {
+    pollingService = new com.auction.client.service.PollingService();
+    pollingService.startPolling(() -> {
+      javafx.application.Platform.runLater(() -> refreshDashboard());
+    }, 2);
     refreshDashboard();
   }
 
@@ -116,6 +122,7 @@ public class UserDashboardController {
   @FXML
   private void handleOpenGallery() {
     try {
+      if (pollingService != null) pollingService.shutdown();
       com.auction.client.core.ClientContext context =
         com.auction.client.core.ClientContext.getInstance();
       context.setPreviousViewName("user_dashboard.fxml");
@@ -139,6 +146,7 @@ public class UserDashboardController {
 
     if (selected != null) {
         try {
+          if (pollingService != null) pollingService.shutdown();
           com.auction.client.core.ClientContext context = com.auction.client.core.ClientContext.getInstance();
           context.setCurrentAuctionId(selected.getId());
           context.setPreviousViewName("user_dashboard.fxml");

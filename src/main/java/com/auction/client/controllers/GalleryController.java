@@ -30,11 +30,26 @@ public class GalleryController {
     private static final Image PLACEHOLDER_IMAGE = loadPlaceholderImage();
     private java.util.List<AuctionItem> allAuctions = java.util.List.of();
 
+    private com.auction.client.service.PollingService pollingService;
+
     @FXML
     public void initialize() {
         try {
             var context = ClientContext.getInstance();
             var service = context.getRmiProvider().getService();
+            
+            pollingService = new com.auction.client.service.PollingService();
+            pollingService.startPolling(() -> {
+                try {
+                    List<AuctionItem> items = service.getActiveAuctions();
+                    allAuctions = (items == null) ? java.util.List.of() : items;
+                    Platform.runLater(() -> handleSearch()); // handleSearch applies current filter/sort
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }, 2);
+            
+            // initial load
             List<AuctionItem> items = service.getActiveAuctions();
             allAuctions = (items == null) ? java.util.List.of() : items;
             Platform.runLater(() -> renderAuctions(allAuctions));
@@ -216,6 +231,7 @@ public class GalleryController {
     @FXML
     private void handleBackToDashboard() {
         try {
+            if (pollingService != null) pollingService.shutdown();
             ClientContext context = ClientContext.getInstance();
             String targetView = context.getPreviousViewName();
             if (targetView == null || targetView.isBlank()) {
@@ -224,6 +240,24 @@ public class GalleryController {
             context.getViewLoader().loadView(targetView);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+    
+    // Also shutdown before going to detail view
+    private void loadDetailView(AuctionItem item, int index) {
+        try {
+            if (pollingService != null) pollingService.shutdown();
+            ClientContext context = ClientContext.getInstance();
+            context.setPreviousViewName("gallery.fxml");
+            Object ctrl = context.getViewLoader().loadView("auction_detail.fxml");
+            if (ctrl instanceof AuctionDetailController) {
+                ((AuctionDetailController) ctrl).loadAuction(item.getId());
+                if (index >= 0) {
+                    ((AuctionDetailController) ctrl).showHeroImageIndex(index);
+                }
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
     }
 }

@@ -39,13 +39,14 @@ public class UdpDiscoveryClient {
                         DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                         socket.receive(packet);
                         String data = new String(packet.getData(), 0, packet.getLength()).trim();
-                        // Format: RTDAS|<ServerName>|<RmiPort>
-                        if (data.startsWith(Constants.UDP_PREFIX + "|")) {
+                        // Format: RTDAS|v1|<rmiPort>|<serverName>|<serverId>|<rmiHost>
+                        if (data.startsWith(Constants.UDP_PREFIX + "|v1|")) {
                             String[] parts = data.split("\\|");
-                            if (parts.length == 3) {
-                                String serverName = parts[1];
+                            if (parts.length >= 6) {
                                 int rmiPort = Integer.parseInt(parts[2]);
-                                String host = packet.getAddress().getHostAddress();
+                                String serverName = parts[3];
+                                String rmiHost = parts[5];
+                                String host = (rmiHost != null && !rmiHost.trim().isEmpty()) ? rmiHost : packet.getAddress().getHostAddress();
                                 ServerInfo info = new ServerInfo(serverName, host, rmiPort);
                                 if (!discoveredServers.contains(info)) {
                                     discoveredServers.add(info);
