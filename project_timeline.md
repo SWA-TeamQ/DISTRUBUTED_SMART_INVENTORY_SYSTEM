@@ -30,7 +30,7 @@
 | **LoginController** | 🔴 Empty | Connect RMI, handle login, navigate to appropriate dashboard |
 | **GalleryController** | 🔴 Empty | Load auctions, display grid, fetch thumbnails, click-to-detail |
 | **AuctionDetailController** | 🔴 Empty | Display auction info, place bids, show bid history, polling integration |
-| **SellerDashboardController** | 🔴 Empty | List seller's auctions, create auction form, cancel auctions, CSV export |
+| **UserDashboardController** | 🔴 Empty | List seller's auctions, create auction form, cancel auctions, CSV export |
 | **AdminPanelController** | 🔴 Empty | Create users, view all users, backup DB, view audit logs |
 | **ConnectController** | 🔴 Empty | Server connection UI, UDP discovery or manual connect |
 | **PollingService** | 🔴 Empty | Implement scheduled polling logic |
@@ -43,10 +43,10 @@
 Each member owns **full-stack features** (backend logic + RMI exposure + GUI controller) for their assigned modules:
 
 ### Member 1 (M1) - Authentication, Seller & Admin Module
-**Owns**: Login flow, server connection, seller dashboard, admin panel, service utilities, documentation for auth/seller/admin
+**Owns**: Login flow, server connection, User Dashboard, admin panel, service utilities, documentation for auth/seller/admin
 - **Backend**: User authentication, seller operations, admin operations, CSV export, backup, audit logs
 - **RMI**: Auth methods, seller/admin service methods, utility methods
-- **GUI**: `LoginController`, `ConnectController`, `SellerDashboardController`, `AdminPanelController`
+- **GUI**: `LoginController`, `ConnectController`, `UserDashboardController`, `AdminPanelController`
 - **Integration**: Full login → dashboard flow, create auction flow, admin operations flow
 
 ### Member 2 (M2) - Auction Bidding & Real-Time Module  
@@ -66,7 +66,7 @@ Each member owns **full-stack features** (backend logic + RMI exposure + GUI con
 | Time | M1 (Auth, Seller, Admin Module) | M2 (Bidding, Gallery Module) |
 |------|---------------------------------|------------------------------|
 | Morning | - Implement `ConnectController`<br>- Add UDP discovery or manual connect<br>- Store server connection<br>- Complete `exportAuctionsToCSV()` in service<br>- Complete `backupDatabase()` in service<br>- Complete `getAuditLogs()` in service | - Implement `PollingService`<br>- Add scheduled executor logic<br>- Test with mock data |
-| Afternoon | - Implement `LoginController`<br>- Call RMI login<br>- Navigate based on role<br>- Start `SellerDashboardController` structure<br>- Load seller's auctions<br>- Display in table | - Start `GalleryController` structure<br>- Load active auctions from RMI<br>- Display auction cards |
+| Afternoon | - Implement `LoginController`<br>- Call RMI login<br>- Navigate based on role<br>- Start `UserDashboardController` structure<br>- Load seller's auctions<br>- Display in table | - Start `GalleryController` structure<br>- Load active auctions from RMI<br>- Display auction cards |
 | Evening Integration | **Joint Session (1.5 hours)**<br>- Test: Connect → Login → Dashboard navigation<br>- Verify role-based routing (Bidder/Seller/Admin)<br>- Test connection error handling |
 
 **Deliverables**:
@@ -81,7 +81,7 @@ Each member owns **full-stack features** (backend logic + RMI exposure + GUI con
 
 | Time | M1 (Auth, Seller, Admin Module) | M2 (Bidding, Gallery Module) |
 |------|---------------------------------|------------------------------|
-| Morning | - Add session management<br>- Implement logout functionality<br>- Test re-authentication<br>- Implement create auction form in `SellerDashboardController`<br>- Add image picker for 3 images<br>- Validate form inputs | - Complete `GalleryController`<br>- Fetch thumbnails via RMI<br>- Add click-to-detail navigation |
+| Morning | - Add session management<br>- Implement logout functionality<br>- Test re-authentication<br>- Implement create auction form in `UserDashboardController`<br>- Add image picker for 3 images<br>- Validate form inputs | - Complete `GalleryController`<br>- Fetch thumbnails via RMI<br>- Add click-to-detail navigation |
 | Afternoon | - Wire up create auction to RMI<br>- Handle success/error feedback<br>- Test auction appears in gallery | - Implement image loading optimization<br>- Add lazy loading for gallery<br>- Test with many auctions |
 | Evening Integration | **Joint Session (1.5 hours)**<br>- Test: Login → Browse Gallery → View Details<br>- Create auction → Appears in gallery<br>- Test thumbnail loading performance |
 
@@ -108,7 +108,7 @@ Each member owns **full-stack features** (backend logic + RMI exposure + GUI con
 
 ---
 
-### Day 4: Seller Dashboard & Auction Management
+### Day 4: User Dashboard & Auction Management
 **Theme**: Complete seller features and polish
 
 | Time | M1 (Auth, Seller, Admin Module) | M2 (Bidding, Gallery Module) |
@@ -185,7 +185,7 @@ Each member owns **full-stack features** (backend logic + RMI exposure + GUI con
 - If integration fails: Roll back to morning's stable version
 - If one member unavailable: Other member covers critical path tasks (both should understand full system)
 - Day 5 afternoon reserved for overflow bug fixes
-- If M1 falls behind on Seller Dashboard: M2 can assist since gallery already displays auctions
+- If M1 falls behind on User Dashboard: M2 can assist since gallery already displays auctions
 - If M2 falls behind on Polling: M1 can implement basic UI updates while M2 optimizes
 
 ---

@@ -24,8 +24,8 @@ Master index of all documentation. Click any link to jump to that section.
 - [Auction Browsing & Discovery (13-19)](#auction-browsing--discovery)
 - [Bidding (20-28)](#bidding)
 - [Snipe Protection with Cap (29-30)](#snipe-protection-with-cap)
-- [Bidder Activity Dashboard (31)](#bidder-activity-dashboard)
-- [Auction Creation & Management (32-41)](#auction-creation--management-seller)
+- [User Activity Dashboard (31)](#user-activity-dashboard)
+- [Auction Creation & Management (32-41)](#auction-creation--management)
 - [Administration (42-44)](#administration)
 - [Auction Lifecycle (45-47)](#auction-lifecycle--state-machine)
 - [Data Export & Audit (48-49)](#data-export--audit)
@@ -75,10 +75,10 @@ Master index of all documentation. Click any link to jump to that section.
 ### 4. Screen-by-Screen Breakdown
 - [Connect Screen](#1-connect-screen-the-gateway)
 - [Login Screen](#2-login-screen)
-- [Bidder Gallery](#3-bidder-gallery-the-marketplace)
+- [Auction Gallery](#3-auction-gallery-the-marketplace)
 - [Auction Detail View](#4-auction-detail-view-high-intensity)
-- [Bidder Dashboard](#5-bidder-dashboard)
-- [Seller Dashboard](#6-seller-dashboard)
+- [User Dashboard](#5-user-dashboard)
+- [User Dashboard](#5-user-dashboard)
 - [Create/Edit Auction](#7-createedit-auction-dialog)
 - [Admin Panel](#8-admin-panel)
 
@@ -96,7 +96,7 @@ Master index of all documentation. Click any link to jump to that section.
 - English auction explanation
 
 ### 2. Key Terms
-- Players: Server, Client, RMI, Admin, Seller, Bidder
+- Players: Server, Client, RMI, Admin, User
 
 ### 3. Auction Rules
 - Minimum increment, snipe protection, self-bid prevention

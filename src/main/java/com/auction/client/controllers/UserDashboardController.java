@@ -3,7 +3,7 @@ package com.auction.client.controllers;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 
-public class SellerDashboardController {
+public class UserDashboardController {
 
   @FXML
   private javafx.scene.control.TableView<
@@ -126,12 +126,27 @@ public class SellerDashboardController {
 
   @FXML
   private void handleOpenAuctionDetail() {
-    try {
-      com.auction.client.core.ClientContext.getInstance()
-        .getViewLoader()
-        .loadView("auction_detail.fxml");
-    } catch (java.io.IOException e) {
-      throw new RuntimeException(e);
+    com.auction.shared.models.AuctionItem selected = null;
+    
+    if (marketTable.getSelectionModel().getSelectedItem() != null) {
+        selected = marketTable.getSelectionModel().getSelectedItem();
+    } else if (myListingsTable.getSelectionModel().getSelectedItem() != null) {
+        selected = myListingsTable.getSelectionModel().getSelectedItem();
+    } else if (wonAuctionsTable.getSelectionModel().getSelectedItem() != null) {
+        selected = wonAuctionsTable.getSelectionModel().getSelectedItem();
+    }
+
+    if (selected != null) {
+        try {
+          com.auction.client.core.ClientContext.getInstance().setCurrentAuctionId(selected.getId());
+          com.auction.client.core.ClientContext.getInstance()
+            .getViewLoader()
+            .loadView("auction_detail.fxml");
+        } catch (java.io.IOException e) {
+          throw new RuntimeException(e);
+        }
+    } else {
+        if (statusLabel != null) statusLabel.setText("Please select an auction first.");
     }
   }
 

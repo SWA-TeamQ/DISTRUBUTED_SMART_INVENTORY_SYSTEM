@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
@@ -16,16 +17,19 @@
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import java.net.URL?>
 
 <BorderPane xmlns="http://javafx.com/javafx/17"
-    xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.SellerDashboardController" styleClass="dashboard-shell page-shell">
-    
+    xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.UserDashboardController" styleClass="dashboard-shell page-shell">
+    <stylesheets>
+        <URL value="@../css/style.css" />
+    </stylesheets>
     
     <top>
         <HBox spacing="16" alignment="CENTER_LEFT" styleClass="page-header">
             <VBox spacing="4" HBox.hgrow="ALWAYS">
                 <Label text="User Dashboard" styleClass="page-title"/>
-                <Label text="Browse auctions, manage listings, review bids, and keep selling in one workspace." styleClass="page-subtitle" wrapText="true"/>
+                <Label text="Browse auctions, manage listings, review activity, and switch context by auction ownership." styleClass="page-subtitle" wrapText="true"/>
             </VBox>
             <Label fx:id="statusLabel" text="Ready" styleClass="status-chip status-chip-success"/>
             <Button text="Refresh" onAction="#handleRefreshDashboard" styleClass="secondary-button"/>
@@ -64,7 +68,7 @@
                         <VBox spacing="16" styleClass="sidebar-stack">
                             <VBox spacing="10" styleClass="hero-card">
                                 <Label text="Create New Auction" styleClass="section-title"/>
-                                <Label text="Use this form when the current user is selling an item." styleClass="section-copy" wrapText="true"/>
+                                <Label text="Use this form when the current user owns the auction being managed." styleClass="section-copy" wrapText="true"/>
                                 <TextField fx:id="titleField" promptText="Title" styleClass="compact-field"/>
                                 <TextArea fx:id="descArea" promptText="Description" prefRowCount="4" styleClass="compact-field"/>
                                 <TextField fx:id="categoryField" promptText="Category" styleClass="compact-field"/>
@@ -200,7 +204,7 @@
                                                     <PropertyValueFactory property="auctionItemId"/>
                                                 </cellValueFactory>
                                             </TableColumn>
-                                            <TableColumn text="Bidder" prefWidth="130">
+                                            <TableColumn text="User" prefWidth="130">
                                                 <cellValueFactory>
                                                     <PropertyValueFactory property="bidderUsername"/>
                                                 </cellValueFactory>

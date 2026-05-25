@@ -26,7 +26,7 @@ SQLite schema, repository architecture, backup strategy, and security measures.
 |--------|------|-------------|-------|
 | `username` | `TEXT` | `PRIMARY KEY` | Unique login name |
 | `password_hash` | `TEXT` | `NOT NULL` | SHA-256 hex string |
-| `role` | `TEXT` | `NOT NULL` | `ADMIN`, `SELLER`, or `BIDDER` |
+| `role` | `TEXT` | `NOT NULL` | `ADMIN` or `USER` |
 | `created_at` | `TEXT` | `NOT NULL` | ISO-8601 UTC |
 
 ### auction_items Table
@@ -40,7 +40,7 @@ SQLite schema, repository architecture, backup strategy, and security measures.
 | `starting_price_cents` | `INTEGER` | `NOT NULL CHECK >= 0` | |
 | `current_bid_cents` | `INTEGER` | `NOT NULL CHECK >= 0` | |
 | `highest_bidder_username` | `TEXT` | | NULL if no bids |
-| `seller_username` | `TEXT` | `NOT NULL` | FK to users.username |
+| `seller_username` | `TEXT` | `NOT NULL` | Auction owner username (FK to users.username) |
 | `start_time` | `TEXT` | `NOT NULL` | ISO-8601 UTC |
 | `end_time` | `TEXT` | `NOT NULL` | ISO-8601 UTC |
 | `cap_end_time` | `TEXT` | `NOT NULL` | Snipe limit (end_time + 10 min) |
@@ -56,7 +56,7 @@ SQLite schema, repository architecture, backup strategy, and security measures.
 |--------|------|-------------|-------|
 | `id` | `INTEGER` | `PRIMARY KEY AUTOINCREMENT` | |
 | `auction_id` | `INTEGER` | `NOT NULL REFERENCES auction_items(id) ON DELETE CASCADE` | |
-| `bidder_username` | `TEXT` | `NOT NULL` | FK to users.username |
+| `bidder_username` | `TEXT` | `NOT NULL` | Bid actor username (FK to users.username) |
 | `amount_cents` | `INTEGER` | `NOT NULL CHECK > 0` | |
 | `timestamp` | `TEXT` | `NOT NULL` | ISO-8601 UTC |
 
@@ -73,7 +73,7 @@ CREATE INDEX idx_auction_seller ON auction_items(seller_username);
 **Rationale:**
 - `idx_bids_auction_id`: Fast lookup for bid history
 - `idx_auction_status_end`: Reaper query `status='ACTIVE' AND end_time < now`
-- `idx_auction_seller`: Seller dashboard queries
+- `idx_auction_seller`: Auction ownership queries for user dashboard context
 
 ---
 

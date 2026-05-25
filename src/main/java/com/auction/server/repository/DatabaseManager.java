@@ -41,6 +41,9 @@ public class DatabaseManager {
         }
 
         String configuredPath = dbUrl.substring(sqlitePrefix.length());
+        if (":memory:".equals(configuredPath)) {
+            return;
+        }
         Path configuredDbPath = Path.of(configuredPath);
         Path legacyDbPath = configuredDbPath.resolveSibling("auction.db");
 

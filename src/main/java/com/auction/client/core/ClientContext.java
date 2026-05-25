@@ -13,6 +13,7 @@ public class ClientContext {
     private String sessionToken;
     private String userRole;
     private String username;
+    private int currentAuctionId = -1;
 
     private ClientContext() {
         rmiProvider = new RmiClientProvider();
@@ -36,6 +37,9 @@ public class ClientContext {
 
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
+
+    public int getCurrentAuctionId() { return currentAuctionId; }
+    public void setCurrentAuctionId(int currentAuctionId) { this.currentAuctionId = currentAuctionId; }
 
     public void clearSession() {
         this.sessionToken = null;

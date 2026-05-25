@@ -3,8 +3,8 @@ package com.auction.shared.models;
 import java.io.Serializable;
 
 /**
- * Abstract base for all user types. Demonstrates OOP inheritance.
- * Subclasses: Admin, Seller, Bidder.
+ * Unified user model.
+ * Roles are ADMIN or USER; auction-side participation is contextual per auction.
  * Password stored as SHA-256 hash — never plaintext.
  */
 public class User implements Serializable {

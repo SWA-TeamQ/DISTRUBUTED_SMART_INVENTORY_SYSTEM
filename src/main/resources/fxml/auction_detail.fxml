@@ -59,9 +59,10 @@
                 </VBox>
 
                 <VBox spacing="12" styleClass="panel-card" prefWidth="420">
-                    <Label text="Bid Controls" styleClass="section-title"/>
-                    <Label text="This panel is ready for the future bid form and status checks." styleClass="section-copy" wrapText="true"/>
-                    <VBox styleClass="hero-card" spacing="10">
+                    <Label fx:id="controlsTitleLabel" text="Auction Controls" styleClass="section-title"/>
+                    <Label fx:id="controlsDescLabel" text="Action panel based on your role." styleClass="section-copy" wrapText="true"/>
+                    
+                    <VBox fx:id="bidderControls" styleClass="hero-card" spacing="10">
                         <Label text="Place bid" styleClass="section-title"/>
                         <TextField fx:id="bidAmountField" promptText="Amount (e.g. 12.50)"/>
                         <HBox spacing="8">
@@ -69,6 +70,12 @@
                             <ProgressIndicator fx:id="bidSpinner" visible="false" prefWidth="24" prefHeight="24"/>
                         </HBox>
                         <Label fx:id="bidStatusLabel" text="" styleClass="section-copy"/>
+                    </VBox>
+
+                    <VBox fx:id="sellerControls" styleClass="hero-card" spacing="10" managed="false" visible="false">
+                        <Label text="Management Settings" styleClass="section-title"/>
+                        <Button text="Cancel Auction" onAction="#handleCancelAuction" styleClass="secondary-button" maxWidth="Infinity"/>
+                        <Button text="Relist Auction" onAction="#handleRelistAuction" styleClass="secondary-button" maxWidth="Infinity"/>
                     </VBox>
                 </VBox>
             </HBox>
@@ -91,7 +98,7 @@
                                 <PropertyValueFactory property="timestamp"/>
                             </cellValueFactory>
                         </TableColumn>
-                        <TableColumn text="Bidder" prefWidth="150">
+                        <TableColumn text="User" prefWidth="150">
                             <cellValueFactory>
                                 <PropertyValueFactory property="bidderUsername"/>
                             </cellValueFactory>

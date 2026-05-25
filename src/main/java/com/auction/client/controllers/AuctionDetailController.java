@@ -279,6 +279,16 @@ public class AuctionDetailController {
     }
 
     @FXML
+    private void handleCancelAuction() {
+        System.out.println("Cancel auction clicked");
+    }
+
+    @FXML
+    private void handleRelistAuction() {
+        System.out.println("Relist auction clicked");
+    }
+
+    @FXML
     private void handleBackToGallery() {
         try {
             shutdown();
