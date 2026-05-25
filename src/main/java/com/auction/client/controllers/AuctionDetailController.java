@@ -292,7 +292,12 @@ public class AuctionDetailController {
     private void handleBackToGallery() {
         try {
             shutdown();
-            ClientContext.getInstance().getViewLoader().loadView("gallery.fxml");
+            ClientContext context = ClientContext.getInstance();
+            String targetView = context.getPreviousViewName();
+            if (targetView == null || targetView.isBlank()) {
+                targetView = "gallery.fxml";
+            }
+            context.getViewLoader().loadView(targetView);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

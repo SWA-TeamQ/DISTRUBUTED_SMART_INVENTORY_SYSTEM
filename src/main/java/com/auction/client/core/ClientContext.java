@@ -13,6 +13,7 @@ public class ClientContext {
     private String sessionToken;
     private String userRole;
     private String username;
+    private String previousViewName;
     private int currentAuctionId = -1;
 
     private ClientContext() {
@@ -38,6 +39,9 @@ public class ClientContext {
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
 
+    public String getPreviousViewName() { return previousViewName; }
+    public void setPreviousViewName(String previousViewName) { this.previousViewName = previousViewName; }
+
     public int getCurrentAuctionId() { return currentAuctionId; }
     public void setCurrentAuctionId(int currentAuctionId) { this.currentAuctionId = currentAuctionId; }
 
@@ -45,6 +49,7 @@ public class ClientContext {
         this.sessionToken = null;
         this.userRole = null;
         this.username = null;
+        this.previousViewName = null;
     }
 
     public void handleConnectionLost() {

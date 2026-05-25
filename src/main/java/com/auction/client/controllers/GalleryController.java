@@ -111,7 +111,9 @@ public class GalleryController {
         view.getStyleClass().addAll("primary-button");
         view.setOnAction(evt -> {
             try {
-                Object ctrl = ClientContext.getInstance().getViewLoader().loadView("auction_detail.fxml");
+                ClientContext context = ClientContext.getInstance();
+                context.setPreviousViewName("gallery.fxml");
+                Object ctrl = context.getViewLoader().loadView("auction_detail.fxml");
                 if (ctrl instanceof AuctionDetailController) {
                     ((AuctionDetailController) ctrl).loadAuction(item.getId());
                 }
@@ -131,7 +133,9 @@ public class GalleryController {
             final int idx = i;
             small.setOnMouseClicked(e -> {
                 try {
-                    Object ctrl = ClientContext.getInstance().getViewLoader().loadView("auction_detail.fxml");
+                    ClientContext context = ClientContext.getInstance();
+                    context.setPreviousViewName("gallery.fxml");
+                    Object ctrl = context.getViewLoader().loadView("auction_detail.fxml");
                     if (ctrl instanceof AuctionDetailController) {
                         ((AuctionDetailController) ctrl).loadAuction(item.getId());
                         ((AuctionDetailController) ctrl).showHeroImageIndex(idx);
@@ -212,9 +216,14 @@ public class GalleryController {
     @FXML
     private void handleBackToDashboard() {
         try {
-            ClientContext.getInstance().getViewLoader().loadView("seller_dashboard.fxml");
+            ClientContext context = ClientContext.getInstance();
+            String targetView = context.getPreviousViewName();
+            if (targetView == null || targetView.isBlank()) {
+                targetView = "user_dashboard.fxml";
+            }
+            context.getViewLoader().loadView(targetView);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 }

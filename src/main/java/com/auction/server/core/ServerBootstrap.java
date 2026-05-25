@@ -6,6 +6,7 @@ import com.auction.shared.Constants;
 
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.ExportException;
 import java.sql.Connection;
 
 /**
@@ -43,7 +44,14 @@ public class ServerBootstrap {
 
         // 5. Setup RMI
         int port = Constants.DEFAULT_RMI_PORT;
-        Registry registry = LocateRegistry.createRegistry(port);
+        Registry registry;
+        try {
+            registry = LocateRegistry.createRegistry(port);
+            System.out.println("[RTDAS] Created RMI Registry on port " + port);
+        } catch (ExportException e) {
+            registry = LocateRegistry.getRegistry(port);
+            System.out.println("[RTDAS] Reusing existing RMI Registry on port " + port);
+        }
         registry.rebind(Constants.RMI_SERVICE_NAME, service);
         System.out.println("[RTDAS] RMI Registry bound: " + Constants.RMI_SERVICE_NAME + " on port " + port);
 
