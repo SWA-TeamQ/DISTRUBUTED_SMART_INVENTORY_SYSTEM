@@ -96,6 +96,49 @@ public class AuctionRepository {
         return list;
     }
 
+    public List<AuctionItem> searchActiveAuctions(String query, String category, String sortBy) {
+        List<AuctionItem> list = new java.util.ArrayList<>();
+
+        StringBuilder sql = new StringBuilder("SELECT * FROM auction_items WHERE status = 'ACTIVE'");
+        java.util.List<Object> params = new java.util.ArrayList<>();
+
+        if (query != null && !query.trim().isBlank()) {
+            sql.append(" AND (LOWER(title) LIKE ? OR LOWER(description) LIKE ? OR LOWER(category) LIKE ?)");
+            String like = "%" + query.trim().toLowerCase() + "%";
+            params.add(like);
+            params.add(like);
+            params.add(like);
+        }
+
+        if (category != null && !category.trim().isBlank()) {
+            sql.append(" AND LOWER(category) = LOWER(?)");
+            params.add(category.trim());
+        }
+
+        String orderBy;
+        switch (sortBy == null ? "" : sortBy) {
+            case "price_asc" -> orderBy = " ORDER BY current_bid_cents ASC, end_time ASC";
+            case "price_desc" -> orderBy = " ORDER BY current_bid_cents DESC, end_time ASC";
+            default -> orderBy = " ORDER BY end_time DESC";
+        }
+        sql.append(orderBy);
+
+        try (var pstmt = connection.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                pstmt.setObject(i + 1, params.get(i));
+            }
+            try (var rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapRowToAuction(rs));
+                }
+            }
+        } catch (java.sql.SQLException e) {
+            throw new RuntimeException("Failed to search active auctions", e);
+        }
+
+        return list;
+    }
+
     public List<AuctionItem> findActiveExpiredAuctions(String nowTimeIso) {
         List<AuctionItem> list = new java.util.ArrayList<>();
         String sql = "SELECT * FROM auction_items WHERE status = 'ACTIVE' AND end_time <= ?";

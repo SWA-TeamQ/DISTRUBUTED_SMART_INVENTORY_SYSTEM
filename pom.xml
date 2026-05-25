@@ -47,6 +47,13 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
+        <!-- JavaFX Swing bridge for tests (JFXPanel) -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-swing</artifactId>
+            <version>${javafx.version}</version>
+            <scope>test</scope>
+        </dependency>
         <!-- AtlantaFX for modern styling -->
         <dependency>
             <groupId>io.github.mkpaz</groupId>

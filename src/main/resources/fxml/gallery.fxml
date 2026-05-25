@@ -1,16 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.collections.FXCollections?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import java.net.URL?>
+<?import java.lang.String?>
 
 <BorderPane xmlns="http://javafx.com/javafx/17"
     xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.GalleryController" styleClass="page-shell">
@@ -23,6 +27,7 @@
                 <Label text="Browse active auctions in a card-like workspace." styleClass="page-subtitle" wrapText="true"/>
             </VBox>
             <Button text="Back to Dashboard" onAction="#handleBackToDashboard" styleClass="secondary-button"/>
+            <Button text="Logout" onAction="#handleLogout" styleClass="secondary-button"/>
         </HBox>
     </top>
 
@@ -31,8 +36,19 @@
             <VBox spacing="10" styleClass="panel-card">
                 <Label text="Filters" styleClass="section-title"/>
                 <HBox spacing="10">
-                    <TextField fx:id="searchField" promptText="Search auctions" styleClass="search-field" HBox.hgrow="ALWAYS" onAction="#handleSearch"/>
-                    <Button text="Search" styleClass="primary-button" onAction="#handleSearch"/>
+                    <TextField fx:id="searchField" promptText="Search title, description, category" styleClass="search-field" HBox.hgrow="ALWAYS" onAction="#handleSearch"/>
+                    <ComboBox fx:id="categoryCombo" promptText="Category" styleClass="select-field" HBox.hgrow="ALWAYS" />
+                    <ChoiceBox fx:id="sortChoice" styleClass="select-field">
+                        <items>
+                            <FXCollections fx:factory="observableArrayList">
+                                <String fx:value="Newest"/>
+                                <String fx:value="Price: Low → High"/>
+                                <String fx:value="Price: High → Low"/>
+                            </FXCollections>
+                        </items>
+                    </ChoiceBox>
+                    <Button text="Search" styleClass="secondary-button" onAction="#handleSearch"/>
+                    <Button text="Refresh" styleClass="primary-button" onAction="#handleRefresh"/>
                 </HBox>
             </VBox>
 

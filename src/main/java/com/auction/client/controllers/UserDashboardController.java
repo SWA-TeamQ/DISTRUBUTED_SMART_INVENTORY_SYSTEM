@@ -66,46 +66,59 @@ public class UserDashboardController {
   }
 
   private void refreshDashboard() {
-    try {
-      com.auction.client.core.ClientContext context =
-        com.auction.client.core.ClientContext.getInstance();
-      com.auction.shared.interfaces.IAuctionService service = context
-        .getRmiProvider()
-        .getService();
-      java.util.List<com.auction.shared.models.AuctionItem> activeAuctions =
-        service.getActiveAuctions();
-      java.util.List<com.auction.shared.models.AuctionItem> mine =
-        service.getActiveAuctionsBySeller(
-          context.getUsername(),
+    javafx.concurrent.Task<DashboardSnapshot> task = new javafx.concurrent.Task<>() {
+      @Override
+      protected DashboardSnapshot call() throws Exception {
+        com.auction.client.core.ClientContext context =
+          com.auction.client.core.ClientContext.getInstance();
+        com.auction.shared.interfaces.IAuctionService service = context
+          .getRmiProvider()
+          .getService();
+        java.util.List<com.auction.shared.models.AuctionItem> activeAuctions =
+          service.getActiveAuctions();
+        java.util.List<com.auction.shared.models.AuctionItem> mine =
+          service.getActiveAuctionsBySeller(
+            context.getUsername(),
+            context.getSessionToken()
+          );
+        java.util.List<com.auction.shared.models.Bid> bids = service.getMyBids(
           context.getSessionToken()
         );
-      java.util.List<com.auction.shared.models.Bid> bids = service.getMyBids(
-        context.getSessionToken()
-      );
-      java.util.List<com.auction.shared.models.AuctionItem> won =
-        service.getMyWonAuctions(context.getSessionToken());
+        java.util.List<com.auction.shared.models.AuctionItem> won =
+          service.getMyWonAuctions(context.getSessionToken());
+        return new DashboardSnapshot(activeAuctions, mine, bids, won);
+      }
+    };
 
-      marketTable.getItems().setAll(activeAuctions);
-      myListingsTable.getItems().setAll(mine);
-      myBidsTable.getItems().setAll(bids);
-      wonAuctionsTable.getItems().setAll(won);
+    task.setOnSucceeded(evt -> {
+      DashboardSnapshot snapshot = task.getValue();
+      if (snapshot == null) {
+        if (statusLabel != null) statusLabel.setText("Dashboard refresh returned no data.");
+        return;
+      }
 
-      if (marketCountLabel != null) marketCountLabel.setText(
-        String.valueOf(activeAuctions.size())
-      );
-      if (listingsCountLabel != null) listingsCountLabel.setText(
-        String.valueOf(mine.size())
-      );
-      if (bidsCountLabel != null) bidsCountLabel.setText(
-        String.valueOf(bids.size())
-      );
-      if (winsCountLabel != null) winsCountLabel.setText(
-        String.valueOf(won.size())
-      );
-      statusLabel.setText("Dashboard refreshed successfully.");
-    } catch (Exception e) {
-      statusLabel.setText("Failed to load dashboard: " + e.getMessage());
-    }
+      marketTable.getItems().setAll(snapshot.activeAuctions);
+      myListingsTable.getItems().setAll(snapshot.mine);
+      myBidsTable.getItems().setAll(snapshot.bids);
+      wonAuctionsTable.getItems().setAll(snapshot.won);
+
+      if (marketCountLabel != null) marketCountLabel.setText(String.valueOf(snapshot.activeAuctions.size()));
+      if (listingsCountLabel != null) listingsCountLabel.setText(String.valueOf(snapshot.mine.size()));
+      if (bidsCountLabel != null) bidsCountLabel.setText(String.valueOf(snapshot.bids.size()));
+      if (winsCountLabel != null) winsCountLabel.setText(String.valueOf(snapshot.won.size()));
+      if (statusLabel != null) statusLabel.setText("Dashboard refreshed successfully.");
+    });
+
+    task.setOnFailed(evt -> {
+      Throwable error = task.getException();
+      if (statusLabel != null) {
+        statusLabel.setText("Failed to load dashboard: " + (error == null ? "unknown error" : error.getMessage()));
+      }
+    });
+
+    Thread thread = new Thread(task, "dashboard-refresh");
+    thread.setDaemon(true);
+    thread.start();
   }
 
   @FXML
@@ -120,8 +133,11 @@ public class UserDashboardController {
         com.auction.client.core.ClientContext.getInstance();
       context.setPreviousViewName("user_dashboard.fxml");
       context.getViewLoader().loadView("gallery.fxml");
-    } catch (java.io.IOException e) {
-      throw new RuntimeException(e);
+    } catch (Exception e) {
+      if (statusLabel != null) {
+        statusLabel.setText("Unable to open gallery: " + e.getMessage());
+      }
+      e.printStackTrace();
     }
   }
 
@@ -187,6 +203,7 @@ public class UserDashboardController {
         );
       statusLabel.setText("Created auction #" + id);
       refreshDashboard();
+      selectCreatedAuction(id);
 
       titleField.clear();
       descArea.clear();
@@ -306,6 +323,52 @@ public class UserDashboardController {
     if (img2Bytes != null) count++;
     if (img3Bytes != null) count++;
     imagesLabel.setText(count + " images selected");
+  }
+
+  private void selectCreatedAuction(int id) {
+    try {
+      javafx.collections.ObservableList<com.auction.shared.models.AuctionItem> items = marketTable.getItems();
+      if (items != null) {
+        for (com.auction.shared.models.AuctionItem item : items) {
+          if (item != null && item.getId() == id) {
+            marketTable.getSelectionModel().select(item);
+            marketTable.scrollTo(item);
+            return;
+          }
+        }
+      }
+
+      items = myListingsTable.getItems();
+      if (items != null) {
+        for (com.auction.shared.models.AuctionItem item : items) {
+          if (item != null && item.getId() == id) {
+            myListingsTable.getSelectionModel().select(item);
+            myListingsTable.scrollTo(item);
+            return;
+          }
+        }
+      }
+    } catch (Exception ignored) {
+    }
+  }
+
+  private static final class DashboardSnapshot {
+    private final java.util.List<com.auction.shared.models.AuctionItem> activeAuctions;
+    private final java.util.List<com.auction.shared.models.AuctionItem> mine;
+    private final java.util.List<com.auction.shared.models.Bid> bids;
+    private final java.util.List<com.auction.shared.models.AuctionItem> won;
+
+    private DashboardSnapshot(
+      java.util.List<com.auction.shared.models.AuctionItem> activeAuctions,
+      java.util.List<com.auction.shared.models.AuctionItem> mine,
+      java.util.List<com.auction.shared.models.Bid> bids,
+      java.util.List<com.auction.shared.models.AuctionItem> won
+    ) {
+      this.activeAuctions = activeAuctions == null ? java.util.List.of() : activeAuctions;
+      this.mine = mine == null ? java.util.List.of() : mine;
+      this.bids = bids == null ? java.util.List.of() : bids;
+      this.won = won == null ? java.util.List.of() : won;
+    }
   }
 
   @FXML

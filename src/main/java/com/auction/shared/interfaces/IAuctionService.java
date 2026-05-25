@@ -27,6 +27,50 @@ public interface IAuctionService extends Remote {
 
     // --- Auction Browsing ---
     List<AuctionItem> getActiveAuctions() throws RemoteException;
+        /**
+         * Server-side active auction query.
+         * @param query free-text query over title/description/category (nullable)
+         * @param category exact category filter (nullable)
+         * @param sortBy one of: newest, price_asc, price_desc
+         */
+        default List<AuctionItem> searchActiveAuctions(String query, String category, String sortBy) throws RemoteException {
+                // Backward-compatible default for tests/fakes that don't override this yet.
+                List<AuctionItem> base = getActiveAuctions();
+                if (base == null) return java.util.List.of();
+
+                String q = query == null ? "" : query.trim().toLowerCase();
+                String c = category == null ? "" : category.trim();
+
+                java.util.stream.Stream<AuctionItem> stream = base.stream();
+                if (!q.isBlank()) {
+                        stream = stream.filter(a -> containsIgnoreCase(a.getTitle(), q)
+                                        || containsIgnoreCase(a.getDescription(), q)
+                                        || containsIgnoreCase(a.getCategory(), q));
+                }
+                if (!c.isBlank()) {
+                        stream = stream.filter(a -> c.equalsIgnoreCase(a.getCategory()));
+                }
+
+                java.util.List<AuctionItem> filtered = stream.toList();
+                if ("price_asc".equals(sortBy)) {
+                        return filtered.stream()
+                                        .sorted(java.util.Comparator.comparingLong(AuctionItem::getCurrentBidCents))
+                                        .toList();
+                }
+                if ("price_desc".equals(sortBy)) {
+                        return filtered.stream()
+                                        .sorted(java.util.Comparator.comparingLong(AuctionItem::getCurrentBidCents).reversed())
+                                        .toList();
+                }
+                return filtered.stream()
+                                .sorted((a, b) -> b.getEndTime().compareTo(a.getEndTime()))
+                                .toList();
+        }
+
+        private static boolean containsIgnoreCase(String value, String needleLower) {
+                return value != null && value.toLowerCase().contains(needleLower);
+        }
+
     List<AuctionItem> getActiveAuctionsBySeller(String sellerUsername, String token) throws RemoteException, AuctionException;
     AuctionItem getAuctionById(int auctionId) throws RemoteException;
 

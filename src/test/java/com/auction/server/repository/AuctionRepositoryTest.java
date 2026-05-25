@@ -66,4 +66,55 @@ class AuctionRepositoryTest {
         List<AuctionItem> active = auctionRepo.findActiveAuctions();
         assertEquals(1, active.size());
     }
+
+    @Test
+    void shouldSearchActiveAuctionsByQueryCategoryAndSort() {
+        AuctionItem a1 = new AuctionItem();
+        a1.setTitle("Gaming Laptop");
+        a1.setDescription("High-end GPU");
+        a1.setCategory("Electronics");
+        a1.setStartingPriceCents(100000);
+        a1.setCurrentBidCents(120000);
+        a1.setSellerUsername("seller1");
+        a1.setStartTime("2026-05-01T10:00:00Z");
+        a1.setEndTime("2026-05-11T10:00:00Z");
+        a1.setCapEndTime("2026-05-11T10:10:00Z");
+        a1.setStatus("ACTIVE");
+        auctionRepo.insertAuction(a1);
+
+        AuctionItem a2 = new AuctionItem();
+        a2.setTitle("Office Chair");
+        a2.setDescription("Ergonomic chair");
+        a2.setCategory("Furniture");
+        a2.setStartingPriceCents(10000);
+        a2.setCurrentBidCents(15000);
+        a2.setSellerUsername("seller1");
+        a2.setStartTime("2026-05-01T10:00:00Z");
+        a2.setEndTime("2026-05-09T10:00:00Z");
+        a2.setCapEndTime("2026-05-09T10:10:00Z");
+        a2.setStatus("ACTIVE");
+        auctionRepo.insertAuction(a2);
+
+        AuctionItem a3 = new AuctionItem();
+        a3.setTitle("Gaming Mouse");
+        a3.setDescription("RGB mouse");
+        a3.setCategory("Electronics");
+        a3.setStartingPriceCents(2000);
+        a3.setCurrentBidCents(3000);
+        a3.setSellerUsername("seller1");
+        a3.setStartTime("2026-05-01T10:00:00Z");
+        a3.setEndTime("2026-05-08T10:00:00Z");
+        a3.setCapEndTime("2026-05-08T10:10:00Z");
+        a3.setStatus("ACTIVE");
+        auctionRepo.insertAuction(a3);
+
+        List<AuctionItem> q = auctionRepo.searchActiveAuctions("gaming", "Electronics", "price_desc");
+        assertEquals(2, q.size());
+        assertTrue(q.get(0).getCurrentBidCents() >= q.get(1).getCurrentBidCents());
+
+        List<AuctionItem> lowToHigh = auctionRepo.searchActiveAuctions(null, null, "price_asc");
+        assertEquals(3, lowToHigh.size());
+        assertTrue(lowToHigh.get(0).getCurrentBidCents() <= lowToHigh.get(1).getCurrentBidCents());
+        assertTrue(lowToHigh.get(1).getCurrentBidCents() <= lowToHigh.get(2).getCurrentBidCents());
+    }
 }

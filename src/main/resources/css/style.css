@@ -197,6 +197,38 @@
     -fx-font-family: "Inter";
 }
 
+/* Reconnect banner shown on polling failures */
+.reconnect-banner {
+    -fx-background-color: linear-gradient(to right, rgba(210,153,34,0.12), rgba(210,153,34,0.18));
+    -fx-border-color: rgba(210,153,34,0.28);
+    -fx-border-width: 1px;
+    -fx-background-radius: 8px;
+    -fx-padding: 8px 12px;
+}
+
+/* Countdown states for AuctionDetail */
+.countdown-normal {
+    -fx-text-fill: #7ee787;
+    -fx-font-weight: 700;
+}
+.countdown-warning {
+    -fx-text-fill: #e3b341;
+    -fx-font-weight: 700;
+}
+.countdown-urgent {
+    -fx-text-fill: #ff6b6b;
+    -fx-font-weight: 800;
+}
+.countdown-ended {
+    -fx-text-fill: #8b949e;
+    -fx-font-weight: 600;
+}
+
+.reconnect-banner .label {
+    -fx-text-fill: #ffdca8;
+    -fx-font-weight: 700;
+}
+
 .compact-field,
 .search-field,
 .input-field,

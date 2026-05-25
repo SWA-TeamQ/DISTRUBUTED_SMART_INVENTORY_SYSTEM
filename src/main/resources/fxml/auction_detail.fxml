@@ -11,6 +11,7 @@
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import java.net.URL?>
 
 <BorderPane xmlns="http://javafx.com/javafx/17"
@@ -25,6 +26,10 @@
             </VBox>
             <Button text="Back to Gallery" onAction="#handleBackToGallery" styleClass="secondary-button"/>
         </HBox>
+        <!-- Reconnect banner shown when polling fails repeatedly -->
+        <HBox fx:id="reconnectBanner" spacing="8" alignment="CENTER" visible="false" managed="false" style="-fx-background-color: rgba(255,200,0,0.95); -fx-padding:8px;">
+            <Label fx:id="reconnectLabel" text="Disconnected — retrying..." />
+        </HBox>
     </top>
 
     <center>
@@ -32,7 +37,7 @@
             <FlowPane hgap="14" vgap="14" prefWrapLength="1200">
                 <VBox styleClass="metric-card" prefWidth="220">
                     <Label text="Current Bid" styleClass="metric-label"/>
-                    <Label fx:id="currentBidLabel" text="$0.00" styleClass="metric-value"/>
+                    <Label fx:id="currentBidLabel" text="0.00" styleClass="metric-value"/>
                 </VBox>
                 <VBox styleClass="metric-card metric-card-accent" prefWidth="220">
                     <Label text="Time Left" styleClass="metric-label"/>
@@ -88,7 +93,7 @@
                     </VBox>
                     <Label text="Live context" styleClass="status-chip status-chip-success"/>
                 </HBox>
-                <TableView VBox.vgrow="ALWAYS" styleClass="data-table">
+                <TableView fx:id="bidHistoryTable" VBox.vgrow="ALWAYS" styleClass="data-table">
                     <placeholder>
                         <Label text="No bid history loaded" styleClass="empty-state"/>
                     </placeholder>
@@ -103,7 +108,7 @@
                                 <PropertyValueFactory property="bidderUsername"/>
                             </cellValueFactory>
                         </TableColumn>
-                        <TableColumn text="Amount" prefWidth="120">
+                        <TableColumn fx:id="amountColumn" text="Amount" prefWidth="120">
                             <cellValueFactory>
                                 <PropertyValueFactory property="amountCents"/>
                             </cellValueFactory>

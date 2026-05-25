@@ -4,8 +4,12 @@ import com.auction.client.core.ClientContext;
 import com.auction.shared.models.AuctionItem;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
@@ -18,60 +22,191 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import com.auction.client.service.ThumbnailExecutor;
 
 public class GalleryController {
 
     @FXML private FlowPane auctionFlow;
-    @FXML private javafx.scene.control.TextField searchField;
+    @FXML private TextField searchField;
+    @FXML private ComboBox<String> categoryCombo;
+    @FXML private ChoiceBox<String> sortChoice;
     @FXML private Label auctionCountLabel;
 
     private final Map<String, Image> thumbnailCache = new ConcurrentHashMap<>();
     private static final Image PLACEHOLDER_IMAGE = loadPlaceholderImage();
     private java.util.List<AuctionItem> allAuctions = java.util.List.of();
+    // Polling executor for live refresh (docs require 2s polling)
+    private ScheduledExecutorService pollExecutor;
+    private ScheduledFuture<?> pollTask;
+    private static final long POLL_INTERVAL_SECONDS = 2L;
 
     @FXML
     public void initialize() {
         try {
-            var context = ClientContext.getInstance();
-            var service = context.getRmiProvider().getService();
-            List<AuctionItem> items = service.getActiveAuctions();
-            allAuctions = (items == null) ? java.util.List.of() : items;
-            Platform.runLater(() -> renderAuctions(allAuctions));
-        } catch (Exception e) {
-            e.printStackTrace();
+            if (sortChoice != null && sortChoice.getItems().isEmpty()) {
+                sortChoice.getItems().addAll("Newest", "Price: Low → High", "Price: High → Low");
+                sortChoice.setValue("Newest");
+                sortChoice.getSelectionModel().selectedItemProperty().addListener((a, b, c) -> fetchAndRenderAuctionsAsync());
+            }
+            if (categoryCombo != null) {
+                categoryCombo.getItems().setAll("All");
+                categoryCombo.setValue("All");
+                categoryCombo.setOnAction(evt -> fetchAndRenderAuctionsAsync());
+            }
+            renderLoadingState();
+            loadCategoriesThenQueryAsync();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            Platform.runLater(() -> {
+                if (auctionCountLabel != null) {
+                    auctionCountLabel.setText("Failed to initialize gallery");
+                }
+            });
+        } finally {
+            // start the periodic polling after attempting initial load
+            startPolling();
         }
     }
 
     @FXML
-    private void handleSearch() {
-        String q = searchField == null ? "" : searchField.getText();
-        if (q == null || q.isBlank()) {
-            renderAuctions(allAuctions);
-            return;
-        }
-
-        String needle = q.trim().toLowerCase();
-        java.util.List<AuctionItem> filtered = allAuctions.stream()
-            .filter(a -> containsIgnoreCase(a.getTitle(), needle)
-                || containsIgnoreCase(a.getDescription(), needle)
-                || containsIgnoreCase(a.getCategory(), needle))
-            .toList();
-        renderAuctions(filtered);
+    private void handleRefresh() {
+        renderLoadingState();
+        loadCategoriesThenQueryAsync();
     }
 
-    private boolean containsIgnoreCase(String value, String needleLower) {
+    @FXML
+    private void handleSearch() {
+        renderLoadingState();
+        fetchAndRenderAuctionsAsync();
+    }
+
+    private void loadCategoriesThenQueryAsync() {
+        CompletableFuture.supplyAsync(() -> {
+            try {
+                var service = ClientContext.getInstance().getRmiProvider().getService();
+                return service.getActiveAuctions();
+            } catch (Exception e) {
+                e.printStackTrace();
+                return java.util.List.<AuctionItem>of();
+            }
+        }, ThumbnailExecutor.getExecutor()).thenAccept(items -> {
+            allAuctions = (items == null) ? java.util.List.of() : items;
+            var cats = allAuctions.stream()
+                    .map(AuctionItem::getCategory)
+                    .filter(c -> c != null && !c.isBlank())
+                    .map(String::trim)
+                    .collect(java.util.stream.Collectors.toCollection(java.util.LinkedHashSet::new));
+            Platform.runLater(() -> {
+                if (categoryCombo != null) {
+                    String previous = categoryCombo.getValue();
+                    categoryCombo.getItems().clear();
+                    categoryCombo.getItems().add("All");
+                    categoryCombo.getItems().addAll(cats);
+                    if (previous != null && categoryCombo.getItems().contains(previous)) {
+                        categoryCombo.setValue(previous);
+                    } else {
+                        categoryCombo.setValue("All");
+                    }
+                }
+                fetchAndRenderAuctionsAsync();
+            });
+        });
+    }
+
+    private void fetchAndRenderAuctionsAsync() {
+        String query = searchField == null ? null : searchField.getText();
+        String selectedCategory = categoryCombo == null ? null : categoryCombo.getValue();
+        if ("All".equals(selectedCategory)) selectedCategory = null;
+        String sortBy = mapSortToServer(sortChoice == null ? null : sortChoice.getValue());
+
+        final String q = query;
+        final String c = selectedCategory;
+        final String s = sortBy;
+
+        CompletableFuture.supplyAsync(() -> {
+            try {
+                var service = ClientContext.getInstance().getRmiProvider().getService();
+                return service.searchActiveAuctions(q, c, s);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return fallbackFilterAndSort(allAuctions, q, c, s);
+            }
+        }, ThumbnailExecutor.getExecutor()).thenAccept(items -> Platform.runLater(() -> renderAuctions(items == null ? java.util.List.of() : items)));
+    }
+
+    private java.util.List<AuctionItem> fallbackFilterAndSort(java.util.List<AuctionItem> base, String query, String category, String sortBy) {
+        java.util.stream.Stream<AuctionItem> stream = (base == null ? java.util.List.<AuctionItem>of() : base).stream();
+
+        String q = query == null ? "" : query.trim().toLowerCase();
+        if (!q.isBlank()) {
+            stream = stream.filter(a -> containsIgnoreCase(a.getTitle(), q)
+                    || containsIgnoreCase(a.getDescription(), q)
+                    || containsIgnoreCase(a.getCategory(), q));
+        }
+
+        String c = category == null ? "" : category.trim();
+        if (!c.isBlank()) {
+            stream = stream.filter(a -> c.equalsIgnoreCase(a.getCategory()));
+        }
+
+        java.util.List<AuctionItem> filtered = stream.toList();
+        if ("price_asc".equals(sortBy)) {
+            return filtered.stream()
+                    .sorted(java.util.Comparator.comparingLong(AuctionItem::getCurrentBidCents))
+                    .toList();
+        }
+        if ("price_desc".equals(sortBy)) {
+            return filtered.stream()
+                    .sorted(java.util.Comparator.comparingLong(AuctionItem::getCurrentBidCents).reversed())
+                    .toList();
+        }
+        return filtered.stream()
+                .sorted((a, b) -> b.getEndTime().compareTo(a.getEndTime()))
+                .toList();
+    }
+
+    private static boolean containsIgnoreCase(String value, String needleLower) {
         return value != null && value.toLowerCase().contains(needleLower);
     }
 
+    private String mapSortToServer(String sortLabel) {
+        if ("Price: Low → High".equals(sortLabel)) return "price_asc";
+        if ("Price: High → Low".equals(sortLabel)) return "price_desc";
+        return "newest";
+    }
+
+    private void renderLoadingState() {
+        Platform.runLater(() -> {
+            if (auctionFlow != null) {
+                auctionFlow.getChildren().clear();
+                VBox loading = new VBox();
+                loading.getStyleClass().add("metric-card");
+                Label t = new Label("Loading auctions...");
+                t.getStyleClass().add("metric-label");
+                loading.getChildren().add(t);
+                auctionFlow.getChildren().add(loading);
+            }
+            if (auctionCountLabel != null) {
+                auctionCountLabel.setText("Loading...");
+            }
+        });
+    }
+
     private void renderAuctions(java.util.List<AuctionItem> items) {
+        if (auctionFlow == null) {
+            return;
+        }
         auctionFlow.getChildren().clear();
         if (items == null || items.isEmpty()) {
             VBox empty = new VBox();
             empty.getStyleClass().add("metric-card");
             Label t = new Label("No auctions found");
             t.getStyleClass().add("metric-label");
-            Label s = new Label("Try a different search term or connect to a live server.");
+            Label s = new Label("Try a different category or connect to a live server.");
             s.getStyleClass().add("section-copy");
             s.setWrapText(true);
             empty.getChildren().addAll(t, s);
@@ -110,16 +245,7 @@ public class GalleryController {
         Button view = new Button("View");
         view.getStyleClass().addAll("primary-button");
         view.setOnAction(evt -> {
-            try {
-                ClientContext context = ClientContext.getInstance();
-                context.setPreviousViewName("gallery.fxml");
-                Object ctrl = context.getViewLoader().loadView("auction_detail.fxml");
-                if (ctrl instanceof AuctionDetailController) {
-                    ((AuctionDetailController) ctrl).loadAuction(item.getId());
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+            openAuctionDetail(item, 0);
         });
 
         // small thumbnail rail (up to 3 thumbnails)
@@ -132,17 +258,7 @@ public class GalleryController {
             small.getStyleClass().add("image-thumb");
             final int idx = i;
             small.setOnMouseClicked(e -> {
-                try {
-                    ClientContext context = ClientContext.getInstance();
-                    context.setPreviousViewName("gallery.fxml");
-                    Object ctrl = context.getViewLoader().loadView("auction_detail.fxml");
-                    if (ctrl instanceof AuctionDetailController) {
-                        ((AuctionDetailController) ctrl).loadAuction(item.getId());
-                        ((AuctionDetailController) ctrl).showHeroImageIndex(idx);
-                    }
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
+                openAuctionDetail(item, idx);
             });
             // prefetch hero on hover for snappier detail view
             small.setOnMouseEntered(e -> loadThumbnailToCache(item.getId(), 0));
@@ -152,6 +268,39 @@ public class GalleryController {
 
         card.getChildren().addAll(thumbView, rail, title, price, view);
         return card;
+    }
+
+    private void openAuctionDetail(AuctionItem item, int heroIndex) {
+        try {
+            ClientContext context = ClientContext.getInstance();
+            context.setCurrentAuctionId(item.getId());
+            context.setPreviousViewName("gallery.fxml");
+            Object ctrl = context.getViewLoader().loadView("auction_detail.fxml");
+            if (ctrl instanceof AuctionDetailController) {
+                AuctionDetailController detailController = (AuctionDetailController) ctrl;
+                if (heroIndex >= 0) {
+                    Platform.runLater(() -> detailController.showHeroImageIndex(heroIndex));
+                }
+            } else {
+                showNavigationError("Auction detail controller was not available.");
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            showNavigationError("Unable to open auction detail: " + ex.getMessage());
+        }
+    }
+
+    private void showNavigationError(String message) {
+        Platform.runLater(() -> {
+            if (auctionCountLabel != null) {
+                auctionCountLabel.setText(message);
+            }
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Navigation Error");
+            alert.setHeaderText("Could not open auction detail");
+            alert.setContentText(message);
+            alert.showAndWait();
+        });
     }
 
     private void loadThumbnailAsync(int auctionId, int index, ImageView target) {
@@ -208,7 +357,7 @@ public class GalleryController {
     private static Image loadPlaceholderImage() {
         InputStream stream = GalleryController.class.getResourceAsStream("/images/placeholder.png");
         if (stream == null) {
-            throw new IllegalStateException("Missing resource: /images/placeholder.png");
+            return null;
         }
         return new Image(stream);
     }
@@ -216,6 +365,9 @@ public class GalleryController {
     @FXML
     private void handleBackToDashboard() {
         try {
+            // stop polling before leaving the view
+            stopPolling();
+
             ClientContext context = ClientContext.getInstance();
             String targetView = context.getPreviousViewName();
             if (targetView == null || targetView.isBlank()) {
@@ -224,6 +376,66 @@ public class GalleryController {
             context.getViewLoader().loadView(targetView);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    @FXML
+    public void handleLogout(javafx.event.ActionEvent event) {
+        try {
+            // stop background polling first
+            stopPolling();
+
+            ClientContext context = ClientContext.getInstance();
+            try {
+                var svc = context.getRmiProvider().getService();
+                svc.logout(context.getSessionToken());
+            } catch (Exception e) {
+                // best-effort logout; log but continue to clear session locally
+                e.printStackTrace();
+            }
+            context.clearSession();
+            context.getViewLoader().loadView("login.fxml");
+        } catch (IOException e) {
+            e.printStackTrace();
+            if (auctionCountLabel != null) auctionCountLabel.setText("Logout failed: " + e.getMessage());
+        }
+    }
+
+    private void startPolling() {
+        try {
+            if (pollExecutor == null || pollExecutor.isShutdown()) {
+                pollExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
+                    Thread t = new Thread(r, "gallery-poller");
+                    t.setDaemon(true);
+                    return t;
+                });
+            }
+            // schedule with fixed rate; first run after interval to allow initial load
+            pollTask = pollExecutor.scheduleAtFixedRate(() -> {
+                try {
+                    fetchAndRenderAuctionsAsync();
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
+            }, POLL_INTERVAL_SECONDS, POLL_INTERVAL_SECONDS, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void stopPolling() {
+        try {
+            if (pollTask != null && !pollTask.isCancelled()) {
+                pollTask.cancel(false);
+            }
+            if (pollExecutor != null && !pollExecutor.isShutdown()) {
+                pollExecutor.shutdownNow();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            pollTask = null;
+            pollExecutor = null;
         }
     }
 }

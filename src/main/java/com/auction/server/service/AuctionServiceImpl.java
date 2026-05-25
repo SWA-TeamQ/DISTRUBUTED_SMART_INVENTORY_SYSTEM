@@ -173,6 +173,11 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
     }
 
     @Override
+    public List<AuctionItem> searchActiveAuctions(String query, String category, String sortBy) throws RemoteException {
+        return auctionManager.searchActiveAuctions(query, category, sortBy);
+    }
+
+    @Override
     public List<AuctionItem> getActiveAuctionsBySeller(String sellerUsername, String token) throws RemoteException, AuctionException {
         validateSession(token);
         return auctionManager.findActiveAuctionsBySeller(sellerUsername);
