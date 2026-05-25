@@ -116,9 +116,10 @@ public class UserDashboardController {
   @FXML
   private void handleOpenGallery() {
     try {
-      com.auction.client.core.ClientContext.getInstance()
-        .getViewLoader()
-        .loadView("gallery.fxml");
+      com.auction.client.core.ClientContext context =
+        com.auction.client.core.ClientContext.getInstance();
+      context.setPreviousViewName("user_dashboard.fxml");
+      context.getViewLoader().loadView("gallery.fxml");
     } catch (java.io.IOException e) {
       throw new RuntimeException(e);
     }
@@ -138,10 +139,10 @@ public class UserDashboardController {
 
     if (selected != null) {
         try {
-          com.auction.client.core.ClientContext.getInstance().setCurrentAuctionId(selected.getId());
-          com.auction.client.core.ClientContext.getInstance()
-            .getViewLoader()
-            .loadView("auction_detail.fxml");
+          com.auction.client.core.ClientContext context = com.auction.client.core.ClientContext.getInstance();
+          context.setCurrentAuctionId(selected.getId());
+          context.setPreviousViewName("user_dashboard.fxml");
+          context.getViewLoader().loadView("auction_detail.fxml");
         } catch (java.io.IOException e) {
           throw new RuntimeException(e);
         }

@@ -5,6 +5,7 @@ import com.auction.shared.Constants;
 import java.io.IOException;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
 
 public class RegistrationController {
 
@@ -20,6 +21,19 @@ public class RegistrationController {
             statusLabel.textProperty().addListener((obs, oldText, newText) ->
                 statusLabel.setVisible(newText != null && !newText.trim().isEmpty())
             );
+        }
+    }
+
+    @FXML
+    private void handleNavigateToLogin(MouseEvent event) {
+        try {
+            ClientContext.getInstance().getViewLoader().loadView("login.fxml");
+        } catch (IOException e) {
+            if (statusLabel != null) {
+                statusLabel.setStyle("-fx-text-fill: #f85149;");
+                statusLabel.setText("Unable to open login page: " + e.getMessage());
+            }
+            e.printStackTrace();
         }
     }
 

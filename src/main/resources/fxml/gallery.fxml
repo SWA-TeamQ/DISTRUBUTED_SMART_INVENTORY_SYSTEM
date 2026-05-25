@@ -31,8 +31,8 @@
             <VBox spacing="10" styleClass="panel-card">
                 <Label text="Filters" styleClass="section-title"/>
                 <HBox spacing="10">
-                    <TextField promptText="Search auctions" styleClass="search-field" HBox.hgrow="ALWAYS"/>
-                    <Button text="Search" styleClass="primary-button"/>
+                    <TextField fx:id="searchField" promptText="Search auctions" styleClass="search-field" HBox.hgrow="ALWAYS" onAction="#handleSearch"/>
+                    <Button text="Search" styleClass="primary-button" onAction="#handleSearch"/>
                 </HBox>
             </VBox>
 
@@ -42,10 +42,10 @@
                         <Label text="Auction Grid" styleClass="section-title"/>
                         <Label text="This surface is ready for auction cards and quick actions." styleClass="section-copy" wrapText="true"/>
                     </VBox>
-                    <Label text="Empty state" styleClass="status-chip status-chip-accent"/>
+                    <Label fx:id="auctionCountLabel" text="0 auctions" styleClass="status-chip status-chip-accent"/>
                 </HBox>
 
-                <FlowPane hgap="14" vgap="14" prefWrapLength="1200">
+                <FlowPane fx:id="auctionFlow" hgap="14" vgap="14" prefWrapLength="1200">
                     <VBox styleClass="metric-card" prefWidth="240">
                         <Label text="No auctions loaded" styleClass="metric-label"/>
                         <Label text="Use refresh or connect to a live server." styleClass="section-copy" wrapText="true"/>

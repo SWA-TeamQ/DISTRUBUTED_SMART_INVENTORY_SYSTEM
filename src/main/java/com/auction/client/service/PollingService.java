@@ -29,6 +29,16 @@ public class PollingService {
      */
     public void startPolling(int auctionId, Consumer<AuctionItem> onUpdate) {
         // TODO: schedule getAuctionById every 2s, call onUpdate with result
+        scheduler = Executors.newSingleThreadScheduledExecutor();
+        scheduler.scheduleAtFixedRate(() -> {
+            try{
+                AuctionItem item = service.getAuctionById(auctionId);
+                onUpdate.accept(item);
+            } catch(Exception e){
+                System.err.println(e.getMessage());
+                e.printStackTrace();
+            }
+        }, 0, 2, TimeUnit.SECONDS);
     }
 
     /** Stop all polling. Call when leaving the detail view. */
