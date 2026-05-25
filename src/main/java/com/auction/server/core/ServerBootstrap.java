@@ -39,8 +39,11 @@ public class ServerBootstrap {
         LifecycleManager lifecycleManager = new LifecycleManager(auctionRepo, bidRepo, lockManager, txManager);
         ImageStore imageStore = new ImageStore(auctionRepo);
 
+        SessionManager sessionManager = new SessionManager(userRepo);
+        AdminManager adminManager = new AdminManager(auctionManager, userRepo);
+
         // 4. Init Service
-        this.service = new AuctionServiceImpl(userRepo, auctionManager, lifecycleManager, imageStore);
+        this.service = new AuctionServiceImpl(auctionManager, sessionManager, adminManager, imageStore);
 
         // 5. Setup RMI
         int port = Constants.DEFAULT_RMI_PORT;

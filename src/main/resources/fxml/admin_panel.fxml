@@ -44,21 +44,23 @@
                 <content>
                     <VBox spacing="16" styleClass="sidebar-stack">
                         <VBox spacing="10" styleClass="panel-card">
-                            <Label text="Create User" styleClass="panel-title"/>
-                            <Label text="Provision an account for a new bidder or admin." styleClass="panel-copy" wrapText="true"/>
+                            <Label text="Search Users" styleClass="panel-title"/>
+                            <Label text="Find users to view their details or manage them." styleClass="panel-copy" wrapText="true"/>
 
-                            <TextField fx:id="usernameField" promptText="Username" styleClass="compact-field"/>
-                            <PasswordField fx:id="passwordField" promptText="Password" styleClass="compact-field"/>
-                            <ComboBox fx:id="roleCombo" promptText="Role" styleClass="compact-field"/>
-
-                            <Button text="Create User" onAction="#handleCreateUser" defaultButton="true" maxWidth="Infinity" styleClass="primary-button"/>
+                            <TextField fx:id="searchField" promptText="Username query..." styleClass="compact-field"/>
+                            <Button text="Search Users" onAction="#handleSearchUser" defaultButton="true" maxWidth="Infinity" styleClass="primary-button"/>
                             <Label fx:id="statusLabel" wrapText="true" styleClass="status-line"/>
                         </VBox>
 
                         <VBox spacing="10" styleClass="panel-card">
+                            <Label text="Promote User" styleClass="panel-title"/>
+                            <Label text="Elevate a standard user to admin privileges." styleClass="panel-copy" wrapText="true"/>
+                            <TextField fx:id="promoteField" promptText="Exact username..." styleClass="compact-field"/>
+                            <Button text="Promote to Admin" onAction="#handlePromoteUser" maxWidth="Infinity" styleClass="secondary-button"/>
+                        </VBox>
+
+                        <VBox spacing="10" styleClass="panel-card">
                             <Label text="System Tools" styleClass="panel-title"/>
-                            <Label text="Maintenance actions that affect the whole system." styleClass="panel-copy" wrapText="true"/>
-                            <Button text="Backup Database" onAction="#handleBackup" maxWidth="Infinity" styleClass="secondary-button"/>
                             <Button text="Refresh Dashboard" onAction="#handleRefreshDashboard" maxWidth="Infinity" styleClass="secondary-button"/>
                         </VBox>
 

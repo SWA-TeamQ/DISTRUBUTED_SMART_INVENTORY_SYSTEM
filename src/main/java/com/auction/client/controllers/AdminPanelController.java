@@ -10,9 +10,8 @@ public class AdminPanelController {
 
     @FXML private javafx.scene.control.TableView<com.auction.shared.models.User> usersTable;
     @FXML private javafx.scene.control.ListView<String> auditListView;
-    @FXML private javafx.scene.control.TextField usernameField;
-    @FXML private javafx.scene.control.PasswordField passwordField;
-    @FXML private javafx.scene.control.ComboBox<String> roleCombo;
+    @FXML private javafx.scene.control.TextField searchField;
+    @FXML private javafx.scene.control.TextField promoteField;
     @FXML private javafx.scene.control.Label statusLabel;
     @FXML private Label totalUsersLabel;
     @FXML private Label adminUsersLabel;
@@ -22,12 +21,6 @@ public class AdminPanelController {
 
     @FXML
     public void initialize() {
-        roleCombo.getItems().addAll(
-            com.auction.shared.Constants.USER, 
-            com.auction.shared.Constants.ADMIN
-        );
-        roleCombo.getSelectionModel().selectFirst();
-
         refreshDashboard();
     }
 
@@ -61,35 +54,38 @@ public class AdminPanelController {
     }
 
     @FXML
-    private void handleCreateUser() {
+    private void handleSearchUser() {
         try {
-            String u = usernameField.getText();
-            String p = passwordField.getText();
-            String r = roleCombo.getValue();
-            
+            String query = searchField.getText();
             com.auction.client.core.ClientContext context = com.auction.client.core.ClientContext.getInstance();
-            context.getRmiProvider().getService().createUser(u, p, r, context.getSessionToken());
-            statusLabel.setText("User created successfully");
-            usernameField.clear();
-            passwordField.clear();
-            refreshDashboard();
+            java.util.List<com.auction.shared.models.User> users;
+            if (query == null || query.trim().isEmpty()) {
+                users = context.getRmiProvider().getService().getAllUsers(context.getSessionToken());
+            } else {
+                users = context.getRmiProvider().getService().searchUsers(query, context.getSessionToken());
+            }
+            usersTable.getItems().setAll(users);
+            statusLabel.setText("Search completed.");
         } catch (java.rmi.RemoteException e) {
             com.auction.client.core.ClientContext.getInstance().handleConnectionLost();
         } catch (Exception e) {
-            statusLabel.setText("Creation failed: " + e.getMessage());
+            statusLabel.setText("Search failed: " + e.getMessage());
         }
     }
 
     @FXML
-    private void handleBackup() {
+    private void handlePromoteUser() {
         try {
+            String username = promoteField.getText();
             com.auction.client.core.ClientContext context = com.auction.client.core.ClientContext.getInstance();
-            byte[] db = context.getRmiProvider().getService().backupDatabase(context.getSessionToken());
-            java.io.File file = new java.io.File("backup_" + System.currentTimeMillis() + ".db");
-            java.nio.file.Files.write(file.toPath(), db);
-            statusLabel.setText("Database backed up to " + file.getAbsolutePath());
+            context.getRmiProvider().getService().promoteUserToAdmin(username, context.getSessionToken());
+            statusLabel.setText("User promoted to admin successfully");
+            promoteField.clear();
+            handleSearchUser(); // Refresh the table
+        } catch (java.rmi.RemoteException e) {
+            com.auction.client.core.ClientContext.getInstance().handleConnectionLost();
         } catch (Exception e) {
-            statusLabel.setText("Backup failed: " + e.getMessage());
+            statusLabel.setText("Promotion failed: " + e.getMessage());
         }
     }
 
