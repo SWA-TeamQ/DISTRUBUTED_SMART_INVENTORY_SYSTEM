@@ -44,7 +44,7 @@ SQLite schema, repository architecture, backup strategy, and security measures.
 | `start_time` | `TEXT` | `NOT NULL` | ISO-8601 UTC |
 | `end_time` | `TEXT` | `NOT NULL` | ISO-8601 UTC |
 | `cap_end_time` | `TEXT` | `NOT NULL` | Snipe limit (end_time + 10 min) |
-| `status` | `TEXT` | `NOT NULL CHECK IN (...)` | ACTIVE, SOLD, EXPIRED, CANCELLED |
+| `status` | `TEXT` | `NOT NULL CHECK IN ('ACTIVE', 'SOLD', 'EXPIRED', 'CANCELLED')` | |
 | `img1` | `TEXT` | | Filename or NULL |
 | `img2` | `TEXT` | | Filename or NULL |
 | `img3` | `TEXT` | | Filename or NULL |
@@ -55,7 +55,7 @@ SQLite schema, repository architecture, backup strategy, and security measures.
 | Column | Type | Constraints | Notes |
 |--------|------|-------------|-------|
 | `id` | `INTEGER` | `PRIMARY KEY AUTOINCREMENT` | |
-| `auction_id` | `INTEGER` | `NOT NULL REFERENCES auction_items(id) ON DELETE CASCADE` | |
+| `auction_item_id` | `INTEGER` | `NOT NULL REFERENCES auction_items(id) ON DELETE CASCADE` | |
 | `bidder_username` | `TEXT` | `NOT NULL` | Bid actor username (FK to users.username) |
 | `amount_cents` | `INTEGER` | `NOT NULL CHECK > 0` | |
 | `timestamp` | `TEXT` | `NOT NULL` | ISO-8601 UTC |
@@ -65,7 +65,7 @@ SQLite schema, repository architecture, backup strategy, and security measures.
 ## 3. Indexes
 
 ```sql
-CREATE INDEX idx_bids_auction_id ON bids(auction_id);
+CREATE INDEX idx_bids_auction_id ON bids(auction_item_id);
 CREATE INDEX idx_auction_status_end ON auction_items(status, end_time);
 CREATE INDEX idx_auction_seller ON auction_items(seller_username);
 ```
@@ -79,9 +79,9 @@ CREATE INDEX idx_auction_seller ON auction_items(seller_username);
 
 ## 4. Data Types: Why Cents?
 
-All monetary values are stored as `INTEGER` cents, not `DOUBLE` dollars.
+All monetary values are stored as `long` cents, not `double` dollars.
 
-| Aspect | Double (dollars) | Integer (cents) |
+| Aspect | Double (dollars) | Long (cents) |
 |--------|------------------|-----------------|
 | Equality checks | Brittle (`0.1 + 0.2 != 0.3`) | Exact (`10 + 20 == 30`) |
 | SQL constraints | Floating-point imprecision | Exact integer math |
@@ -116,7 +116,7 @@ try {
 
 ```java
 // SQLite VACUUM INTO is atomic and non-blocking
-String backupPath = "data/backup-" + timestamp + ".db";
+String backupPath = "data/backup-" + UUID.randomUUID().toString() + ".db";
 try (Statement stmt = connection.createStatement()) {
     stmt.execute("VACUUM INTO '" + backupPath + "'");
 }
@@ -126,7 +126,7 @@ try (Statement stmt = connection.createStatement()) {
 | Feature | Implementation |
 |---------|----------------|
 | Trigger | Admin clicks "Backup" |
-| Location | `data/auction_backup_YYYYMMDD.db` |
+| Location | `data/backup_<uuid>.db` |
 | Format | Full `.db` file (binary) |
 | Transfer | Returned as `byte[]` over RMI, saved via `FileChooser` |
 
@@ -141,16 +141,16 @@ try (Statement stmt = connection.createStatement()) {
 | AuctionID | `id` | |
 | Title | `title` | |
 | Category | `category` | |
-| StartingPrice | `starting_price_cents / 100` | Formatted |
-| FinalPrice | `current_bid_cents / 100` | Same as starting if no bids |
+| StartingPrice | `starting_price_cents / 100.0` | Formatted as double string |
+| FinalPrice | `current_bid_cents / 100.0` | Same as starting if no bids |
 | Winner | `highest_bidder_username` | Empty string if none |
 | Status | `status` | ACTIVE, SOLD, EXPIRED, CANCELLED |
-| StartTime | `start_time` | ISO-8601 |
-| EndTime | `end_time` | ISO-8601 |
+| StartTime | `start_time` | ISO-8601 UTC |
+| EndTime | `end_time` | ISO-8601 UTC |
 
 ### Rules
 
-- Only auctions where `seller_username = ?`
+- Only auctions where `seller_username = ?` (or all if Admin)
 - All statuses included (not just active)
 - RFC 4180 escaping for commas, quotes, newlines in title/description
 
@@ -161,7 +161,7 @@ try (Statement stmt = connection.createStatement()) {
 | Aspect | Implementation |
 |--------|----------------|
 | Passwords | SHA-256 hash only (no salt) — acceptable for university demo |
-| Registration | Admin-only via `createUser()`; no public endpoint |
+| Registration | Admin-only via `createUser()` or fixed admin seeding |
 | SQL Injection | Parameterized queries throughout |
 
 ---
@@ -176,7 +176,7 @@ connection.createStatement().execute("PRAGMA foreign_keys = ON");
 
 // Create tables if not exist (see schema above)
 // Insert default admin if users table empty
-// Create directories: data/, logs/, resources/images/, resources/thumbs/
+// Create directories: data/, logs/, resources/images/, resources/thumbs/, exports/
 ```
 
 ---
@@ -188,6 +188,5 @@ connection.createStatement().execute("PRAGMA foreign_keys = ON");
 | Path | `logs/audit.log` |
 | Format | `[ISO-8601] [LEVEL] actor: description` |
 | Rotation | None (append-only, manual delete) |
-| Examples | See architecture.md examples |
 
-**Note:** The term "tamper-resistant" has been removed from documentation; it is a simple append-only text file.
+**Note:** The audit log is a simple append-only text file managed by `AsyncLogger`.

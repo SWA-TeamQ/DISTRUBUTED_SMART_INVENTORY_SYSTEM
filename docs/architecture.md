@@ -71,9 +71,15 @@ Enforced by `AuctionManager`:
 if (amount < currentBid * 1.05) throw new InsufficientBidException();
 ```
 
-### Snipe Protection
+### Snipe Protection with Cap
 
-Triggered by `AuctionManager` during bid placement if `now` is within 30s of `endTime`.
+Triggered by `AuctionManager` during bid placement if `now` is within 30s of `endTime`. 
+- Effect: `endTime = min(endTime + 30s, capEndTime)`
+- `capEndTime` is set at auction creation to prevent auctions from running indefinitely.
+
+### Clock Authority (Server-Time)
+
+To prevent discrepancies between client and server clocks during countdowns, the server provides a `serverTime()` method. Clients compute a drift offset on connection and use it to adjust their local timers to match the server's authoritative clock.
 
 ---
 
@@ -88,6 +94,7 @@ Full contract in `shared/interfaces/IAuctionService.java`.
 | `placeBid(...)` | Adapter | `AuctionManager.placeBid(...)` |
 | `createAuction(...)` | Adapter | `AuctionManager.createAuction(...)` + `ImageStore` |
 | `getActiveAuctions()` | Adapter | `AuctionManager.getActiveAuctions()` |
+| `serverTime()` | Adapter | Authority for synchronization |
 
 ---
 
@@ -95,11 +102,19 @@ Full contract in `shared/interfaces/IAuctionService.java`.
 
 ### Server-Side Locking
 
-`AuctionManager` manages per-auction concurrency using fine-grained locks (or database transactions) to ensure atomic bid updates.
+`AuctionManager` manages per-auction concurrency using a `ConcurrentHashMap` of `ReentrantLock` objects. Every mutation (bid placement, cancellation, relisting) must acquire the lock for the specific auction ID.
+
+### Atomic Bid Commit
+
+Bid placement is executed within a single database transaction:
+1. Validate rules (increment, self-bid, etc.)
+2. Insert bid record.
+3. Update auction record (new price, highest bidder, potentially extended end time).
+4. Commit or rollback on failure.
 
 ### Background Lifecycle
 
-`AuctionReaper` runs as a daemon thread, ensuring terminal states are reached even if no users are active.
+`AuctionReaper` runs as a daemon thread, ensuring terminal states are reached even if no users are active. It also acquires the auction-specific lock before performing transitions.
 
 ---
 
@@ -108,3 +123,4 @@ Full contract in `shared/interfaces/IAuctionService.java`.
 - RMI callbacks (clients must poll).
 - Salted password hashing (using SHA-256 for demo simplicity).
 - Horizontal scaling.
+- Audit log tamper-resistance (simple append-only text file).
