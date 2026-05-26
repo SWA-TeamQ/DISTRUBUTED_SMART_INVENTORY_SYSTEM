@@ -47,11 +47,15 @@ public class AdminManager {
     }
 
     public List<User> getAllUsers(SessionContext context) {
-        return userRepo.findAllUsers();
+        return userRepo.findAllUsers().stream()
+            .map(u -> new User(u.getUsername(), null, u.getRoleType(), u.getCreatedAt()))
+            .toList();
     }
 
     public List<User> searchUsers(String query, SessionContext context) {
-        return userRepo.searchUsers(query);
+        return userRepo.searchUsers(query).stream()
+            .map(u -> new User(u.getUsername(), null, u.getRoleType(), u.getCreatedAt()))
+            .toList();
     }
 
     public void promoteUserToAdmin(String username, SessionContext context) throws AuctionException {

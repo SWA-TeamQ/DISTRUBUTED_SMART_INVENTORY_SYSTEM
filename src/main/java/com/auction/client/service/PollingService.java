@@ -15,33 +15,38 @@ import java.util.function.Consumer;
  */
 public class PollingService {
 
-    private final IAuctionService service;
     private ScheduledExecutorService scheduler;
+    private int failureCount = 0;
 
-    public PollingService(IAuctionService service) {
-        this.service = service;
+    public PollingService() {
+        // generic service
     }
 
     /**
-     * Start polling a specific auction for updates.
-     * @param auctionId auction to watch
-     * @param onUpdate callback with updated AuctionItem (called on background thread)
+     * Start polling a generic task.
+     * @param task the RMI call to execute
+     * @param intervalSeconds polling interval
      */
-    public void startPolling(int auctionId, Consumer<AuctionItem> onUpdate) {
-        // TODO: schedule getAuctionById every 2s, call onUpdate with result
+    public void startPolling(Runnable task, int intervalSeconds) {
         scheduler = Executors.newSingleThreadScheduledExecutor();
         scheduler.scheduleAtFixedRate(() -> {
-            try{
-                AuctionItem item = service.getAuctionById(auctionId);
-                onUpdate.accept(item);
-            } catch(Exception e){
-                System.err.println(e.getMessage());
-                e.printStackTrace();
+            try {
+                task.run();
+                failureCount = 0; // reset on success
+            } catch (Exception e) {
+                failureCount++;
+                System.err.println("Polling failed (" + failureCount + "): " + e.getMessage());
+                if (failureCount >= 3) {
+                    shutdown();
+                    javafx.application.Platform.runLater(() -> {
+                        com.auction.client.core.ClientContext.getInstance().handleConnectionLost();
+                    });
+                }
             }
-        }, 0, 2, TimeUnit.SECONDS);
+        }, 0, intervalSeconds, TimeUnit.SECONDS);
     }
 
-    /** Stop all polling. Call when leaving the detail view. */
+    /** Stop all polling. Call when leaving the view. */
     public void shutdown() {
         if (scheduler != null && !scheduler.isShutdown()) {
             scheduler.shutdownNow();

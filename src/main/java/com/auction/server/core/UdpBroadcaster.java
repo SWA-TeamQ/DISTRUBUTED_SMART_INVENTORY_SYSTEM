@@ -31,7 +31,12 @@ public class UdpBroadcaster {
         if (scheduler != null) return;
         
         scheduler = Executors.newSingleThreadScheduledExecutor();
-        String message = Constants.UDP_PREFIX + "|" + serverName + "|" + rmiPort;
+        String serverId = java.util.UUID.randomUUID().toString();
+        // Fallback to localhost if we cannot determine address, but client prefers payload host
+        String rmiHost = "127.0.0.1";
+        try { rmiHost = java.net.InetAddress.getLocalHost().getHostAddress(); } catch (Exception ignored) {}
+        
+        String message = Constants.UDP_PREFIX + "|v1|" + rmiPort + "|" + serverName + "|" + serverId + "|" + rmiHost;
         byte[] data = message.getBytes();
 
         scheduler.scheduleAtFixedRate(() -> {

@@ -50,7 +50,7 @@ public class AuctionDetailController {
         this.currentAuctionId = auctionId;
         try {
             var service = ClientContext.getInstance().getRmiProvider().getService();
-            this.pollingService = new PollingService(service);
+            this.pollingService = new PollingService();
             // load initial item state
             AuctionItem initial = service.getAuctionById(auctionId);
             this.currentItem = initial;
@@ -60,10 +60,21 @@ public class AuctionDetailController {
             loadDetailThumbnail(auctionId, 1, thumb1View);
             loadDetailThumbnail(auctionId, 2, thumb2View);
             loadDetailThumbnail(auctionId, 3, thumb3View);
-            pollingService.startPolling(auctionId, item -> {
-                this.currentItem = item;
-                Platform.runLater(() -> updateUi(item));
-            });
+            pollingService.startPolling(() -> {
+                try {
+                    AuctionItem item = service.getAuctionById(auctionId);
+                    if (item != null && currentItem != null) {
+                        String oldEnd = currentItem.getEndTime();
+                        if (oldEnd != null && !oldEnd.equals(item.getEndTime())) {
+                            Platform.runLater(() -> showToast("Timer Extended!"));
+                        }
+                    }
+                    this.currentItem = item;
+                    Platform.runLater(() -> updateUi(item));
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }, 2);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -180,6 +191,7 @@ public class AuctionDetailController {
                 Platform.runLater(() -> {
                     updateUi(currentItem);
                     bidStatusLabel.setText("Failed: " + finalMsg);
+                    animateShakeError();
                 });
             } finally {
                 Platform.runLater(() -> {
@@ -189,6 +201,17 @@ public class AuctionDetailController {
                 });
             }
         }, executor);
+    }
+
+    private void animateShakeError() {
+        if (bidAmountField == null) return;
+        bidAmountField.setStyle("-fx-border-color: #f85149; -fx-border-width: 2px;");
+        javafx.animation.TranslateTransition tt = new javafx.animation.TranslateTransition(Duration.millis(50), bidAmountField);
+        tt.setByX(10f);
+        tt.setCycleCount(6);
+        tt.setAutoReverse(true);
+        tt.setOnFinished(e -> bidAmountField.setStyle(""));
+        tt.play();
     }
 
     private void loadDetailThumbnail(int auctionId, int index, javafx.scene.image.ImageView target) {
