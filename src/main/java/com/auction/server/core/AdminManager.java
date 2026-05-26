@@ -66,4 +66,13 @@ public class AdminManager {
         AsyncLogger.log(LogCategory.SECURITY, EventType.LOGIN,
                 "Admin=" + context.username() + " PromotedUser=" + username);
     }
+
+    public void demoteUserToStandard(String username, SessionContext context) throws AuctionException {
+        if (userRepo.findUserByUsername(username) == null) {
+            throw new AuctionException("User not found");
+        }
+        userRepo.demoteUserToStandard(username);
+        AsyncLogger.log(LogCategory.SECURITY, EventType.LOGIN,
+                "Admin=" + context.username() + " DemotedUser=" + username);
+    }
 }

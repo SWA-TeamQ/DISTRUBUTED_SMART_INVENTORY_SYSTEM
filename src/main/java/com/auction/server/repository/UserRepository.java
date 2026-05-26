@@ -115,4 +115,15 @@ public class UserRepository {
             throw new RuntimeException("Failed to promote user", e);
         }
     }
+
+    public void demoteUserToStandard(String username) {
+        String sql = "UPDATE users SET role = ? WHERE username = ?";
+        try (var pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, Constants.USER);
+            pstmt.setString(2, username);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to demote user", e);
+        }
+    }
 }

@@ -26,14 +26,12 @@ import java.util.*;
  */
 public class DemoSeeder {
 
-  private static final String DB_URL = "jdbc:sqlite:data/rtdas.db";
-
   public static void main(String[] args) {
     System.out.println("🌱 RTDAS Demo Seeder Starting...");
 
     try {
       // Initialize database
-      DatabaseManager dbManager = new DatabaseManager(DB_URL);
+      DatabaseManager dbManager = new DatabaseManager();
       var connection = dbManager.getConnection();
       var userRepo = new UserRepository(connection);
       var auctionRepo = new AuctionRepository(connection);

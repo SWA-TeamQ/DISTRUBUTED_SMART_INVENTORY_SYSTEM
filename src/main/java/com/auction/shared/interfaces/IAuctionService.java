@@ -77,6 +77,8 @@ public interface IAuctionService extends Remote {
 
         void promoteUserToAdmin(String username, String token) throws RemoteException, AuctionException;
 
+        void demoteUserToStandard(String username, String token) throws RemoteException, AuctionException;
+
         List<String> getAuditLogs(int lastNLines, String token)
                         throws RemoteException, AuctionException;
 }

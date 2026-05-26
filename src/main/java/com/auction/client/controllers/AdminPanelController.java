@@ -10,6 +10,8 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 public class AdminPanelController {
@@ -22,6 +24,7 @@ public class AdminPanelController {
     private TableView<com.auction.shared.models.User> usersTable;
     private TextField searchField;
     private ObservableList<com.auction.shared.models.User> allUsers = FXCollections.observableArrayList();
+    private FilteredList<com.auction.shared.models.User> filteredUsers;
     
     // KPI Labels
     private Label totalUsersVal = new Label("0");
@@ -82,9 +85,17 @@ public class AdminPanelController {
                 if (empty) {
                     setGraphic(null);
                 } else {
-                    var user = getTableView().getItems().get(getIndex());
+                    var row = getTableRow();
+                    var user = row == null ? null : row.getItem();
+                    if (user == null) {
+                        setGraphic(null);
+                        return;
+                    }
                     var adminUser = com.auction.client.core.ClientContext.getInstance().getUsername();
-                    
+                    btn.setDisable(false);
+                    btn.setOnAction(null);
+                    btn.getStyleClass().removeAll("action-demote", "action-promote");
+
                     if (user.getUsername().equals(adminUser)) {
                         btn.setText("Self");
                         btn.setDisable(true);
@@ -107,8 +118,11 @@ public class AdminPanelController {
         
         usersTable.getColumns().addAll(nameCol, roleCol, actionCol);
         usersTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        usersTable.setItems(allUsers);
-        
+        filteredUsers = new FilteredList<>(allUsers, user -> true);
+        SortedList<com.auction.shared.models.User> sortedUsers = new SortedList<>(filteredUsers);
+        sortedUsers.comparatorProperty().bind(usersTable.comparatorProperty());
+        usersTable.setItems(sortedUsers);
+
         // Add real-time search filtering
         searchField.textProperty().addListener((obs, oldVal, newVal) -> filterUsers(newVal));
         
@@ -132,14 +146,11 @@ public class AdminPanelController {
 
     private void filterUsers(String query) {
         if (query == null || query.isEmpty()) {
-            usersTable.setItems(allUsers);
-        } else {
-            String lowerQuery = query.toLowerCase();
-            ObservableList<com.auction.shared.models.User> filtered = allUsers.filtered(user ->
-                user.getUsername().toLowerCase().contains(lowerQuery)
-            );
-            usersTable.setItems(filtered);
+            filteredUsers.setPredicate(user -> true);
+            return;
         }
+        String lowerQuery = query.toLowerCase();
+        filteredUsers.setPredicate(user -> user.getUsername().toLowerCase().contains(lowerQuery));
     }
 
     @FXML public void showUsers() { contentArea.getChildren().setAll(usersView); refreshUsers(); }
@@ -175,8 +186,7 @@ public class AdminPanelController {
     private void demoteUser(String username) {
         try {
             var context = com.auction.client.core.ClientContext.getInstance();
-            // Demotion by promoting to User (assuming same endpoint or specific logic exists)
-            context.getRmiProvider().getService().promoteUserToAdmin(username, context.getSessionToken());
+            context.getRmiProvider().getService().demoteUserToStandard(username, context.getSessionToken());
             refreshUsers();
         } catch (Exception e) {
             statusLabel.setText("Demotion failed: " + e.getMessage());
