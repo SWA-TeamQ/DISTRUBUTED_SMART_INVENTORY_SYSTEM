@@ -31,30 +31,36 @@ public class UdpDiscoveryClient {
         if (running) return;
         running = true;
         listenerThread = new Thread(() -> {
-            try (DatagramSocket socket = new DatagramSocket(Constants.UDP_BROADCAST_PORT)) {
-                socket.setSoTimeout(1000); // 1 second timeout to allow interrupt checking
-                byte[] buffer = new byte[1024];
-                while (running) {
-                    try {
-                        DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-                        socket.receive(packet);
-                        String data = new String(packet.getData(), 0, packet.getLength()).trim();
-                        // Format: RTDAS|v1|<rmiPort>|<serverName>|<serverId>|<rmiHost>
-                        if (data.startsWith(Constants.UDP_PREFIX + "|v1|")) {
-                            String[] parts = data.split("\\|");
-                            if (parts.length >= 6) {
-                                int rmiPort = Integer.parseInt(parts[2]);
-                                String serverName = parts[3];
-                                String rmiHost = parts[5];
-                                String host = (rmiHost != null && !rmiHost.trim().isEmpty()) ? rmiHost : packet.getAddress().getHostAddress();
-                                ServerInfo info = new ServerInfo(serverName, host, rmiPort);
-                                if (!discoveredServers.contains(info)) {
-                                    discoveredServers.add(info);
+            try {
+                java.net.DatagramSocket socket = new java.net.DatagramSocket(null);
+                socket.setReuseAddress(true);
+                socket.bind(new java.net.InetSocketAddress(com.auction.shared.Constants.UDP_BROADCAST_PORT));
+                
+                try (socket) {
+                    socket.setSoTimeout(1000); // 1 second timeout to allow interrupt checking
+                    byte[] buffer = new byte[1024];
+                    while (running) {
+                        try {
+                            java.net.DatagramPacket packet = new java.net.DatagramPacket(buffer, buffer.length);
+                            socket.receive(packet);
+                            String data = new String(packet.getData(), 0, packet.getLength()).trim();
+                            // Format: RTDAS|v1|<rmiPort>|<serverName>|<serverId>|<rmiHost>
+                            if (data.startsWith(com.auction.shared.Constants.UDP_PREFIX + "|v1|")) {
+                                String[] parts = data.split("\\|");
+                                if (parts.length >= 6) {
+                                    int rmiPort = Integer.parseInt(parts[2]);
+                                    String serverName = parts[3];
+                                    String rmiHost = parts[5];
+                                    String host = (rmiHost != null && !rmiHost.trim().isEmpty()) ? rmiHost : packet.getAddress().getHostAddress();
+                                    ServerInfo info = new ServerInfo(serverName, host, rmiPort);
+                                    if (!discoveredServers.contains(info)) {
+                                        discoveredServers.add(info);
+                                    }
                                 }
                             }
+                        } catch (java.net.SocketTimeoutException e) {
+                            // Expected timeout, loop continues and checks running flag
                         }
-                    } catch (java.net.SocketTimeoutException e) {
-                        // Expected timeout, loop continues and checks running flag
                     }
                 }
             } catch (Exception e) {
