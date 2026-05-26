@@ -291,6 +291,10 @@ public class UserDashboardController {
       );
     java.io.File f = fc.showOpenDialog(marketTable.getScene().getWindow());
     if (f != null) {
+      if (f.length() > com.auction.shared.Constants.MAX_IMAGE_SIZE_BYTES) {
+        statusLabel.setText("Image exceeds 2MB limit.");
+        return null;
+      }
       try {
         return java.nio.file.Files.readAllBytes(f.toPath());
       } catch (Exception e) {

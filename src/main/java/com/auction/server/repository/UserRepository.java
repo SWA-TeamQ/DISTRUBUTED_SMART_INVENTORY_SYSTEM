@@ -84,4 +84,35 @@ public class UserRepository {
         }
         return users;
     }
+    public List<User> searchUsers(String query) {
+        List<User> users = new ArrayList<>();
+        String sql = "SELECT username, password_hash, role, created_at FROM users WHERE username LIKE ?";
+        try (var pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, "%" + query + "%");
+            try (var rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    String u = rs.getString("username");
+                    String p = rs.getString("password_hash");
+                    String r = rs.getString("role");
+                    String createdAt = rs.getString("created_at");
+                    if (Constants.ADMIN.equals(r)) users.add(new Admin(u, p, createdAt));
+                    else if (Constants.USER.equals(r)) users.add(new User(u, p, Constants.USER, createdAt));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to search users", e);
+        }
+        return users;
+    }
+
+    public void promoteUserToAdmin(String username) {
+        String sql = "UPDATE users SET role = ? WHERE username = ?";
+        try (var pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, Constants.ADMIN);
+            pstmt.setString(2, username);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to promote user", e);
+        }
+    }
 }

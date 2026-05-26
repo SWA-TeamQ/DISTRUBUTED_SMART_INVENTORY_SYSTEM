@@ -14,7 +14,7 @@ University students need to demonstrate mastery of advanced Java topics — OOP,
 
 ## Solution
 
-A distributed, multi-user **English auction platform** where a headless RMI server manages auctions, persists data in SQLite, and serves one or more JavaFX desktop clients. The system supports two roles (Admin, User) with real-time bid updates via client polling, image galleries with LQIP (Low-Quality Image Placeholder) loading, automatic server discovery via UDP broadcast, and robust concurrency controls including snipe protection.
+A distributed, multi-user **English auction platform** where a headless RMI server manages auctions, persists data in SQLite, and serves one or more JavaFX desktop clients. The system supports two roles (Admin, User) with real-time bid updates via client polling, image galleries with LQIP (Low-Quality Image Placeholder) loading, automatic server discovery via UDP broadcast, and robust concurrency controls including snipe protection. Note: "User" is a unified role; any user can be both a seller and a bidder.
 
 **Demo environment:** One PC runs the server (you); four teammate PCs connect as clients, all on the same local Wi-Fi. Clients discover the server automatically via UDP broadcast or connect manually by entering the server's IP. No internet required.
 
@@ -33,7 +33,7 @@ A distributed, multi-user **English auction platform** where a headless RMI serv
 ### Authentication & User Management
 
 6. As an **Admin**, I want to create new user accounts (with a username, password, and role), so that I control who can access the system.
-7. As an **Admin**, I want to assign one of two roles (admin, user) when creating a user, so that each person has appropriate permissions.
+7. As an **Admin**, I want to assign one of two roles (ADMIN, USER) when creating a user, so that each person has appropriate permissions.
 8. As a **User**, I want to log in with my username and password, so that I can access the system with my assigned role.
 9. As a **User**, I want my password stored as a SHA-256 hash, so that raw credentials are never persisted.
 10. As a **User**, I want to see a clear error message if my login credentials are incorrect, so that I know what went wrong.
@@ -43,7 +43,7 @@ A distributed, multi-user **English auction platform** where a headless RMI serv
 ### Auction Browsing & Discovery
 
 13. As a **User**, I want to see a gallery of all active auctions with thumbnail images, so that I can quickly browse available items.
-14. As a **User**, I want to filter auctions by category (Electronics, Furniture, Art, Other), so that I find items I'm interested in.
+14. As a **User**, I want to filter auctions by category (ELECTRONICS, FURNITURE, ART, OTHER), so that I find items I'm interested in.
 15. As a **User**, I want to sort auctions by end time, current bid, or category, so that I can prioritise what to look at.
 16. As a **User**, I want to see a small blurred thumbnail (LQIP) load instantly in the gallery, so that the UI feels fast even with slow connections.
 17. As a **User**, I want to click on an auction to see its full detail view, so that I can evaluate the item before bidding.
@@ -58,14 +58,14 @@ A distributed, multi-user **English auction platform** where a headless RMI serv
 23. As a **User**, I want the system to prevent me from bidding on my own auction, so that self-bidding is impossible.
 24. As a **User**, I want the system to prevent me from bidding if I'm already the highest bidder, so that I don't waste bids.
 25. As a **User**, I want the "Bid" button to be disabled while my bid is being processed, so that I don't accidentally double-click.
-26. As a **User**, I want to see the full bid history for any auction (all bidders, amounts, timestamps), so that I can gauge competition.
+26. As a **User**, I want to see the full bid history for any auction (all bidders, amounts in cents, timestamps), so that I can gauge competition.
 27. As a **User**, I want the auction detail view to auto-refresh every 2 seconds, so that I see the latest bid without manually refreshing.
 28. As a **User**, I want to see a live countdown timer showing time remaining on an auction, so that I know how much time I have.
 
 ### Snipe Protection
 
 29. As a **User**, I want the auction timer to extend by 30 seconds if a bid is placed in the last 30 seconds, so that last-second sniping is discouraged.
-30. As a **User**, I want the system to cap total extension so auctions don't run forever, so that the demo stays predictable.
+30. As a **User**, I want the system to cap total extension so auctions don't run forever, so that the demo stays predictable. Extensions are capped at `capEndTime` (default: `originalEndTime + 10 minutes`).
 
 ### User Activity Dashboard
 
@@ -73,14 +73,14 @@ A distributed, multi-user **English auction platform** where a headless RMI serv
 
 ### Auction Creation & Management
 
-32. As a **User**, I want to create a new auction with a title, description, category, starting price, end time, and up to 3 images (max 2MB each), so that I can list items for sale.
+32. As a **User**, I want to create a new auction with a title, description, category, starting price (in cents), end time, and up to 3 images (max 2MB each), so that I can list items for sale.
 33. As a **User**, I want the client to validate image file sizes before upload and reject files over 2MB with a clear message, so that I don't waste time uploading oversized files.
 34. As a **User**, I want the system to auto-generate a 40×40 blurred thumbnail from my first image, so that gallery loading is fast.
 35. As a **User**, I want to cancel an auction that has zero bids, so that I can remove items I no longer want to sell.
 36. As a **User**, I want to be prevented from cancelling an auction that already has bids, so that users are protected.
-37. As a **User**, I want to see a dashboard of all my auctions grouped by status (active, sold, expired, cancelled), so that I can track my listings.
+37. As a **User**, I want to see a dashboard of all my auctions grouped by status (ACTIVE, SOLD, EXPIRED, CANCELLED), so that I can track my listings.
 38. As a **User**, I want to see the full bid history and final sale price for my sold auctions, so that I have a complete sales record.
-39. As a **User**, I want to relist an expired auction that received no bids as a new auction, so that I can try selling the item again.
+39. As a **User**, I want to relist an expired auction that received no bids as a new auction, so that I can try selling the item again. This creates a new auction row linked via `relisted_from`.
 40. As a **User**, I want to bid on other users' auctions, so that I can participate as a buyer too.
 41. As a **User**, I want to export my auctions to a CSV file via a save dialog, so that I have an offline record of my sales.
 
@@ -92,7 +92,7 @@ A distributed, multi-user **English auction platform** where a headless RMI serv
 
 ### Auction Lifecycle & State Machine
 
-45. As the **System**, I want auctions to follow a strict state machine (ACTIVE → SOLD | EXPIRED → optionally relisted, or ACTIVE → CANCELLED), so that state transitions are predictable.
+45. As the **System**, I want auctions to follow a strict state machine (ACTIVE ──(has bids)──→ SOLD; ACTIVE ──(no bids)────────→ EXPIRED; EXPIRED ─/relist/→ ACTIVE (new row); ACTIVE ──(cancel, 0 bids)─→ CANCELLED), so that state transitions are predictable.
 46. As the **System**, I want an "Auction Reaper" background thread to scan every 1 second for auctions whose end time has passed and automatically transition them to SOLD (if bids exist) or EXPIRED (if no bids), so that auction closure is automatic and requires no user action.
 47. As the **System**, I want to recover from a server crash by expiring all overdue ACTIVE auctions on startup, so that stale auctions don't persist.
 
@@ -135,38 +135,39 @@ All mutating methods require a session token from `login()`.
 
 | Method | Signature | Notes |
 |--------|-----------|-------|
-| login | `Session login(String u, String p)` | Returns token |
+| login | `String login(String u, String p)` | Returns token |
 | logout | `void logout(String token)` | Invalidates session |
 | serverTime | `String serverTime()` | UTC ISO-8601, for clock sync |
-| placeBid | `void placeBid(int id, String token, long cents, long expected)` | Stale detection |
-| getActiveAuctions | `List<AuctionItem> getActiveAuctions(String token)` | Gallery feed |
-| getAuctionById | `AuctionItem getAuctionById(int id, String token)` | Detail view |
-| getBidHistory | `List<Bid> getBidHistory(int id, String token)` | History table |
+| placeBid | `void placeBid(int id, long cents, long expected, String token)` | Stale detection |
+| getActiveAuctions | `List<AuctionItem> getActiveAuctions()` | Gallery feed |
+| getActiveAuctionsBySeller | `List<AuctionItem> getActiveAuctionsBySeller(String seller, String token)` | Filtered |
+| getAuctionById | `AuctionItem getAuctionById(int id)` | Detail view |
+| getBidHistory | `List<Bid> getBidHistory(int id)` | History table |
 | createAuction | `int createAuction(AuctionItem, byte[]1,2,3, String token)` | Returns new ID |
 | cancelAuction | `void cancelAuction(int id, String token)` | Zero bids only |
-| relistAuction | `int relistAuction(int id, String newEnd, String token)` | Creates new row |
+| relistAuction | `void relistAuction(int id, String newEnd, String token)` | Creates new row |
 | getMyBids | `List<Bid> getMyBids(String token)` | User activity |
 | getMyWonAuctions | `List<AuctionItem> getMyWonAuctions(String token)` | User activity |
+| getThumbnail | `byte[] getThumbnail(int id, int idx)` | LQIP |
+| getFullImage | `byte[] getFullImage(int id, int idx)` | Full-res |
 | exportAuctionsToCSV | `byte[] exportAuctionsToCSV(String token)` | User dashboard |
-| createUser | `void createUser(String adminToken, ...)` | Admin only |
-| getAllUsers | `List<User> getAllUsers(String adminToken)` | Admin only |
-| backupDatabase | `byte[] backupDatabase(String adminToken)` | Via VACUUM INTO |
-| getAuditLogs | `List<String> getAuditLogs(String adminToken, int n)` | Admin only |
-| getThumbnail | `byte[] getThumbnail(int id, int idx, String token)` | LQIP |
-| getFullImage | `byte[] getFullImage(int id, int idx, String token)` | Full-res |
+| createUser | `void createUser(String u, String p, String r, String token)` | Admin only |
+| getAllUsers | `List<User> getAllUsers(String token)` | Admin only |
+| backupDatabase | `byte[] backupDatabase(String token)` | Via VACUUM INTO |
+| getAuditLogs | `List<String> getAuditLogs(int n, String token)` | Admin only |
 
 ### 4. Database — SQLite via JDBC
 
 - Single file: `data/auction.db.sqlite`.
 - Three tables: `users`, `auction_items`, `bids`.
-- **All monetary values are INTEGER cents** (see rationale below).
+- **All monetary values are INTEGER cents.**
 - **All timestamps are ISO-8601 UTC strings with Z suffix.**
 - `PRAGMA foreign_keys = ON` enabled per connection.
 - Schema auto-created on first run via `CREATE TABLE IF NOT EXISTS`.
 
 ### 5. Currency Model — Integer Cents
 
-All prices and bids stored as `INTEGER` cents (not `DOUBLE` dollars).
+All prices and bids stored as `long` cents (not `double` dollars).
 
 **Rationale:** Floating-point equality checks are brittle. In a bidding system where `clientExpectedPrice == currentPrice` must work reliably, integer comparison avoids rounding errors entirely.
 
@@ -187,18 +188,18 @@ All prices and bids stored as `INTEGER` cents (not `DOUBLE` dollars).
 
 - Trigger: `endTime - now < 30s`
 - Effect: `endTime = min(endTime + 30s, capEndTime)`
-- `capEndTime = originalEndTime + 10 minutes`
+- `capEndTime` is set at auction creation (default = `originalEndTime + 10 minutes`).
 
 ### 8. Image Handling — LQIP Pattern
 
-- Server re-encodes all uploads to JPG (no external dependency).
+- Server re-encodes all uploads to JPG.
 - Center-crop 40×40 thumbnail generated from image 1.
 - Missing images return built-in placeholder bytes.
 - Client caches images in-memory per session.
 
 ### 9. Security
 
-- Passwords: SHA-256 hash (no salt, acceptable for demo).
+- Passwords: SHA-256 hash.
 - Authentication: Session tokens with server-side map.
 - Admin-only registration.
 - Rate limiting on `login` and `placeBid` per-IP.

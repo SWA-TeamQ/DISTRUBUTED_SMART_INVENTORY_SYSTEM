@@ -23,7 +23,7 @@ Master index of all documentation. Click any link to jump to that section.
 - [Authentication & User Management (6-12)](#authentication--user-management)
 - [Auction Browsing & Discovery (13-19)](#auction-browsing--discovery)
 - [Bidding (20-28)](#bidding)
-- [Snipe Protection with Cap (29-30)](#snipe-protection-with-cap)
+- [Snipe Protection with Cap (29-30)](#snipe-protection)
 - [User Activity Dashboard (31)](#user-activity-dashboard)
 - [Auction Creation & Management (32-41)](#auction-creation--management)
 - [Administration (42-44)](#administration)
@@ -36,7 +36,7 @@ Master index of all documentation. Click any link to jump to that section.
 - [2. Networking](#2-networking--java-rmi--udp-discovery)
 - [3. RMI Interface Contract](#3-rmi-interface-contract)
 - [4. Database](#4-database--sqlite-via-jdbc)
-- [5. Currency Model](#5-concurrency-model)
+- [5. Currency Model](#5-currency-model--integer-cents)
 - [6. Concurrency Model](#6-concurrency-model)
 - [7. Snipe Protection with Cap](#7-snipe-protection-with-cap)
 - [8. Image Handling](#8-image-handling--lqip-pattern)
@@ -51,7 +51,7 @@ Master index of all documentation. Click any link to jump to that section.
 - [Modules to test](#modules-to-test)
 
 ### 5. Out of Scope
-- [12 items explicitly excluded](#out-of-scope)
+- [Items explicitly excluded](#out-of-scope)
 
 ### 6. Demo & Grading Notes
 - [Cross-References](#cross-references)
@@ -78,7 +78,6 @@ Master index of all documentation. Click any link to jump to that section.
 - [Auction Gallery](#3-auction-gallery-the-marketplace)
 - [Auction Detail View](#4-auction-detail-view-high-intensity)
 - [User Dashboard](#5-user-dashboard)
-- [User Dashboard](#5-user-dashboard)
 - [Create/Edit Auction](#7-createedit-auction-dialog)
 - [Admin Panel](#8-admin-panel)
 
@@ -95,26 +94,25 @@ Master index of all documentation. Click any link to jump to that section.
 ### 1. The Core Concept
 - English auction explanation
 
-### 2. Key Terms
-- Players: Server, Client, RMI, Admin, User
+### 2. Server Architecture
+- [Deep Modules](#2-server-architecture-deep-modules)
 
-### 3. Auction Rules
-- Minimum increment, snipe protection, self-bid prevention
+### 3. Component Interactions
+- [Bidding Flow](#bidding-flow)
+- [Expiration Flow](#expiration-flow-the-reaper)
 
-### 4. Auction Lifecycle
-- [State machine](#4-auction-lifecycle-state-machine)
+### 4. Key Mechanics
+- [Minimum Increment](#minimum-increment-5-rule)
+- [Snipe Protection with Cap](#snipe-protection-with-cap)
+- [Clock Authority](#clock-authority-server-time)
 
-### 5. The Auction Reaper
-- Background thread that closes auctions
+### 5. RMI Interface Contract
+- [IAuctionService](#5-rmi-interface-contract-iauctionservice)
 
-### 6. RMI Interface Contract
-- Session tokens, method signatures
-
-### 7. Concurrency Model
-- Per-auction locks, atomic transactions
-
-### 8. Clock Synchronization
-- Server time offset for accurate countdowns
+### 6. Concurrency Model
+- [Server-Side Locking](#server-side-locking)
+- [Atomic Bid Commit](#atomic-bid-commit)
+- [Background Lifecycle](#background-lifecycle)
 
 ---
 
@@ -125,7 +123,7 @@ Master index of all documentation. Click any link to jump to that section.
 
 ### 2. Schema Definition
 - [users table](#users-table)
-- [auction_items table](#auctionitems-table)
+- [auction_items table](#auction_items-table)
 - [bids table](#bids-table)
 
 ### 3. Indexes
@@ -151,7 +149,7 @@ Master index of all documentation. Click any link to jump to that section.
 ## docs/networking.md
 
 ### 1. UDP Broadcast Discovery
-- [Packet format](#packet-format)
+- [Packet format (v1)](#packet-format-v1)
 - Broadcast parameters
 - Client discovery flow
 
@@ -167,6 +165,9 @@ Master index of all documentation. Click any link to jump to that section.
 
 ### 5. Reconnection & Error Handling
 - Connection lost detection, recovery options
+
+### 6. Multi-NIC Configuration
+- RMI host binding
 
 ---
 
@@ -202,11 +203,11 @@ Master index of all documentation. Click any link to jump to that section.
 
 | Topic | File | Section |
 |-------|------|---------|
-| User Stories | RTDAS_PRD.md | Line ~23 |
-| State Machine | architecture.md | §4 |
+| User Stories | RTDAS_PRD.md | §2 |
+| State Machine | RTDAS_PRD.md | §10 |
 | Database Schema | database.md | §2 |
 | RMI Contract | RTDAS_PRD.md | §3 |
-| Session Tokens | architecture.md | §6 |
+| Concurrency Strategy | architecture.md | §6 |
 | UI Screens | DESIGN.md | §4 |
-| Concurrency Rules | architecture.md | §7 |
+| Locking Discipline | architecture.md | §6 |
 | Demo Commands | demo-runbook.md | §2 |
