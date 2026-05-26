@@ -2,7 +2,17 @@ package com.auction.client.controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
-
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TableCell;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.control.Button;
+import javafx.scene.control.TableRow;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CompletableFuture;
+import javafx.application.Platform;
 public class UserDashboardController {
 
   @FXML
@@ -60,14 +70,70 @@ public class UserDashboardController {
 
   private byte[] img1Bytes, img2Bytes, img3Bytes;
 
+  private final Map<String, Image> thumbnailCache = new ConcurrentHashMap<>();
+  private static final Image PLACEHOLDER_IMAGE = new Image(UserDashboardController.class.getResourceAsStream("/images/placeholder.png"));
   private com.auction.client.service.PollingService pollingService;
 
   @FXML
   public void initialize() {
     pollingService = new com.auction.client.service.PollingService();
     pollingService.startPolling(() -> {
-      javafx.application.Platform.runLater(() -> refreshDashboard());
+        Platform.runLater(() -> refreshDashboard());
     }, 2);
+    // Add thumbnail column to market table
+    TableColumn<com.auction.shared.models.AuctionItem, ImageView> thumbCol = new TableColumn<>("");
+    thumbCol.setPrefWidth(80);
+    thumbCol.setCellFactory(col -> new TableCell<>() {
+        private final ImageView iv = new ImageView();
+        {
+            iv.setFitWidth(70);
+            iv.setFitHeight(50);
+            iv.setPreserveRatio(true);
+        }
+        @Override
+        protected void updateItem(ImageView item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty) {
+                setGraphic(null);
+            } else {
+                com.auction.shared.models.AuctionItem auction = getTableView().getItems().get(getIndex());
+                loadThumbnailAsync(auction.getId(), 0, iv);
+                setGraphic(iv);
+            }
+        }
+    });
+    marketTable.getColumns().add(0, thumbCol);
+
+    // Double-click on market table rows to open auction detail
+    marketTable.setRowFactory(tv -> {
+        TableRow<com.auction.shared.models.AuctionItem> row = new TableRow<>();
+        row.setOnMouseClicked(event -> {
+            if (!row.isEmpty() && event.getClickCount() == 2) {
+                handleOpenAuctionDetail();
+            }
+        });
+        return row;
+    });
+    // Double-click on my listings table rows
+    myListingsTable.setRowFactory(tv -> {
+        TableRow<com.auction.shared.models.AuctionItem> row = new TableRow<>();
+        row.setOnMouseClicked(event -> {
+            if (!row.isEmpty() && event.getClickCount() == 2) {
+                handleOpenAuctionDetail();
+            }
+        });
+        return row;
+    });
+    // Double-click on won auctions table rows
+    wonAuctionsTable.setRowFactory(tv -> {
+        TableRow<com.auction.shared.models.AuctionItem> row = new TableRow<>();
+        row.setOnMouseClicked(event -> {
+            if (!row.isEmpty() && event.getClickCount() == 2) {
+                handleOpenAuctionDetail();
+            }
+        });
+        return row;
+    });
     refreshDashboard();
   }
 
@@ -158,6 +224,36 @@ public class UserDashboardController {
         if (statusLabel != null) statusLabel.setText("Please select an auction first.");
     }
   }
+
+  @FXML
+    private void loadThumbnailAsync(int auctionId, int index, ImageView target) {
+        String key = auctionId + ":" + index;
+        Image cached = thumbnailCache.get(key);
+        if (cached != null) {
+            target.setImage(cached);
+            return;
+        }
+        CompletableFuture.supplyAsync(() -> {
+            try {
+                var service = com.auction.client.core.ClientContext.getInstance().getRmiProvider().getService();
+                byte[] bytes = service.getThumbnail(auctionId, index);
+                if (bytes == null || bytes.length == 0) return null;
+                return new Image(new java.io.ByteArrayInputStream(bytes));
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }, com.auction.client.service.ThumbnailExecutor.getExecutor()).thenAccept(image -> {
+            if (image != null) {
+                thumbnailCache.put(key, image);
+                Platform.runLater(() -> {
+                    target.setImage(image);
+                });
+            } else {
+                Platform.runLater(() -> target.setImage(PLACEHOLDER_IMAGE));
+            }
+        });
+    }
 
   @FXML
   private void handleCreateAuction() {

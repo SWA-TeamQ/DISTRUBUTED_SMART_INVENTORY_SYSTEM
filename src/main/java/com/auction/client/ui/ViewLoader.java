@@ -44,6 +44,12 @@ public class ViewLoader {
         Parent root = loader.load();
         Scene scene = new Scene(root);
         scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
+        
+        // Load admin-panel.css for admin views
+        if (fxmlFile.contains("admin")) {
+            scene.getStylesheets().add(getClass().getResource("/css/admin-panel.css").toExternalForm());
+        }
+        
         primaryStage.setScene(scene);
         return loader.getController();
     }

@@ -14,6 +14,7 @@
         <configuration>
           <source>17</source>
           <target>17</target>
+          <useIncrementalCompilation>false</useIncrementalCompilation>
         </configuration>
       </plugin>
       <plugin>

@@ -8,6 +8,8 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
@@ -32,7 +34,24 @@
                 <Label text="Browse auctions, manage listings, review activity, and switch context by auction ownership." styleClass="page-subtitle" wrapText="true"/>
             </VBox>
             <Label fx:id="statusLabel" text="Ready" styleClass="status-chip status-chip-success"/>
-            <Button text="Refresh" onAction="#handleRefreshDashboard" styleClass="secondary-button"/>
+                    <Button styleClass="icon-button secondary-button" onAction="#handleRefreshDashboard">
+            <graphic>
+                <ImageView fitWidth="16" fitHeight="16">
+                    <image>
+                        <Image url="@../icons/refresh.png" />
+                    </image>
+                </ImageView>
+            </graphic>
+        </Button>
+        <Button styleClass="icon-button secondary-button" onAction="#handleLogout">
+            <graphic>
+                <ImageView fitWidth="16" fitHeight="16">
+                    <image>
+                        <Image url="@../icons/logout.png" />
+                    </image>
+                </ImageView>
+            </graphic>
+        </Button>
             <Button text="Logout" onAction="#handleLogout" styleClass="secondary-button"/>
         </HBox>
     </top>
@@ -91,7 +110,6 @@
                                 <Button text="Open Gallery" onAction="#handleOpenGallery" maxWidth="Infinity" styleClass="secondary-button"/>
                                 <Button text="Open Auction Detail" onAction="#handleOpenAuctionDetail" maxWidth="Infinity" styleClass="secondary-button"/>
                                 <Button text="Export to CSV" onAction="#handleExportCSV" maxWidth="Infinity" styleClass="secondary-button"/>
-                                <Button text="Refresh Dashboard" onAction="#handleRefreshDashboard" maxWidth="Infinity" styleClass="secondary-button"/>
                                 <Button text="Cancel Selected Listing" onAction="#handleCancelAuction" maxWidth="Infinity" styleClass="secondary-button"/>
                                 <Button text="Relist Selected Listing" onAction="#handleRelistAuction" maxWidth="Infinity" styleClass="secondary-button"/>
                             </VBox>
