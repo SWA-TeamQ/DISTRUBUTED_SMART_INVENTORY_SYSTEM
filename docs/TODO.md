@@ -12,8 +12,7 @@ Outcome target: a coherent, university-grade-but-well-implemented spec ready to 
 |---|---|---|
 | D1 | Default admin credentials | **`admin` / `admin`**. Update `Constants.java` (currently `abelmekonen/demo123`). PRD/README already say this. |
 | D2 | Per-call authentication on RMI | **Session tokens.** `login()` returns a UUID token; mutating calls require it; server keeps `ConcurrentHashMap<String, Session>` with TTL + `logout(token)`. No JWT. |
-| D3 | Rate limiting | **Sliding-window per-IP limiter on `login()` and `placeBid()` only.** Polling reads are unlimited. IP via `RemoteServer.getClientHost()`. |
-| D4 | Real-time update mechanism | **Keep 2 s short polling.** No long polling, no RMI callbacks. |
+| D3 | Real-time update mechanism | **Keep 2 s short polling.** No long polling, no RMI callbacks. |
 | D5 | First-bid rule | If no bids: `amount >= startingPrice`. Else: `amount >= currentBid * 1.05`. Plus `amount > 0` and `Double.isFinite(amount)`. |
 | D6 | Snipe protection cap | **Hard `cap_end_time` set at auction creation.** Default = `endTime + 10 minutes`. Extensions can never push `endTime` past `cap_end_time`. |
 | D7 | Reaper ↔ placeBid race | **Same per-auction `ReentrantLock`.** Both re-check `status == ACTIVE && now < endTime` inside the lock. |
@@ -66,7 +65,7 @@ Each item lists **file → exact change**. This is the master "nothing missed" l
 - [x] **`shared/models/AuctionItem.java`** — change `double startingPrice/currentBid` to `long startingPriceCents/currentBidCents`. Add `Long capEndTime` (ISO string, UTC). Add `Integer relistedFrom`. Update Javadoc to specify UTC `Z` timestamps.
 - [x] **`shared/models/Bid.java`** — `long amountCents`; UTC timestamp.
 - [ ] **`shared/models/User.java`** — confirm `passwordHash`, `roleType`. Ensure no plaintext password ever leaves the server.
-- [x] **`shared/exceptions/`** — add `UnauthorizedException` (bad/missing token), `RateLimitedException`, `SnipeCapReachedException` (optional — could fold into AuctionClosedException).
+- [x] **`shared/exceptions/`** — add `UnauthorizedException` (bad/missing token), `SnipeCapReachedException` (optional — could fold into AuctionClosedException).
 - [x] **`server/repository/DatabaseManager.java`** — set `PRAGMA foreign_keys = ON` per connection; create directories on init; create indexes; add `relisted_from` column.
 - [x] **`server/repository/AuctionRepository.java`** — long-cents columns; `findActiveExpired()` query for the reaper; update with snipe-extended `end_time`; insert-with-relisted_from; transactional `placeBidAndUpdate(...)`.
 - [x] **`server/repository/BidRepository.java`** — long-cents amount; `findByBidder(username)` for the activity view.
