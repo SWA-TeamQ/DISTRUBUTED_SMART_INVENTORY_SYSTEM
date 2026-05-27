@@ -33,15 +33,8 @@ public class UserDashboardController {
   private TableView<Bid> myBidsTable;
 
   @FXML
-  private TextField titleField, categoryField, priceField, endTimeField;
+  private Label statusLabel, marketCountLabel, listingsCountLabel, bidsCountLabel, winsCountLabel;
 
-  @FXML
-  private TextArea descArea;
-
-  @FXML
-  private Label imagesLabel, statusLabel, marketCountLabel, listingsCountLabel, bidsCountLabel, winsCountLabel;
-
-  private byte[] img1Bytes, img2Bytes, img3Bytes;
   private final Map<String, Image> thumbnailCache = new ConcurrentHashMap<>();
   private static final Image PLACEHOLDER = new Image(
     UserDashboardController.class.getResourceAsStream("/images/placeholder.png")
@@ -201,53 +194,50 @@ public class UserDashboardController {
   }
 
   @FXML
-  private void handleCreateAuction() {
+  private void handleProfile() {
     try {
-      long cents = (long) (Double.parseDouble(priceField.getText()) * 100);
-      Instant end = Instant.now().plus(
-        Duration.ofMinutes(Integer.parseInt(endTimeField.getText()))
-      );
-
-      AuctionItem item = new AuctionItem(
-        0,
-        titleField.getText(),
-        descArea.getText(),
-        categoryField.getText(),
-        cents,
-        ClientContext.getInstance().getUsername(),
-        Instant.now().toString(),
-        end.toString(),
-        null
-      );
-
-      ClientContext ctx = ClientContext.getInstance();
-      int id = ctx
-        .getRmiProvider()
-        .getService()
-        .createAuction(
-          item,
-          img1Bytes,
-          img2Bytes,
-          img3Bytes,
-          ctx.getSessionToken()
-        );
-
-      statusLabel.setText("Auction #" + id + " created.");
-      clearAuctionForm();
-      refreshDashboard();
-    } catch (Exception e) {
-      statusLabel.setText("Error: " + e.getMessage());
+      javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/profile_dialog.fxml"));
+      javafx.scene.Parent root = loader.load();
+      
+      javafx.stage.Stage dialogStage = new javafx.stage.Stage();
+      dialogStage.setTitle("User Profile");
+      dialogStage.initModality(javafx.stage.Modality.WINDOW_MODAL);
+      dialogStage.initOwner(statusLabel.getScene().getWindow());
+      javafx.scene.Scene scene = new javafx.scene.Scene(root);
+      dialogStage.setScene(scene);
+      
+      dialogStage.showAndWait();
+    } catch (IOException e) {
+      statusLabel.setText("Error opening profile: " + e.getMessage());
     }
   }
 
-  private void clearAuctionForm() {
-    titleField.clear();
-    descArea.clear();
-    categoryField.clear();
-    priceField.clear();
-    endTimeField.clear();
-    img1Bytes = img2Bytes = img3Bytes = null;
-    imagesLabel.setText("No images selected");
+  @FXML
+  private void handleCreateAuction() {
+    try {
+      javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/create_auction_dialog.fxml"));
+      javafx.scene.Parent root = loader.load();
+      
+      CreateAuctionDialogController controller = loader.getController();
+      
+      javafx.stage.Stage dialogStage = new javafx.stage.Stage();
+      dialogStage.setTitle("Create Auction");
+      dialogStage.initModality(javafx.stage.Modality.WINDOW_MODAL);
+      dialogStage.initOwner(statusLabel.getScene().getWindow());
+      javafx.scene.Scene scene = new javafx.scene.Scene(root);
+      dialogStage.setScene(scene);
+      
+      controller.setDialogStage(dialogStage);
+      dialogStage.showAndWait();
+
+      if (controller.isCreated()) {
+        com.auction.client.util.Toast.makeText((javafx.stage.Stage) statusLabel.getScene().getWindow(), "Auction Created Successfully!", 1500, 500, 500);
+        refreshDashboard();
+      }
+    } catch (IOException e) {
+      statusLabel.setText("Error opening dialog: " + e.getMessage());
+      e.printStackTrace();
+    }
   }
 
   @FXML
@@ -334,45 +324,4 @@ public class UserDashboardController {
     }
   }
 
-  @FXML
-  private void handlePickImg1() {
-    img1Bytes = pickImage();
-    updateImagesLabel();
-  }
-
-  @FXML
-  private void handlePickImg2() {
-    img2Bytes = pickImage();
-    updateImagesLabel();
-  }
-
-  @FXML
-  private void handlePickImg3() {
-    img3Bytes = pickImage();
-    updateImagesLabel();
-  }
-
-  private byte[] pickImage() {
-    FileChooser fc = new FileChooser();
-    fc
-      .getExtensionFilters()
-      .add(new FileChooser.ExtensionFilter("Images", "*.jpg", "*.png"));
-    File f = fc.showOpenDialog(marketTable.getScene().getWindow());
-    if (f != null && f.length() <= Constants.MAX_IMAGE_SIZE_BYTES) {
-      try {
-        return Files.readAllBytes(f.toPath());
-      } catch (IOException e) {
-        return null;
-      }
-    }
-    return null;
-  }
-
-  private void updateImagesLabel() {
-    int count =
-      (img1Bytes != null ? 1 : 0) +
-      (img2Bytes != null ? 1 : 0) +
-      (img3Bytes != null ? 1 : 0);
-    imagesLabel.setText(count + " images selected");
-  }
 }

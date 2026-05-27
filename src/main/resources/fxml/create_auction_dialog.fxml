@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="15"
+    xmlns="http://javafx.com/javafx"
+    xmlns:fx="http://javafx.com/fxml" fx:controller="com.auction.client.controllers.CreateAuctionDialogController" stylesheets="@../css/style.css" styleClass="card" style="-fx-padding: 30; -fx-background-color: #2D2D2D;">
+
+    <Label text="Create New Auction" styleClass="header-label" style="-fx-font-size: 20px;"/>
+
+    <Label fx:id="errorLabel" textFill="RED" wrapText="true"/>
+
+    <GridPane vgap="15" hgap="10">
+        <columnConstraints>
+            <ColumnConstraints minWidth="100"/>
+            <ColumnConstraints hgrow="ALWAYS"/>
+        </columnConstraints>
+
+        <Label text="Title:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-text-fill: white;"/>
+        <TextField fx:id="titleField" promptText="Item Name" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-background-color: #3D3D3D; -fx-text-fill: white;"/>
+
+        <Label text="Category:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-text-fill: white;"/>
+        <TextField fx:id="categoryField" promptText="e.g. Electronics" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-background-color: #3D3D3D; -fx-text-fill: white;"/>
+
+        <Label text="Starting Price:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-text-fill: white;"/>
+        <HBox spacing="5" alignment="CENTER_LEFT" GridPane.rowIndex="2" GridPane.columnIndex="1">
+            <Label text="$" style="-fx-text-fill: white;"/>
+            <TextField fx:id="priceField" promptText="0.00" style="-fx-background-color: #3D3D3D; -fx-text-fill: white;" HBox.hgrow="ALWAYS"/>
+        </HBox>
+
+        <Label text="Duration (mins):" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-text-fill: white;"/>
+        <TextField fx:id="durationField" promptText="e.g. 60" GridPane.rowIndex="3" GridPane.columnIndex="1" style="-fx-background-color: #3D3D3D; -fx-text-fill: white;"/>
+
+        <Label text="Description:" GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.valignment="TOP" style="-fx-text-fill: white;"/>
+        <TextArea fx:id="descArea" promptText="Detailed description..." prefRowCount="3" GridPane.rowIndex="4" GridPane.columnIndex="1" style="-fx-control-inner-background: #3D3D3D; -fx-text-fill: white;"/>
+    </GridPane>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding: 20 0 0 0;">
+        <Button text="Cancel" onAction="#handleCancel" styleClass="secondary-button" />
+        <Button text="Create Auction" onAction="#handleCreate" defaultButton="true" styleClass="primary-button" style="-fx-background-color: #0078D7; -fx-text-fill: white;"/>
+    </HBox>
+</VBox>

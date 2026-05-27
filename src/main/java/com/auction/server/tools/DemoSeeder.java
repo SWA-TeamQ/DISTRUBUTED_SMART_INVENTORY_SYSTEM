@@ -26,6 +26,16 @@ import java.util.*;
  */
 public class DemoSeeder {
 
+  private static final String[] DEMO_USERNAMES = {
+    "seller-alice",
+    "seller-bob",
+    "seller-charlie",
+    "bella-247",
+    "bidder-dan",
+    "bidder-eve",
+    "bidder-frank",
+  };
+
   public static void main(String[] args) {
     System.out.println("🌱 RTDAS Demo Seeder Starting...");
 
@@ -36,6 +46,8 @@ public class DemoSeeder {
       var userRepo = new UserRepository(connection);
       var auctionRepo = new AuctionRepository(connection);
       var bidRepo = new BidRepository(connection);
+
+      resetDemoData(connection);
 
       // Seed users
       seedUsers(userRepo);
@@ -74,6 +86,25 @@ public class DemoSeeder {
     } catch (Exception e) {
       System.err.println("❌ Seeding failed: " + e.getMessage());
       e.printStackTrace();
+    }
+  }
+
+  private static void resetDemoData(java.sql.Connection connection)
+    throws Exception {
+    String usernamesSql = String.join(", ", java.util.Arrays.stream(DEMO_USERNAMES)
+      .map(username -> "'" + username + "'")
+      .toArray(String[]::new));
+
+    try (var stmt = connection.createStatement()) {
+      stmt.executeUpdate(
+        "DELETE FROM bids WHERE auction_item_id IN (SELECT id FROM auction_items WHERE seller_username IN (" + usernamesSql + "))"
+      );
+      stmt.executeUpdate(
+        "DELETE FROM auction_items WHERE seller_username IN (" + usernamesSql + ")"
+      );
+      stmt.executeUpdate(
+        "DELETE FROM users WHERE username IN (" + usernamesSql + ")"
+      );
     }
   }
 

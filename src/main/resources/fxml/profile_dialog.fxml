@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="20" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" 
+    fx:controller="com.auction.client.controllers.ProfileDialogController"
+    stylesheets="@../css/style.css"
+    styleClass="card" style="-fx-padding: 30; -fx-background-color: #2D2D2D;">
+    
+    <Label text="User Profile" styleClass="header-label" style="-fx-font-size: 20px;"/>
+    
+    <VBox spacing="10">
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Label text="Username:" style="-fx-text-fill: #AAAAAA; -fx-font-weight: bold;"/>
+            <Label fx:id="usernameLabel" style="-fx-text-fill: white; -fx-font-size: 16px;"/>
+        </HBox>
+        
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Label text="Role:" style="-fx-text-fill: #AAAAAA; -fx-font-weight: bold;"/>
+            <Label fx:id="roleLabel" style="-fx-text-fill: white; -fx-font-size: 16px;"/>
+        </HBox>
+    </VBox>
+
+    <Separator style="-fx-background-color: #4D4D4D;" />
+
+    <Label text="Settings" styleClass="section-title" />
+    <CheckBox text="Enable Push Notifications" style="-fx-text-fill: white;" selected="true"/>
+    <CheckBox text="Dark Mode UI" style="-fx-text-fill: white;" selected="true"/>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding: 20 0 0 0;">
+        <Button text="Close" onAction="#handleClose" styleClass="secondary-button" />
+    </HBox>
+</VBox>
