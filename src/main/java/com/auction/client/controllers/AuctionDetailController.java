@@ -4,7 +4,10 @@ import com.auction.client.core.ClientContext;
 import com.auction.client.service.PollingService;
 import com.auction.client.service.ThumbnailExecutor;
 import com.auction.shared.Constants;
+import com.auction.shared.exceptions.AuctionClosedException;
 import com.auction.shared.exceptions.AuctionException;
+import com.auction.shared.exceptions.InsufficientBidException;
+import com.auction.shared.exceptions.SelfBidException;
 import com.auction.shared.models.AuctionItem;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -134,9 +137,7 @@ public class AuctionDetailController {
               showToast("Bid placed");
             });
           } catch (Exception e) {
-            String msg = (e.getCause() instanceof AuctionException)
-              ? e.getCause().getMessage()
-              : "Failed to place bid";
+            String msg = resolveBidMessage(e);
             Platform.runLater(() -> {
               bidStatusLabel.setText(msg);
               animateShake();
@@ -150,6 +151,26 @@ public class AuctionDetailController {
     } catch (Exception e) {
       bidStatusLabel.setText("Invalid amount");
     }
+  }
+
+  private String resolveBidMessage(Throwable throwable) {
+    Throwable current = throwable;
+    while (current != null) {
+      if (current instanceof SelfBidException) {
+        return "You cannot bid on your own auction.";
+      }
+      if (current instanceof AuctionClosedException) {
+        return "Bidding is closed for this item.";
+      }
+      if (current instanceof InsufficientBidException) {
+        return "Bid must be higher than current price.";
+      }
+      if (current instanceof AuctionException) {
+        return current.getMessage();
+      }
+      current = current.getCause();
+    }
+    return "Failed to place bid";
   }
 
   private void setBidState(boolean working) {

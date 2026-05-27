@@ -194,13 +194,13 @@ public class AuctionManager {
 
     private void validateActive(AuctionItem item) throws AuctionClosedException {
         if (!Constants.STATUS_ACTIVE.equals(item.getStatus())) {
-            throw new AuctionClosedException("Auction is closed");
+            throw new AuctionClosedException("Bidding is closed for this item.");
         }
     }
 
     private void validateNotSeller(AuctionItem item, String bidder) throws SelfBidException {
         if (bidder.equals(item.getSellerUsername())) {
-            throw new SelfBidException("Cannot bid on your own auction");
+            throw new SelfBidException("You cannot bid on your own auction.");
         }
     }
 
@@ -222,12 +222,12 @@ public class AuctionManager {
         }
         if (item.getHighestBidderUsername() == null) {
             if (amountCents < item.getStartingPriceCents()) {
-                throw new InsufficientBidException("Bid must be at least the starting price of " + Constants.formatCents(item.getStartingPriceCents()));
+                throw new InsufficientBidException("Bid must be higher than current price.");
             }
         } else {
             long minBidCents = item.getCurrentBidCents() + (item.getCurrentBidCents() + 19) / 20;
             if (amountCents < minBidCents) {
-                throw new InsufficientBidException("Bid must be at least " + Constants.formatCents(minBidCents) + " (5% increment)");
+                throw new InsufficientBidException("Bid must be higher than current price.");
             }
         }
     }
@@ -236,7 +236,7 @@ public class AuctionManager {
         Instant now = Instant.now();
         Instant endTime = Instant.parse(item.getEndTime());
         if (now.isAfter(endTime)) {
-            throw new AuctionClosedException("Auction time has expired");
+            throw new AuctionClosedException("Bidding is closed for this item.");
         }
     }
 

@@ -1,5 +1,7 @@
 package com.auction.integration;
 
+import com.auction.server.core.AdminManager;
+import com.auction.server.core.SessionManager;
 import com.auction.server.core.AuctionManager;
 import com.auction.server.core.ImageStore;
 import com.auction.server.core.LifecycleManager;
@@ -25,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class GalleryDetailBidIntegrationTest {
 
     private DatabaseManager dbManager;
-    private AuctionServiceImpl service;
+    private com.auction.server.service.AuctionServiceImpl service;
     private java.nio.file.Path tempDbPath;
 
     @BeforeEach
@@ -37,14 +39,17 @@ class GalleryDetailBidIntegrationTest {
         AuctionRepository auctionRepo = new AuctionRepository(dbManager.getConnection());
         BidRepository bidRepo = new BidRepository(dbManager.getConnection());
 
-        TransactionManager txManager = new TransactionManager(dbManager.getConnection());
-        LockManager lockManager = new LockManager();
+        com.auction.server.core.TransactionManager txManager = new com.auction.server.core.TransactionManager(dbManager.getConnection());
+        com.auction.server.core.LockManager lockManager = new com.auction.server.core.LockManager();
 
-        AuctionManager auctionManager = new AuctionManager(auctionRepo, bidRepo, lockManager, txManager);
-        LifecycleManager lifecycleManager = new LifecycleManager(auctionRepo, bidRepo, lockManager, txManager);
-        ImageStore imageStore = new ImageStore(auctionRepo);
+        com.auction.server.core.AuctionManager auctionManager = new com.auction.server.core.AuctionManager(auctionRepo, bidRepo, lockManager, txManager);
+        com.auction.server.core.LifecycleManager lifecycleManager = new com.auction.server.core.LifecycleManager(auctionRepo, bidRepo, lockManager, txManager);
+        com.auction.server.core.ImageStore imageStore = new com.auction.server.core.ImageStore(auctionRepo);
+        
+        com.auction.server.core.SessionManager sessionManager = new com.auction.server.core.SessionManager(userRepo);
+        com.auction.server.core.AdminManager adminManager = new com.auction.server.core.AdminManager(auctionManager, userRepo);
 
-        service = new AuctionServiceImpl(userRepo, auctionManager, lifecycleManager, imageStore);
+        service = new com.auction.server.service.AuctionServiceImpl(auctionManager, sessionManager, adminManager, imageStore);
     }
 
     @AfterEach

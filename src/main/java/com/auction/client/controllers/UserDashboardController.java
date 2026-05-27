@@ -15,6 +15,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import javafx.application.Platform;
@@ -57,6 +58,7 @@ public class UserDashboardController {
     );
 
     setupTableThumbnails(marketTable);
+    formatCurrencyColumns();
     setupRowDoubleClick(marketTable);
     setupRowDoubleClick(myListingsTable);
     setupRowDoubleClick(wonAuctionsTable);
@@ -141,6 +143,31 @@ public class UserDashboardController {
 
   private void updateCount(Label label, int count) {
     if (label != null) label.setText(String.valueOf(count));
+  }
+
+  @SuppressWarnings("unchecked")
+  private void formatCurrencyColumns() {
+    formatCurrencyColumn(marketTable, 5);
+    formatCurrencyColumn(myListingsTable, 3);
+    formatCurrencyColumn(myBidsTable, 3);
+    formatCurrencyColumn(wonAuctionsTable, 3);
+  }
+
+  @SuppressWarnings("unchecked")
+  private <S> void formatCurrencyColumn(TableView<S> table, int columnIndex) {
+    if (table == null || table.getColumns().size() <= columnIndex) return;
+
+    TableColumn<S, Long> column = (TableColumn<S, Long>) table
+      .getColumns()
+      .get(columnIndex);
+    column.setCellFactory(col ->
+      new TableCell<S, Long>() {
+        @Override
+        protected void updateItem(Long value, boolean empty) {
+          super.updateItem(value, empty);
+          setText(empty || value == null ? null : Constants.formatCents(value));
+        }
+      });
   }
 
   @FXML
@@ -252,25 +279,38 @@ public class UserDashboardController {
 
   @FXML
   private void handleCancelAuction() {
-    performAction(myListingsTable.getSelectionModel().getSelectedItem(), s ->
-      ClientContext.getInstance()
-        .getRmiProvider()
-        .getService()
-        .cancelAuction(s.getId(), ClientContext.getInstance().getSessionToken())
+    performActionWithConfirmation(
+      "Cancel Auction",
+      "Cancel the selected auction?",
+      "This will permanently cancel the listing.",
+      myListingsTable.getSelectionModel().getSelectedItem(),
+      s ->
+        ClientContext.getInstance()
+          .getRmiProvider()
+          .getService()
+          .cancelAuction(
+            s.getId(),
+            ClientContext.getInstance().getSessionToken()
+          )
     );
   }
 
   @FXML
   private void handleRelistAuction() {
-    performAction(myListingsTable.getSelectionModel().getSelectedItem(), s ->
-      ClientContext.getInstance()
-        .getRmiProvider()
-        .getService()
-        .relistAuction(
-          s.getId(),
-          Instant.now().plus(Duration.ofDays(1)).toString(),
-          ClientContext.getInstance().getSessionToken()
-        )
+    performActionWithConfirmation(
+      "Relist Auction",
+      "Relist the selected auction?",
+      "A new auction record will be created with a fresh end time.",
+      myListingsTable.getSelectionModel().getSelectedItem(),
+      s ->
+        ClientContext.getInstance()
+          .getRmiProvider()
+          .getService()
+          .relistAuction(
+            s.getId(),
+            Instant.now().plus(Duration.ofDays(1)).toString(),
+            ClientContext.getInstance().getSessionToken()
+          )
     );
   }
 
@@ -285,6 +325,31 @@ public class UserDashboardController {
       refreshDashboard();
     } catch (Exception e) {
       statusLabel.setText("Action failed: " + e.getMessage());
+    }
+  }
+
+  private void performActionWithConfirmation(
+    String title,
+    String header,
+    String content,
+    AuctionItem item,
+    AuctionAction action
+  ) {
+    if (item == null) {
+      statusLabel.setText("Select an auction first.");
+      return;
+    }
+
+    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+    alert.setTitle(title);
+    alert.setHeaderText(header);
+    alert.setContentText(content);
+    ButtonType yesButton = new ButtonType("YES", ButtonBar.ButtonData.YES);
+    ButtonType noButton = new ButtonType("NO", ButtonBar.ButtonData.NO);
+    alert.getButtonTypes().setAll(yesButton, noButton);
+    Optional<ButtonType> result = alert.showAndWait();
+    if (result.isPresent() && result.get() == yesButton) {
+      performAction(item, action);
     }
   }
 
@@ -320,9 +385,9 @@ public class UserDashboardController {
         .exportAuctionsToCSV(ctx.getSessionToken());
 
       FileChooser fc = new FileChooser();
-      fc.getExtensionFilters().add(
-        new FileChooser.ExtensionFilter("CSV Files", "*.csv")
-      );
+      fc
+        .getExtensionFilters()
+        .add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
       fc.setInitialFileName("auctions.csv");
       File out = fc.showSaveDialog(marketTable.getScene().getWindow());
       if (out != null) {

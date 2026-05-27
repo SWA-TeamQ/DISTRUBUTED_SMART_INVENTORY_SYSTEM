@@ -24,7 +24,7 @@ public final class Constants {
     public static final double MIN_BID_INCREMENT_PERCENT = 0.05;
     public static final int SNIPE_PROTECTION_SECONDS = 30;
     public static final int SNIPE_CAP_DEFAULT_MINUTES = 10;
-    public static final int REAPER_INTERVAL_SECONDS = 1;
+    public static final int REAPER_INTERVAL_SECONDS = 5;
 
     // --- Polling ---
     public static final int CLIENT_POLL_INTERVAL_MS = 2000;
@@ -52,6 +52,6 @@ public final class Constants {
 
     // --- Money Helper ---
     public static String formatCents(long cents) {
-        return String.format("$%.2f", cents / 100.0);
+        return String.format("%,.2f ETB", cents / 100.0);
     }
 }
