@@ -1,117 +1,114 @@
 package com.auction.client.controllers;
 
+import com.auction.client.core.ClientContext;
+import com.auction.client.network.UdpDiscoveryClient.ServerInfo;
+import java.rmi.ConnectException;
+import java.rmi.NotBoundException;
+import java.util.List;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.control.*;
 
 public class ConnectController {
-    
-    @FXML private javafx.scene.control.ListView<com.auction.client.network.UdpDiscoveryClient.ServerInfo> serverListView;
-    @FXML private javafx.scene.control.TextField ipField;
-    @FXML private javafx.scene.control.TextField portField;
-    @FXML private javafx.scene.control.Label statusLabel;
 
-    @FXML
-    public void initialize() {
-        com.auction.client.core.ClientContext context = com.auction.client.core.ClientContext.getInstance();
-        context.getUdpClient().startListening();
+  @FXML
+  private ListView<ServerInfo> serverListView;
 
-        javafx.application.Platform.runLater(() -> statusLabel.setText("Waiting for discovered servers. You can edit IP and port manually."));
+  @FXML
+  private TextField ipField, portField;
 
-        // Start a background thread to update the list view
-        Thread updateThread = new Thread(() -> {
-            while (true) {
-                try {
-                    Thread.sleep(1000);
-                    java.util.List<com.auction.client.network.UdpDiscoveryClient.ServerInfo> servers = context.getUdpClient().getDiscoveredServers();
-                    javafx.application.Platform.runLater(() -> {
-                        if (servers == null || servers.isEmpty()) {
-                            serverListView.getItems().clear();
-                            if (ipField.getText() == null || ipField.getText().isBlank()) {
-                                ipField.setText("localhost");
-                            }
-                            if (portField.getText() == null || portField.getText().isBlank()) {
-                                portField.setText("1099");
-                            }
-                            statusLabel.setText("No discovered server yet. Localhost is prefilled and can be edited.");
-                        } else {
-                            serverListView.getItems().setAll(servers);
-                            statusLabel.setText("Discovered " + servers.size() + " server(s).");
-                        }
-                    });
-                } catch (InterruptedException e) {
-                    break;
-                }
-            }
-        });
-        updateThread.setDaemon(true);
-        updateThread.start();
-        
-        serverListView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null) {
-                ipField.setText(newVal.host());
-                portField.setText(String.valueOf(newVal.rmiPort()));
-            }
-        });
-    }
+  @FXML
+  private Label statusLabel;
 
-    @FXML
-    private void handleConnect() {
-        String hostInput = ipField.getText();
-        String portInput = portField.getText();
+  @FXML
+  public void initialize() {
+    ClientContext ctx = ClientContext.getInstance();
+    ctx.getUdpClient().startListening();
 
-        String host = (hostInput == null || hostInput.trim().isEmpty()) ? "localhost" : hostInput.trim();
-        int port = 1099;
-        if (portInput != null && !portInput.trim().isEmpty()) {
-            try {
-                port = Integer.parseInt(portInput.trim());
-            } catch (NumberFormatException e) {
-                statusLabel.setText("Invalid port number.");
-                return;
-            }
+    startDiscoveryTask(ctx);
+
+    serverListView
+      .getSelectionModel()
+      .selectedItemProperty()
+      .addListener((obs, old, newVal) -> {
+        if (newVal != null) {
+          ipField.setText(newVal.host());
+          portField.setText(String.valueOf(newVal.rmiPort()));
         }
+      });
+  }
 
-        statusLabel.setText("Connecting to " + host + ":" + port + "...");
-        
-        final String finalHost = host;
-        final int finalPort = port;
-
-        // Set short timeout for RMI connection attempts
-        System.setProperty("sun.rmi.transport.tcp.connectTimeout", "3000");
-
-        // Use a standard Thread to avoid any issues with common pool size or configuration
-        new Thread(() -> {
-            try {
-                com.auction.client.core.ClientContext context = com.auction.client.core.ClientContext.getInstance();
-                // Perform the RMI connection and health check
-                context.getRmiProvider().connect(finalHost, finalPort);
-                
-                javafx.application.Platform.runLater(() -> {
-                    try {
-                        statusLabel.setText("Connected successfully!");
-                        context.getUdpClient().stopListening();
-                        // Navigate to login
-                        context.getViewLoader().loadView("login.fxml");
-                    } catch (Exception e) {
-                        statusLabel.setText("Navigation failed: " + e.getMessage());
-                    }
-                });
-            } catch (Exception e) {
-                javafx.application.Platform.runLater(() -> {
-                    Throwable root = e;
-                    while (root.getCause() != null && root.getCause() != root) {
-                        root = root.getCause();
-                    }
-                    
-                    String errorMsg;
-                    if (root instanceof java.net.ConnectException || root instanceof java.rmi.ConnectException) {
-                        errorMsg = "Server unreachable at " + finalHost + ":" + finalPort;
-                    } else if (e instanceof java.rmi.NotBoundException) {
-                        errorMsg = "RTDAS service not found on this server.";
-                    } else {
-                        errorMsg = (root.getMessage() != null) ? root.getMessage() : root.toString();
-                    }
-                    statusLabel.setText("Connection failed: " + errorMsg);
-                });
+  private void startDiscoveryTask(ClientContext ctx) {
+    Thread task = new Thread(() -> {
+      while (!Thread.currentThread().isInterrupted()) {
+        try {
+          Thread.sleep(1000);
+          List<ServerInfo> servers = ctx.getUdpClient().getDiscoveredServers();
+          Platform.runLater(() -> {
+            if (servers == null || servers.isEmpty()) {
+              serverListView.getItems().clear();
+              statusLabel.setText(
+                "No server discovered. Please enter details manually."
+              );
+            } else {
+              serverListView.getItems().setAll(servers);
+              statusLabel.setText(
+                "Discovered " + servers.size() + " server(s)."
+              );
             }
-        }).start();
+          });
+        } catch (InterruptedException e) {
+          Thread.currentThread().interrupt();
+        }
+      }
+    });
+    task.setDaemon(true);
+    task.start();
+  }
+
+  @FXML
+  private void handleConnect() {
+    String host = ipField.getText().trim().isEmpty()
+      ? "localhost"
+      : ipField.getText().trim();
+    int port;
+    try {
+      port = Integer.parseInt(portField.getText().trim());
+    } catch (Exception e) {
+      statusLabel.setText("Invalid port.");
+      return;
     }
+
+    statusLabel.setText("Connecting...");
+    System.setProperty("sun.rmi.transport.tcp.connectTimeout", "3000");
+
+    new Thread(() -> {
+      try {
+        ClientContext ctx = ClientContext.getInstance();
+        ctx.getRmiProvider().connect(host, port);
+        Platform.runLater(() -> {
+          statusLabel.setText("Connected!");
+          ctx.getUdpClient().stopListening();
+          try {
+            ctx.getViewLoader().loadView("login.fxml");
+          } catch (Exception e) {
+            statusLabel.setText("View load error.");
+          }
+        });
+      } catch (Exception e) {
+        Platform.runLater(() ->
+          statusLabel.setText("Failed: " + formatError(e))
+        );
+      }
+    })
+      .start();
+  }
+
+  private String formatError(Exception e) {
+    Throwable t = e;
+    while (t.getCause() != null) t = t.getCause();
+    if (t instanceof ConnectException) return "Server unreachable.";
+    if (t instanceof NotBoundException) return "Service not found.";
+    return t.getMessage();
+  }
 }

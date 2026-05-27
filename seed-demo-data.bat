@@ -18,7 +18,7 @@ if errorlevel 1 (
 )
 
 echo 1️⃣  Running DemoSeeder...
-call mvn exec:java -Dexec.mainClass=com.auction.server.core.DemoSeeder
+call mvn exec:java -Dexec.mainClass=com.auction.server.tools.DemoSeeder
 if errorlevel 1 (
     echo ❌ DemoSeeder failed
     exit /b 1
@@ -26,7 +26,7 @@ if errorlevel 1 (
 
 echo.
 echo 2️⃣  Generating Test Images...
-call mvn exec:java -Dexec.mainClass=com.auction.server.core.SeedTestImages
+call mvn exec:java -Dexec.mainClass=com.auction.server.tools.SeedTestImages
 if errorlevel 1 (
     echo ❌ Image generation failed
     exit /b 1

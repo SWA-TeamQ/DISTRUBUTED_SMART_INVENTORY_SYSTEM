@@ -1,4 +1,4 @@
-package com.auction.server.core;
+package com.auction.server.tools;
 
 import com.auction.shared.Constants;
 import java.awt.*;
@@ -12,7 +12,7 @@ import javax.imageio.ImageIO;
  * SeedTestImages — Generates colorful placeholder images for the demo seeded auctions.
  * Call this after running DemoSeeder to populate image directories.
  *
- * Run with: mvn exec:java -Dexec.mainClass=com.auction.server.core.SeedTestImages
+ * Run with: mvn exec:java -Dexec.mainClass=com.auction.server.tools.SeedTestImages
  */
 public class SeedTestImages {
 

@@ -312,7 +312,7 @@ Based on the TODO.md checklist, incomplete items:
 | README.md       | mentions HashMap cache | ⚠️ Partially outdated |
 | architecture.md | ✅ Updated             | ✅ Accurate           |
 | database.md     | ✅ Updated             | ✅ Accurate           |
-| DESIGN.md       | ✅ Recent              | ✅ Mostly accurate    |
+| UI_UX.md        | ✅ Recent              | ✅ Mostly accurate    |
 
 **Recommendation:** Update README.md and TODO.md to reflect "implementation-in-progress" or "MVP-ready" status.
 
@@ -323,8 +323,8 @@ Based on the TODO.md checklist, incomplete items:
 1. **Run the Seeder** to create test data:
 
     ```bash
-    mvn exec:java -Dexec.mainClass=com.auction.server.core.DemoSeeder
-    mvn exec:java -Dexec.mainClass=com.auction.server.core.SeedTestImages
+    mvn exec:java -Dexec.mainClass=com.auction.server.tools.DemoSeeder
+    mvn exec:java -Dexec.mainClass=com.auction.server.tools.SeedTestImages
     ```
 
 2. **Start the Server:**

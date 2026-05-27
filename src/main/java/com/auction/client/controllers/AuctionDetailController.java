@@ -2,327 +2,279 @@ package com.auction.client.controllers;
 
 import com.auction.client.core.ClientContext;
 import com.auction.client.service.PollingService;
-import com.auction.shared.models.AuctionItem;
-import javafx.application.Platform;
-import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.TextField;
-import javafx.animation.PauseTransition;
-import javafx.animation.ScaleTransition;
-import javafx.util.Duration;
-import javafx.stage.Popup;
 import com.auction.client.service.ThumbnailExecutor;
-
+import com.auction.shared.Constants;
+import com.auction.shared.exceptions.AuctionException;
+import com.auction.shared.models.AuctionItem;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import javafx.animation.PauseTransition;
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
+import javafx.application.Platform;
+import javafx.fxml.FXML;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.stage.Popup;
+import javafx.util.Duration;
 
 public class AuctionDetailController {
 
-    @FXML private Label auctionTitleLabel;
-    @FXML private Label auctionDescriptionLabel;
-    @FXML private Label currentBidLabel;
-    @FXML private Label timeLeftLabel;
-    @FXML private Label highestBidderLabel;
-    @FXML private Button placeBidButton;
+  @FXML
+  private Label auctionTitleLabel, auctionDescriptionLabel, currentBidLabel, timeLeftLabel, highestBidderLabel, bidStatusLabel;
 
-    private PollingService pollingService;
-    private int currentAuctionId = -1;
-    private com.auction.shared.models.AuctionItem currentItem;
-    @FXML private TextField bidAmountField;
-    @FXML private Label bidStatusLabel;
-    @FXML private ProgressIndicator bidSpinner;
-    @FXML private javafx.scene.image.ImageView heroImageView;
-    @FXML private javafx.scene.image.ImageView thumb1View;
-    @FXML private javafx.scene.image.ImageView thumb2View;
-    @FXML private javafx.scene.image.ImageView thumb3View;
-    private final java.util.concurrent.Executor executor = java.util.concurrent.Executors.newCachedThreadPool();
-    private static final javafx.scene.image.Image PLACEHOLDER_IMAGE = loadPlaceholderImage();
+  @FXML
+  private Button placeBidButton;
 
-    @FXML
-    public void initialize() {
-        // nothing; detail view will be initialized via loadAuction(int)
+  @FXML
+  private TextField bidAmountField;
+
+  @FXML
+  private ProgressIndicator bidSpinner;
+
+  @FXML
+  private ImageView heroImageView, thumb1View, thumb2View, thumb3View;
+
+  private PollingService pollingService;
+  private int auctionId = -1;
+  private AuctionItem currentItem;
+  private final Executor executor = Executors.newCachedThreadPool();
+  private static final Image PLACEHOLDER = loadPlaceholder();
+
+  public void loadAuction(int id) {
+    this.auctionId = id;
+    try {
+      var service = ClientContext.getInstance().getRmiProvider().getService();
+      this.pollingService = new PollingService();
+      this.currentItem = service.getAuctionById(id);
+
+      Platform.runLater(() -> updateUi(currentItem));
+      loadDetailThumbnail(id, 0, heroImageView);
+      loadDetailThumbnail(id, 1, thumb1View);
+      loadDetailThumbnail(id, 2, thumb2View);
+      loadDetailThumbnail(id, 3, thumb3View);
+
+      pollingService.startPolling(
+        () -> {
+          try {
+            AuctionItem fresh = service.getAuctionById(id);
+            if (
+              fresh != null &&
+              currentItem != null &&
+              !fresh.getEndTime().equals(currentItem.getEndTime())
+            ) {
+              Platform.runLater(() -> showToast("Timer Extended!"));
+            }
+            this.currentItem = fresh;
+            Platform.runLater(() -> updateUi(fresh));
+          } catch (Exception ignored) {}
+        },
+        2
+      );
+    } catch (Exception e) {
+      e.printStackTrace();
     }
+  }
 
-    public void loadAuction(int auctionId) {
-        this.currentAuctionId = auctionId;
+  private void updateUi(AuctionItem item) {
+    if (item == null) return;
+    auctionTitleLabel.setText(
+      item.getTitle() == null ? "Auction Detail" : item.getTitle()
+    );
+    auctionDescriptionLabel.setText(
+      item.getDescription() == null
+        ? "No description provided"
+        : item.getDescription()
+    );
+    currentBidLabel.setText(Constants.formatCents(item.getCurrentBidCents()));
+    highestBidderLabel.setText(
+      item.getHighestBidderUsername() == null
+        ? "N/A"
+        : item.getHighestBidderUsername()
+    );
+    timeLeftLabel.setText(formatTime(item.getEndTime()));
+  }
+
+  private String formatTime(String iso) {
+    try {
+      var d = java.time.Duration.between(Instant.now(), Instant.parse(iso));
+      if (d.isNegative() || d.isZero()) return "Ended";
+      return String.format("%02dh %02dm", d.toHours(), d.toMinutesPart());
+    } catch (Exception e) {
+      return "--:--";
+    }
+  }
+
+  @FXML
+  private void handlePlaceBid() {
+    try {
+      double amount = Double.parseDouble(bidAmountField.getText().trim());
+      long cents = Math.round(amount * 100);
+      long expected = currentItem.getCurrentBidCents();
+
+      setBidState(true);
+      CompletableFuture.runAsync(
+        () -> {
+          try {
+            var ctx = ClientContext.getInstance();
+            ctx
+              .getRmiProvider()
+              .getService()
+              .placeBid(auctionId, cents, expected, ctx.getSessionToken());
+            Platform.runLater(() -> {
+              bidStatusLabel.setText("Bid submitted");
+              bidAmountField.clear();
+              animateHero(1.06, 300, 2);
+              showToast("Bid placed");
+            });
+          } catch (Exception e) {
+            String msg = (e.getCause() instanceof AuctionException)
+              ? e.getCause().getMessage()
+              : "Failed to place bid";
+            Platform.runLater(() -> {
+              bidStatusLabel.setText(msg);
+              animateShake();
+            });
+          } finally {
+            Platform.runLater(() -> setBidState(false));
+          }
+        },
+        executor
+      );
+    } catch (Exception e) {
+      bidStatusLabel.setText("Invalid amount");
+    }
+  }
+
+  private void setBidState(boolean working) {
+    placeBidButton.setDisable(working);
+    bidAmountField.setDisable(working);
+    bidSpinner.setVisible(working);
+  }
+
+  private void animateShake() {
+    TranslateTransition tt = new TranslateTransition(
+      Duration.millis(50),
+      bidAmountField
+    );
+    tt.setByX(10f);
+    tt.setCycleCount(6);
+    tt.setAutoReverse(true);
+    tt.play();
+  }
+
+  private void animateHero(double scale, int ms, int cycles) {
+    ScaleTransition st = new ScaleTransition(
+      Duration.millis(ms),
+      heroImageView
+    );
+    st.setToX(scale);
+    st.setToY(scale);
+    st.setAutoReverse(true);
+    st.setCycleCount(cycles);
+    st.play();
+  }
+
+  private void showToast(String msg) {
+    Label lbl = new Label(msg);
+    lbl.setStyle(
+      "-fx-background-color: #28a043; -fx-text-fill: white; -fx-padding: 8px; -fx-background-radius: 5px;"
+    );
+    Popup p = new Popup();
+    p.getContent().add(lbl);
+    p.show(heroImageView.getScene().getWindow());
+    PauseTransition pt = new PauseTransition(Duration.seconds(1.5));
+    pt.setOnFinished(e -> p.hide());
+    pt.play();
+  }
+
+  private void loadDetailThumbnail(int id, int idx, ImageView view) {
+    CompletableFuture.supplyAsync(
+      () -> {
         try {
-            var service = ClientContext.getInstance().getRmiProvider().getService();
-            this.pollingService = new PollingService();
-            // load initial item state
-            AuctionItem initial = service.getAuctionById(auctionId);
-            this.currentItem = initial;
-            Platform.runLater(() -> updateUi(initial));
-            // load thumbnails for detail view
-            loadDetailThumbnail(auctionId, 0, heroImageView);
-            loadDetailThumbnail(auctionId, 1, thumb1View);
-            loadDetailThumbnail(auctionId, 2, thumb2View);
-            loadDetailThumbnail(auctionId, 3, thumb3View);
-            pollingService.startPolling(() -> {
-                try {
-                    AuctionItem item = service.getAuctionById(auctionId);
-                    if (item != null && currentItem != null) {
-                        String oldEnd = currentItem.getEndTime();
-                        if (oldEnd != null && !oldEnd.equals(item.getEndTime())) {
-                            Platform.runLater(() -> showToast("Timer Extended!"));
-                        }
-                    }
-                    this.currentItem = item;
-                    Platform.runLater(() -> updateUi(item));
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }, 2);
+          byte[] bytes = ClientContext.getInstance()
+            .getRmiProvider()
+            .getService()
+            .getThumbnail(id, idx);
+          return (bytes == null || bytes.length == 0)
+            ? null
+            : new Image(new ByteArrayInputStream(bytes));
         } catch (Exception e) {
-            e.printStackTrace();
+          return null;
         }
+      },
+      ThumbnailExecutor.getExecutor()
+    ).thenAccept(img ->
+      Platform.runLater(() -> view.setImage(img != null ? img : PLACEHOLDER))
+    );
+  }
+
+  @FXML
+  private void handleThumb1Click() {
+    updateHero(thumb1View.getImage());
+  }
+
+  @FXML
+  private void handleThumb2Click() {
+    updateHero(thumb2View.getImage());
+  }
+
+  @FXML
+  private void handleThumb3Click() {
+    updateHero(thumb3View.getImage());
+  }
+
+  private void updateHero(Image img) {
+    if (img != null) heroImageView.setImage(img);
+  }
+
+  public void showHeroImageIndex(int index) {
+    switch (index) {
+      case 1:
+        updateHero(thumb1View.getImage());
+        break;
+      case 2:
+        updateHero(thumb2View.getImage());
+        break;
+      case 3:
+        updateHero(thumb3View.getImage());
+        break;
+      default:
+        break;
     }
+  }
 
-    private void updateUi(AuctionItem item) {
-        if (item == null) return;
-        if (auctionTitleLabel != null) {
-            auctionTitleLabel.setText(item.getTitle() == null || item.getTitle().isBlank() ? "Auction Detail" : item.getTitle());
-        }
-        if (auctionDescriptionLabel != null) {
-            String desc = (item.getDescription() == null || item.getDescription().isBlank())
-                ? "No description provided"
-                : item.getDescription();
-            auctionDescriptionLabel.setText(desc);
-        }
-        currentBidLabel.setText(com.auction.shared.Constants.formatCents(item.getCurrentBidCents()));
-        highestBidderLabel.setText(item.getHighestBidderUsername() == null ? "N/A" : item.getHighestBidderUsername());
-        if (timeLeftLabel != null) {
-            timeLeftLabel.setText(formatTimeLeft(item.getEndTime()));
-        }
+  @FXML
+  private void handleBackToGallery() {
+    if (pollingService != null) pollingService.shutdown();
+    try {
+      ClientContext ctx = ClientContext.getInstance();
+      ctx
+        .getViewLoader()
+        .loadView(
+          ctx.getPreviousViewName() == null
+            ? "gallery.fxml"
+            : ctx.getPreviousViewName()
+        );
+    } catch (IOException e) {
+      e.printStackTrace();
     }
+  }
 
-    private String formatTimeLeft(String endTimeIso) {
-        if (endTimeIso == null || endTimeIso.isBlank()) return "--:--";
-        try {
-            java.time.Instant end = java.time.Instant.parse(endTimeIso);
-            java.time.Duration d = java.time.Duration.between(java.time.Instant.now(), end);
-            if (d.isNegative() || d.isZero()) return "Ended";
-            long hours = d.toHours();
-            long minutes = d.minusHours(hours).toMinutes();
-            long seconds = d.minusHours(hours).minusMinutes(minutes).toSeconds();
-            if (hours > 0) {
-                return String.format("%02dh %02dm", hours, minutes);
-            }
-            return String.format("%02dm %02ds", minutes, seconds);
-        } catch (Exception ignored) {
-            return "--:--";
-        }
-    }
+  public void shutdown() {
+    if (pollingService != null) pollingService.shutdown();
+  }
 
-    public void shutdown() {
-        if (pollingService != null) pollingService.shutdown();
-    }
-
-    @FXML
-    private void handlePlaceBid() {
-        if (currentAuctionId < 0) return;
-        String input = bidAmountField.getText();
-        if (input == null || input.trim().isEmpty()) {
-            bidStatusLabel.setText("Enter bid amount");
-            return;
-        }
-
-        double amount;
-        try {
-            amount = Double.parseDouble(input.trim());
-        } catch (NumberFormatException nfe) {
-            bidStatusLabel.setText("Invalid amount format");
-            return;
-        }
-
-        long amountCents = Math.round(amount * 100);
-        long expected = currentItem == null ? 0L : currentItem.getCurrentBidCents();
-
-        // optimistic UI update
-        long prevBid = currentItem == null ? 0L : currentItem.getCurrentBidCents();
-        String prevHighest = currentItem == null ? null : currentItem.getHighestBidderUsername();
-
-        var context = ClientContext.getInstance();
-        String you = context.getUsername() == null ? "You" : context.getUsername();
-
-        // apply optimistic change
-        if (currentItem != null) {
-            currentItem.setCurrentBidCents(amountCents);
-            currentItem.setHighestBidderUsername(you);
-        }
-        Platform.runLater(() -> {
-            updateUi(currentItem);
-            placeBidButton.setDisable(true);
-            bidAmountField.setDisable(true);
-            bidSpinner.setVisible(true);
-            bidStatusLabel.setText("Submitting...");
-        });
-
-        java.util.concurrent.CompletableFuture.runAsync(() -> {
-            try {
-                var service = context.getRmiProvider().getService();
-                service.placeBid(currentAuctionId, amountCents, expected, context.getSessionToken());
-                Platform.runLater(() -> {
-                    bidStatusLabel.setText("Bid submitted");
-                    bidAmountField.clear();
-                    // show success toast and highlight hero image
-                    showToast("Bid placed");
-                    animateSuccess();
-                });
-            } catch (Exception e) {
-                // parse server-side AuctionException if present
-                String userMsg = "Failed to place bid";
-                Throwable cause = e;
-                while (cause != null) {
-                    if (cause instanceof com.auction.shared.exceptions.AuctionException) {
-                        userMsg = cause.getMessage();
-                        break;
-                    }
-                    cause = cause.getCause();
-                }
-                final String finalMsg = userMsg;
-                // rollback optimistic update
-                if (currentItem != null) {
-                    currentItem.setCurrentBidCents(prevBid);
-                    currentItem.setHighestBidderUsername(prevHighest);
-                }
-                Platform.runLater(() -> {
-                    updateUi(currentItem);
-                    bidStatusLabel.setText("Failed: " + finalMsg);
-                    animateShakeError();
-                });
-            } finally {
-                Platform.runLater(() -> {
-                    placeBidButton.setDisable(false);
-                    bidAmountField.setDisable(false);
-                    bidSpinner.setVisible(false);
-                });
-            }
-        }, executor);
-    }
-
-    private void animateShakeError() {
-        if (bidAmountField == null) return;
-        bidAmountField.setStyle("-fx-border-color: #f85149; -fx-border-width: 2px;");
-        javafx.animation.TranslateTransition tt = new javafx.animation.TranslateTransition(Duration.millis(50), bidAmountField);
-        tt.setByX(10f);
-        tt.setCycleCount(6);
-        tt.setAutoReverse(true);
-        tt.setOnFinished(e -> bidAmountField.setStyle(""));
-        tt.play();
-    }
-
-    private void loadDetailThumbnail(int auctionId, int index, javafx.scene.image.ImageView target) {
-        java.util.concurrent.CompletableFuture.supplyAsync(() -> {
-            try {
-                var service = ClientContext.getInstance().getRmiProvider().getService();
-                byte[] bytes = service.getThumbnail(auctionId, index);
-                if (bytes == null || bytes.length == 0) return null;
-                return new javafx.scene.image.Image(new java.io.ByteArrayInputStream(bytes));
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        }, ThumbnailExecutor.getExecutor()).thenAccept(image -> {
-            if (image != null) {
-                Platform.runLater(() -> {
-                    target.setImage(image);
-                    target.setStyle(null);
-                });
-            } else {
-                Platform.runLater(() -> {
-                    target.setImage(PLACEHOLDER_IMAGE);
-                    target.setStyle(null);
-                });
-            }
-        });
-    }
-
-    @FXML
-    private void handleThumb1Click(javafx.scene.input.MouseEvent e) {
-        if (thumb1View.getImage() != null) heroImageView.setImage(thumb1View.getImage());
-    }
-
-    @FXML
-    private void handleThumb2Click(javafx.scene.input.MouseEvent e) {
-        if (thumb2View.getImage() != null) heroImageView.setImage(thumb2View.getImage());
-    }
-
-    @FXML
-    private void handleThumb3Click(javafx.scene.input.MouseEvent e) {
-        if (thumb3View.getImage() != null) heroImageView.setImage(thumb3View.getImage());
-    }
-
-    // allow gallery to request showing a particular hero index after loading
-    public void showHeroImageIndex(int index) {
-        switch (index) {
-            case 0: if (heroImageView.getImage() != null) heroImageView.setImage(heroImageView.getImage()); break;
-            case 1: if (thumb1View.getImage() != null) heroImageView.setImage(thumb1View.getImage()); break;
-            case 2: if (thumb2View.getImage() != null) heroImageView.setImage(thumb2View.getImage()); break;
-            default: break;
-        }
-    }
-
-    private void animateSuccess() {
-        if (heroImageView == null) return;
-        ScaleTransition st = new ScaleTransition(Duration.millis(300), heroImageView);
-        st.setFromX(1.0);
-        st.setFromY(1.0);
-        st.setToX(1.06);
-        st.setToY(1.06);
-        st.setAutoReverse(true);
-        st.setCycleCount(2);
-        st.play();
-    }
-
-    private void showToast(String message) {
-        try {
-            Label lbl = new Label(message);
-            lbl.setStyle("-fx-background-color: rgba(40,160,67,0.95); -fx-text-fill: white; -fx-padding: 8px 12px; -fx-background-radius: 6px;");
-            Popup popup = new Popup();
-            popup.getContent().add(lbl);
-            javafx.geometry.Bounds b = heroImageView.localToScreen(heroImageView.getBoundsInLocal());
-            double x = b.getMinX() + b.getWidth() - 10;
-            double y = b.getMinY() + 10;
-            popup.show(heroImageView.getScene().getWindow(), x, y);
-            PauseTransition pt = new PauseTransition(Duration.seconds(1.6));
-            pt.setOnFinished(evt -> popup.hide());
-            pt.play();
-        } catch (Exception ignored) {}
-    }
-
-    private static javafx.scene.image.Image loadPlaceholderImage() {
-        InputStream stream = AuctionDetailController.class.getResourceAsStream("/images/placeholder.png");
-        if (stream == null) {
-            throw new IllegalStateException("Missing resource: /images/placeholder.png");
-        }
-        return new javafx.scene.image.Image(stream);
-    }
-
-    @FXML
-    private void handleCancelAuction() {
-        System.out.println("Cancel auction clicked");
-    }
-
-    @FXML
-    private void handleRelistAuction() {
-        System.out.println("Relist auction clicked");
-    }
-
-    @FXML
-    private void handleBackToGallery() {
-        try {
-            shutdown();
-            ClientContext context = ClientContext.getInstance();
-            String targetView = context.getPreviousViewName();
-            if (targetView == null || targetView.isBlank()) {
-                targetView = "gallery.fxml";
-            }
-            context.getViewLoader().loadView(targetView);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+  private static Image loadPlaceholder() {
+    InputStream s = AuctionDetailController.class.getResourceAsStream(
+      "/images/placeholder.png"
+    );
+    return (s == null) ? null : new Image(s);
+  }
 }

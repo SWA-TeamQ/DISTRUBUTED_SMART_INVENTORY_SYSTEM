@@ -272,7 +272,7 @@ See `docs/demo-runbook.md`.
 
 | Topic | Document |
 |-------|----------|
-| UI Design | `docs/DESIGN.md` |
+| UI Design | `docs/UI_UX.md` |
 | Architecture | `docs/architecture.md` |
 | Database | `docs/database.md` |
 | Networking | `docs/networking.md` |

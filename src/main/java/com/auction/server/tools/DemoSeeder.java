@@ -1,4 +1,4 @@
-package com.auction.server.core;
+package com.auction.server.tools;
 
 import com.auction.server.repository.AuctionRepository;
 import com.auction.server.repository.BidRepository;
@@ -16,7 +16,7 @@ import java.util.*;
  * DemoSeeder — Populates the database with test users, auctions, and bids
  * for manual testing and UI validation.
  *
- * Run with: mvn exec:java -Dexec.mainClass=com.auction.server.core.DemoSeeder
+ * Run with: mvn exec:java -Dexec.mainClass=com.auction.server.tools.DemoSeeder
  *
  * Creates:
  * - 3 Seller accounts (seller-alice, seller-bob, seller-charlie)
@@ -218,89 +218,63 @@ public class DemoSeeder {
         auctionRepo,
         a1.getId(),
         "bidder-dan",
-        a1.getStartingPriceCents() + 1000,
-        now.plusSeconds(10)
+        a1.getStartingPriceCents() + 700,
+        now.plusSeconds(30)
       );
       placeBid(
         bidRepo,
         auctionRepo,
         a1.getId(),
         "bella-247",
-        a1.getStartingPriceCents() + 1600,
-        now.plusSeconds(20)
+        a1.getStartingPriceCents() + 900,
+        now.plusSeconds(60)
       );
       bidCount += 3;
     }
 
-    // Place bids on auction 3 (Chair) - bella-247 leading
+    // Place bids on auction 3 (Teak Chair)
     if (auctions.size() > 2) {
       AuctionItem a3 = auctions.get(2);
       placeBid(
         bidRepo,
         auctionRepo,
         a3.getId(),
-        "bidder-eve",
-        a3.getStartingPriceCents() + 1000,
-        now
-      );
-      placeBid(
-        bidRepo,
-        auctionRepo,
-        a3.getId(),
-        "bella-247",
-        a3.getStartingPriceCents() + 1800,
-        now.plusSeconds(15)
-      );
-      placeBid(
-        bidRepo,
-        auctionRepo,
-        a3.getId(),
         "bidder-frank",
-        a3.getStartingPriceCents() + 2500,
-        now.plusSeconds(30)
-      );
-      placeBid(
-        bidRepo,
-        auctionRepo,
-        a3.getId(),
-        "bella-247",
-        a3.getStartingPriceCents() + 3200,
+        a3.getStartingPriceCents() + 200,
         now.plusSeconds(45)
       );
-      bidCount += 4;
+      bidCount += 1;
     }
 
-    // Place bids on auction 4 (Painting) - high-value item
+    // Place bids on auction 4 (Oil Painting)
     if (auctions.size() > 3) {
       AuctionItem a4 = auctions.get(3);
       placeBid(
         bidRepo,
         auctionRepo,
         a4.getId(),
-        "bidder-dan",
-        a4.getStartingPriceCents() + 2000,
-        now
-      );
-      placeBid(
-        bidRepo,
-        auctionRepo,
-        a4.getId(),
-        "bella-247",
-        a4.getStartingPriceCents() + 3500,
-        now.plusSeconds(20)
-      );
-      placeBid(
-        bidRepo,
-        auctionRepo,
-        a4.getId(),
         "bidder-eve",
-        a4.getStartingPriceCents() + 5000,
-        now.plusSeconds(40)
+        a4.getStartingPriceCents() + 500,
+        now.plusSeconds(90)
       );
-      bidCount += 3;
+      bidCount += 1;
     }
 
-    // Place bids on auction 6 (Bookshelf) - light competition
+    // Place bids on auction 5 (Harry Potter)
+    if (auctions.size() > 4) {
+      AuctionItem a5 = auctions.get(4);
+      placeBid(
+        bidRepo,
+        auctionRepo,
+        a5.getId(),
+        "bella-247",
+        a5.getStartingPriceCents() + 500,
+        now.plusSeconds(15)
+      );
+      bidCount += 1;
+    }
+
+    // Place bids on auction 6 (Bookshelf)
     if (auctions.size() > 5) {
       AuctionItem a6 = auctions.get(5);
       placeBid(
@@ -308,15 +282,13 @@ public class DemoSeeder {
         auctionRepo,
         a6.getId(),
         "bella-247",
-        a6.getStartingPriceCents() + 300,
-        now
+        a6.getStartingPriceCents() + 30,
+        now.plusSeconds(10)
       );
       bidCount += 1;
     }
 
-    System.out.println("  ✓ " + bidCount + " bids placed across auctions");
-    System.out.println("    - bella-247 is active bidder on multiple auctions");
-    System.out.println("    - Simulates competitive bidding scenarios");
+    System.out.println("  ✓ " + bidCount + " bids created");
   }
 
   private static void placeBid(
@@ -332,10 +304,7 @@ public class DemoSeeder {
     bid.setBidderUsername(bidder);
     bid.setAmountCents(amountCents);
     bid.setTimestamp(timestamp.toString());
-
     bidRepo.insertBid(bid);
-
-    // Update auction's current bid & highest bidder
     auctionRepo.updateAuctionBid(auctionId, amountCents, bidder);
   }
 
@@ -343,38 +312,21 @@ public class DemoSeeder {
     String title,
     String description,
     String category,
-    long startingPriceCents,
+    long startingPrice,
     Instant endTime,
-    String sellerUsername
+    String seller
   ) {
     AuctionItem item = new AuctionItem();
     item.setTitle(title);
     item.setDescription(description);
     item.setCategory(category);
-    item.setStartingPriceCents(startingPriceCents);
-    item.setCurrentBidCents(0); // No bids yet
-    item.setHighestBidderUsername(null);
-    item.setSellerUsername(sellerUsername);
-
-    Instant now = Instant.now();
-    item.setStartTime(now.toString());
+    item.setStartingPriceCents(startingPrice);
+    item.setCurrentBidCents(startingPrice);
+    item.setSellerUsername(seller);
+    item.setStartTime(Instant.now().toString());
     item.setEndTime(endTime.toString());
-
-    // Snipe cap = endTime + 10 minutes
-    Instant capEndTime = endTime.plus(
-      Duration.ofMinutes(Constants.SNIPE_CAP_DEFAULT_MINUTES)
-    );
-    item.setCapEndTime(capEndTime.toString());
-
+    item.setCapEndTime(endTime.plus(Duration.ofMinutes(Constants.SNIPE_CAP_DEFAULT_MINUTES)).toString());
     item.setStatus(Constants.STATUS_ACTIVE);
-
-    // Image paths will be set by seedAuctions after auction is created with ID
-    item.setImg1(null);
-    item.setImg2(null);
-    item.setImg3(null);
-
-    item.setRelistedFrom(null);
-
     return item;
   }
 }

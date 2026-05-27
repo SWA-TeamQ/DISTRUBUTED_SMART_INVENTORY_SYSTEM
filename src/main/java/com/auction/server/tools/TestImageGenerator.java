@@ -1,4 +1,4 @@
-package com.auction.server.core;
+package com.auction.server.tools;
 
 import com.auction.shared.Constants;
 import java.awt.*;
@@ -15,7 +15,7 @@ import javax.imageio.ImageIO;
  * Generates full-size images and thumbnails for visual testing.
  *
  * Run AFTER DemoSeeder to populate image directories.
- * Run with: mvn exec:java -Dexec.mainClass=com.auction.server.core.TestImageGenerator
+ * Run with: mvn exec:java -Dexec.mainClass=com.auction.server.tools.TestImageGenerator
  */
 public class TestImageGenerator {
 
@@ -268,16 +268,15 @@ public class TestImageGenerator {
       title.toLowerCase().contains("book")
     ) {
       return "📖";
-    } else {
-      return "✨";
     }
+    return "📦";
   }
 
-  private static Color darken(Color color, float amount) {
+  private static Color darken(Color c, float factor) {
     return new Color(
-      Math.max(0, (int) (color.getRed() * (1 - amount))),
-      Math.max(0, (int) (color.getGreen() * (1 - amount))),
-      Math.max(0, (int) (color.getBlue() * (1 - amount)))
+      Math.max(0, (int) (c.getRed() * (1 - factor))),
+      Math.max(0, (int) (c.getGreen() * (1 - factor))),
+      Math.max(0, (int) (c.getBlue() * (1 - factor)))
     );
   }
 }

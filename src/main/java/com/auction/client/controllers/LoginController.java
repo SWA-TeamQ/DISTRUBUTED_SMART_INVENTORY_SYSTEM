@@ -1,116 +1,96 @@
 package com.auction.client.controllers;
 
-import java.io.IOException;
+import com.auction.client.core.ClientContext;
+import com.auction.shared.Constants;
+import com.auction.shared.exceptions.AuctionException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-
 import javafx.fxml.FXML;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 
 public class LoginController {
 
-    @FXML private TextField usernameField;
-    @FXML private PasswordField passwordField;
+  @FXML
+  private TextField usernameField;
 
-    @FXML private javafx.scene.control.Label statusLabel;
-    @FXML private javafx.scene.control.TitledPane adminErrorPanel;
-    @FXML private javafx.scene.control.TextArea adminErrorDetails;
+  @FXML
+  private PasswordField passwordField;
 
-    @FXML
-    public void initialize() {
-        if (!com.auction.client.core.ClientContext.getInstance().getRmiProvider().isConnected()) {
-            System.err.println("Not connected to RMI server.");
-        }
-        // Hide status label when empty and show only on errors/messages
-        if (statusLabel != null) {
-            statusLabel.setVisible(false);
-            statusLabel.managedProperty().bind(statusLabel.visibleProperty());
-            statusLabel.textProperty().addListener((obs, oldText, newText) -> {
-                statusLabel.setVisible(newText != null && !newText.trim().isEmpty());
-            });
-        }
+  @FXML
+  private Label statusLabel;
 
-        if (adminErrorPanel != null) {
-            adminErrorPanel.setVisible(false);
-            adminErrorPanel.setManaged(false);
-            adminErrorPanel.setExpanded(false);
-        }
+  @FXML
+  private TitledPane adminErrorPanel;
+
+  @FXML
+  private TextArea adminErrorDetails;
+
+  @FXML
+  public void initialize() {
+    if (statusLabel != null) {
+      statusLabel.managedProperty().bind(statusLabel.visibleProperty());
+      statusLabel.setVisible(false);
+    }
+    if (adminErrorPanel != null) {
+      adminErrorPanel.setManaged(false);
+      adminErrorPanel.setVisible(false);
+    }
+  }
+
+  @FXML
+  private void handleNavigateToRegister() {
+    try {
+      ClientContext.getInstance().getViewLoader().loadView("registration.fxml");
+    } catch (Exception e) {
+      showError("Navigation error: " + e.getMessage());
+    }
+  }
+
+  @FXML
+  private void handleLogin() {
+    String user = usernameField.getText().trim();
+    String pass = passwordField.getText().trim();
+
+    if (user.isEmpty() || pass.isEmpty()) {
+      showError("Enter username and password.");
+      return;
     }
 
-    @FXML
-    private void handleNavigateToRegister(javafx.scene.input.MouseEvent event) {
-        try {
-            com.auction.client.core.ClientContext.getInstance().getViewLoader().loadView("registration.fxml");
-        } catch (IOException e) {
-            if (statusLabel != null) {
-                statusLabel.setText("Unable to open registration page: " + e.getMessage());
-            }
-            e.printStackTrace();
-        }
+    try {
+      var ctx = ClientContext.getInstance();
+      var service = ctx.getRmiProvider().getService();
+      String token = service.login(user, pass);
+
+      ctx.setSessionToken(token);
+      ctx.setUsername(user);
+      ctx.setUserRole(service.getMyRole(token));
+
+      String view = Constants.ADMIN.equals(ctx.getUserRole())
+        ? "admin_panel.fxml"
+        : "user_dashboard.fxml";
+      ctx.getViewLoader().loadView(view);
+    } catch (AuctionException e) {
+      showError(e.getMessage());
+    } catch (Exception e) {
+      showError("System error: " + e.getMessage());
+      showDebug(e);
     }
+  }
 
-    @FXML
-    private void handleLogin() {
-        String username = usernameField.getText();
-        String password = passwordField.getText();
-
-        if (adminErrorPanel != null) {
-            adminErrorPanel.setVisible(false);
-            adminErrorPanel.setManaged(false);
-            adminErrorPanel.setExpanded(false);
-        }
-
-        if (username.isEmpty() || password.isEmpty()) {
-            if (statusLabel != null) statusLabel.setText("Please enter credentials.");
-            return;
-        }
-        
-        com.auction.client.core.ClientContext context = com.auction.client.core.ClientContext.getInstance();
-        com.auction.shared.interfaces.IAuctionService service = context.getRmiProvider().getService();
-        String token;
-        try {
-            token = service.login(username, password);
-            context.setSessionToken(token);
-            context.setUsername(username);
-            String role = service.getMyRole(token);
-            context.setUserRole(role);
-        } catch (com.auction.shared.exceptions.AuctionException ae) {
-            if (statusLabel != null) statusLabel.setText("Authentication failed: " + ae.getMessage());
-            return;
-        } catch (java.rmi.RemoteException re) {
-            if (statusLabel != null) statusLabel.setText("Connection error: " + re.getMessage());
-            re.printStackTrace();
-            return;
-        } catch (Exception e) {
-            if (statusLabel != null) statusLabel.setText("Unexpected error: " + e.getMessage());
-            e.printStackTrace();
-            return;
-        }
-
-        // Load UI in a separate try so view-loading errors don't look like authentication failures
-        try {
-            if (com.auction.shared.Constants.ADMIN.equals(context.getUserRole())) {
-                context.getViewLoader().loadView("admin_panel.fxml");
-            } else {
-                context.getViewLoader().loadView("user_dashboard.fxml");
-            }
-        } catch (IOException ioe) {
-            if (statusLabel != null) statusLabel.setText("Login succeeded but failed to load UI: " + ioe.getMessage());
-            ioe.printStackTrace();
-        } catch (Exception e) {
-            if (statusLabel != null) statusLabel.setText("Login failed: " + e.getMessage());
-
-            boolean isAdminAttempt = com.auction.shared.Constants.DEFAULT_ADMIN_USERNAME.equalsIgnoreCase(username);
-            if (isAdminAttempt && adminErrorPanel != null && adminErrorDetails != null) {
-                StringWriter sw = new StringWriter();
-                e.printStackTrace(new PrintWriter(sw));
-                adminErrorDetails.setText(sw.toString());
-                adminErrorPanel.setVisible(true);
-                adminErrorPanel.setManaged(true);
-            }
-
-            e.printStackTrace();
-        }
+  private void showError(String msg) {
+    if (statusLabel != null) {
+      statusLabel.setText(msg);
+      statusLabel.setVisible(true);
     }
+  }
+
+  private void showDebug(Exception e) {
+    if (adminErrorPanel != null) {
+      StringWriter sw = new StringWriter();
+      e.printStackTrace(new PrintWriter(sw));
+      adminErrorDetails.setText(sw.toString());
+      adminErrorPanel.setManaged(true);
+      adminErrorPanel.setVisible(true);
+    }
+  }
 }

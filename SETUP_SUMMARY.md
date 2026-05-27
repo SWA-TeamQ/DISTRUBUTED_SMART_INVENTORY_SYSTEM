@@ -8,27 +8,17 @@
 
 **The "skeleton" claim is OUTDATED.**
 
-✅ **What IS Implemented:**
-
-- ✓ Full bidding logic with 5% increment validation
-- ✓ Reaper (automatic auction expiration every 1 second)
 - ✓ Session token-based authentication with TTL
 - ✓ Image upload, JPG re-encoding, thumbnail generation
 - ✓ Database with transactions, FK constraints, indexes
 - ✓ RMI service with complete method implementations
-- ✓ Optimistic locking (stale data detection)
 - ✓ Snipe protection with hard cap
 - ✓ Activity views (My Bids, Won Auctions, Outbid)
-- ✓ Seller dashboard with auction management
 - ✓ CSV export with RFC 4180 escaping
 
 ✅ **Status:** ~75-80% production-ready (mainly needs test coverage)
 
 📄 **See:** [docs/CODEBASE_VERIFICATION.md](docs/CODEBASE_VERIFICATION.md) for detailed evidence
-
----
-
-## 🌱 Your Question #2: "Create sample auctions for bella-247..."
 
 ### **DONE!** ✅
 
@@ -46,7 +36,7 @@ Created TWO test utilities:
 **Run:**
 
 ```bash
-mvn exec:java -Dexec.mainClass=com.auction.server.core.DemoSeeder
+mvn exec:java -Dexec.mainClass=com.auction.server.tools.DemoSeeder
 ```
 
 **Output:**
@@ -69,7 +59,7 @@ mvn exec:java -Dexec.mainClass=com.auction.server.core.DemoSeeder
 **Run:**
 
 ```bash
-mvn exec:java -Dexec.mainClass=com.auction.server.core.SeedTestImages
+mvn exec:java -Dexec.mainClass=com.auction.server.tools.SeedTestImages
 ```
 
 ---
@@ -108,10 +98,10 @@ mvn exec:java -Dexec.mainClass=com.auction.server.core.SeedTestImages
 
 ```bash
 # Step 1: Seed database
-mvn exec:java -Dexec.mainClass=com.auction.server.core.DemoSeeder
+mvn exec:java -Dexec.mainClass=com.auction.server.tools.DemoSeeder
 
 # Step 2: Generate test images
-mvn exec:java -Dexec.mainClass=com.auction.server.core.SeedTestImages
+mvn exec:java -Dexec.mainClass=com.auction.server.tools.SeedTestImages
 
 # Step 3: Start server
 mvn exec:java
@@ -174,7 +164,7 @@ mvn exec:java
 **Java seeders:**
 
 ```
-src/main/java/com/auction/server/core/
+src/main/java/com/auction/server/tools/
   ├── DemoSeeder.java          (creates users, auctions, bids)
   └── SeedTestImages.java      (generates colorful test images)
 ```
@@ -183,7 +173,7 @@ src/main/java/com/auction/server/core/
 
 ```
 data/
-  └── rtdas.db                 (SQLite database)
+  └── auction.db.sqlite        (SQLite database)
 resources/
   ├── images/                  (full-size images: 400x400px)
   └── thumbs/                  (thumbnails: 40x40px)

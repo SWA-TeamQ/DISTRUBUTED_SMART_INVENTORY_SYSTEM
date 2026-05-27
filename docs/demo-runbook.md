@@ -6,12 +6,12 @@ Step-by-step guide for demo day setup, execution, and troubleshooting.
 
 ## 1. Prerequisites
 
-| Item | Minimum | Notes |
-|------|---------|-------|
-| Java | 17 LTS | `java -version` |
-| Maven | 3.8+ | `mvn -version` |
-| Network | Local Wi-Fi | All machines on same subnet |
-| Firewall | Configured | Allow `java.exe` on private networks |
+| Item     | Minimum     | Notes                                |
+| -------- | ----------- | ------------------------------------ |
+| Java     | 17 LTS      | `java -version`                      |
+| Maven    | 3.8+        | `mvn -version`                       |
+| Network  | Local Wi-Fi | All machines on same subnet          |
+| Firewall | Configured  | Allow `java.exe` on private networks |
 
 ---
 
@@ -53,12 +53,12 @@ mvn javafx:run
 ### Connection Flow
 
 1. **Connect Screen:**
-   - Wait for server to appear in discovered list
-   - Click server OR enter IP manually
+    - Wait for server to appear in discovered list
+    - Click server OR enter IP manually
 
 2. **Login Screen:**
-   - Username: `admin`
-   - Password: `admin`
+    - Username: `admin`
+    - Password: `admin`
 
 ---
 
@@ -68,16 +68,18 @@ mvn javafx:run
 
 ```bash
 # Optional: run seeder to create demo users/auctions
-mvn exec:java -Dexec.mainClass="com.auction.DemoSeeder"
+mvn exec:java -Dexec.mainClass="com.auction.server.tools.DemoSeeder"
 ```
 
 Creates:
+
 - 5 Standard users (usable in creator or participant context per auction)
 - 5 sample auctions with placeholder images
 
 ### Manual Creation
 
 If no seeder:
+
 1. Login as Admin
 2. Admin Panel → Create Users
 3. Logout, login as a standard user
@@ -121,14 +123,14 @@ If no seeder:
 
 ## 6. Troubleshooting
 
-| Problem | Solution |
-|---------|----------|
-| Server not discovered | Check UDP port 9999 not blocked; use manual IP |
-| RMI connection refused | Verify `-Djava.rmi.server.hostname` matches server IP |
-| Login fails | Check default credentials `admin/admin`; reset DB if needed |
-| Images not loading | Verify `resources/images/` exists; check file permissions |
-| Timer inaccurate | Ensure server time sync; check client offset calculation |
-| Bid rejected unexpectedly | Check stale price warning; refresh auction detail |
+| Problem                   | Solution                                                    |
+| ------------------------- | ----------------------------------------------------------- |
+| Server not discovered     | Check UDP port 9999 not blocked; use manual IP              |
+| RMI connection refused    | Verify `-Djava.rmi.server.hostname` matches server IP       |
+| Login fails               | Check default credentials `admin/admin`; reset DB if needed |
+| Images not loading        | Verify `resources/images/` exists; check file permissions   |
+| Timer inaccurate          | Ensure server time sync; check client offset calculation    |
+| Bid rejected unexpectedly | Check stale price warning; refresh auction detail           |
 
 ---
 
@@ -151,31 +153,31 @@ java -Djava.rmi.server.hostname=<YOUR_IP> \
 
 ## 8. Expected Behavior Checklist
 
-| Feature | Expected | Status |
-|---------|----------|--------|
-| UDP discovery | Server appears within 3s | ☐ |
-| Login | Role-appropriate dashboard | ☐ |
-| Gallery | Thumbnails load instantly | ☐ |
-| Detail view | Full image loads after placeholder | ☐ |
-| Place bid | Minimum 5% increment enforced | ☐ |
-| Snipe protection | Timer extends, capped at 10 min | ☐ |
-| Concurrent bids | Exactly one succeeds, other stale error | ☐ |
-| Reaper | Auction auto-closes after end time | ☐ |
-| Cancel | Only available on active with zero bids | ☐ |
-| CSV export | File saves with correct columns | ☐ |
-| Audit log | All actions recorded | ☐ |
+| Feature          | Expected                                | Status |
+| ---------------- | --------------------------------------- | ------ |
+| UDP discovery    | Server appears within 3s                | ☐      |
+| Login            | Role-appropriate dashboard              | ☐      |
+| Gallery          | Thumbnails load instantly               | ☐      |
+| Detail view      | Full image loads after placeholder      | ☐      |
+| Place bid        | Minimum 5% increment enforced           | ☐      |
+| Snipe protection | Timer extends, capped at 10 min         | ☐      |
+| Concurrent bids  | Exactly one succeeds, other stale error | ☐      |
+| Reaper           | Auction auto-closes after end time      | ☐      |
+| Cancel           | Only available on active with zero bids | ☐      |
+| CSV export       | File saves with correct columns         | ☐      |
+| Audit log        | All actions recorded                    | ☐      |
 
 ---
 
 ## 9. Grading Alignment
 
-| Requirement | Where Demonstrated |
-|-------------|---------------------|
-| OOP | User hierarchy, Serializable models |
-| Collections | HashMap locks, List results |
-| Multithreading | Reaper, polling threads, locks |
-| File I/O | CSV export, image read/write |
-| JDBC | All repositories |
-| RMI | Full IAuctionService |
-| Networking | UDP discovery |
-| GUI | JavaFX with FXML/CSS |
+| Requirement    | Where Demonstrated                  |
+| -------------- | ----------------------------------- |
+| OOP            | User hierarchy, Serializable models |
+| Collections    | HashMap locks, List results         |
+| Multithreading | Reaper, polling threads, locks      |
+| File I/O       | CSV export, image read/write        |
+| JDBC           | All repositories                    |
+| RMI            | Full IAuctionService                |
+| Networking     | UDP discovery                       |
+| GUI            | JavaFX with FXML/CSS                |

@@ -1,7 +1,7 @@
 # RTDAS — Locked Decisions, Update Checklist & Dev Roadmap
 
 Status: pre-implementation. All design questions resolved below.
-Scope: PRD, DESIGN.md, architecture.md, database.md, networking.md, ui.md, README.md, code skeleton (interfaces, models, constants, repositories, services).
+Scope: PRD, UI_UX.md, architecture.md, database.md, networking.md, README.md, code skeleton (interfaces, models, constants, repositories, services).
 Outcome target: a coherent, university-grade-but-well-implemented spec ready to code against, plus a phased roadmap that touches every inconsistent file.
 
 ---
@@ -32,7 +32,7 @@ Outcome target: a coherent, university-grade-but-well-implemented spec ready to 
 | D21 | Schema hardening | `PRAGMA foreign_keys = ON;` on every connection. Indexes: `bids(auction_id)`, `auction_items(status, end_time)`, `auction_items(seller_username)`. CHECK on `status`, `amount > 0`, prices `>= 0`. |
 | D22 | Image format | **Re-encode all uploads to JPG** on save; strip EXIF; center-crop square then scale for thumbnails. |
 | D23 | Client image cache | In-memory `Map<String, byte[]>` keyed `auctionId:index` to avoid re-downloads. Cleared on logout. |
-| D24 | Free-text gallery search | **Dropped.** Category filter + sort only. Update DESIGN.md. |
+| D24 | Free-text gallery search | **Dropped.** Category filter + sort only. Update UI_UX.md. |
 | D25 | UI animations | Stretch goals only. Core components: Card, Button, TextField, ListView, TableView, ComboBox, Alert, FileChooser. |
 | D26 | First-run filesystem | Server auto-creates `data/`, `logs/`, `resources/images/`, `resources/thumbs/`, `exports/` on startup. No manual mkdir. |
 | D27 | Seed script | **Yes.** Optional `mvn exec:java -Dexec.mainClass=...DemoSeeder` that creates 2 sellers, 3 bidders, 5 auctions with placeholder images. |
@@ -55,8 +55,7 @@ Each item lists **file → exact change**. This is the master "nothing missed" l
 - [x] **docs/architecture.md** — add: snipe cap, locking discipline, atomic bid commit, server-time clock authority. Remove "tamper-resistant" wording.
 - [x] **docs/database.md** — add full schema (tables, columns, types, indexes, CHECK constraints, FKs, `PRAGMA foreign_keys`). Add `relisted_from` column. Document online backup. Remove tamper-resistant claim.
 - [x] **docs/networking.md** — add UDP packet v1 schema, `serverTime()` method, reconnect UX, multi-NIC note.
-- [x] **docs/ui.md** — drop free-text search, drop animation requirements (mark as stretch), align with DESIGN.md component scope.
-- [x] **docs/DESIGN.md** — drop "search bar" and FAB if not implemented; reduce animation list to "stretch"; explicitly list AtlantaFX components used.
+- [x] **docs/UI_UX.md** — consolidate UI spec, drop free-text search, align component scope.
 
 ### 1.2 Code skeleton
 
@@ -196,7 +195,7 @@ Concretely the very first commit-sized chunk of work is:
 
 1. README.md rewrite (short overview + pointer to PRD).
 2. PRD edits per §1.4 items 1–15.
-3. Sync architecture.md / database.md / networking.md / ui.md / DESIGN.md.
+3. Sync architecture.md / database.md / networking.md / UI_UX.md.
 
 After that, we move to Phase 1 with a clean spec to code against.
 

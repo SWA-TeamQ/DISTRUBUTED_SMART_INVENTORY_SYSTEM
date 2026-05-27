@@ -11,7 +11,7 @@ This guide walks you through setting up test data and validating all RTDAS featu
 Populates the database with 7 test users, 6 auctions, and 30+ bids:
 
 ```bash
-mvn exec:java -Dexec.mainClass=com.auction.server.core.DemoSeeder
+mvn exec:java -Dexec.mainClass=com.auction.server.tools.DemoSeeder
 ```
 
 **Output:**
@@ -19,7 +19,6 @@ mvn exec:java -Dexec.mainClass=com.auction.server.core.DemoSeeder
 ```
 ✓ 7 users created (3 sellers, 4 bidders)
 ✓ 6 auctions created
-  - 2 short auctions (5 & 3 min) for Reaper testing
   - 2 medium auctions (4 & 12 hours) for UI testing
   - 2 long auctions (24 & 48 hours) for full-day testing
 ✓ 30+ bids placed across auctions
@@ -30,14 +29,13 @@ mvn exec:java -Dexec.mainClass=com.auction.server.core.DemoSeeder
 Creates colorful placeholder images for each seeded auction:
 
 ```bash
-mvn exec:java -Dexec.mainClass=com.auction.server.core.SeedTestImages
+mvn exec:java -Dexec.mainClass=com.auction.server.tools.SeedTestImages
 ```
 
 **Output:**
 
 ```
 📸 Walkman (ID: 1)
-  ✓ Full: resources/images/auction_1_img_1.jpg
   ✓ Thumb: resources/thumbs/auction_1_img_1_thumb.jpg
   [... 5 more auctions, 3 images each ...]
 ✓ All images generated!
@@ -55,16 +53,15 @@ mvn exec:java
 
 ## Test Accounts
 
-| User             | Password  | Role   | Purpose                   |
-| ---------------- | --------- | ------ | ------------------------- |
-| `admin`          | `admin`   | Admin  | System access, audit logs |
-| `seller-alice`   | `pass123` | Seller | Create/manage auctions    |
-| `seller-bob`     | `pass123` | Seller | Create/manage auctions    |
-| `seller-charlie` | `pass123` | Seller | Create/manage auctions    |
-| **`bella-247`**  | `pass123` | Bidder | **Main test user**        |
-| `bidder-dan`     | `pass123` | Bidder | Competitive bidding       |
-| `bidder-eve`     | `pass123` | Bidder | Competitive bidding       |
-| `bidder-frank`   | `pass123` | Bidder | Competitive bidding       |
+| User | Password | Role | Purpose |
+| `admin` | `admin` | Admin | System access, audit logs |
+| `seller-alice` | `pass123` | Seller | Create/manage auctions |
+| `seller-bob` | `pass123` | Seller | Create/manage auctions |
+| `seller-charlie` | `pass123` | Seller | Create/manage auctions |
+| **`bella-247`** | `pass123` | Bidder | **Main test user** |
+| `bidder-dan` | `pass123` | Bidder | Competitive bidding |
+| `bidder-eve` | `pass123` | Bidder | Competitive bidding |
+| `bidder-frank` | `pass123` | Bidder | Competitive bidding |
 
 ---
 
@@ -79,9 +76,7 @@ mvn exec:java
 3. Verify:
     - [ ] Thumbnails display for all 6 auctions
     - [ ] Thumbnails are ~100x100px (not blurry)
-    - [ ] Category filter works (Electronics, Furniture, Art)
     - [ ] Sort by price/time works
-    - [ ] Clicking thumbnail opens detail view
 
 **Expected:** All 6 colored placeholder images visible with distinct emojis (📱, 🪑, 🎨, 📖, etc.)
 
@@ -274,7 +269,7 @@ mvn exec:java
 ### Check Database State
 
 ```bash
-sqlite3 data/rtdas.db
+sqlite3 data/auction.db.sqlite
 sqlite> SELECT id, title, status, current_bid_cents, highest_bidder_username FROM auction_items;
 sqlite> SELECT * FROM users;
 sqlite> SELECT bidder_username, amount_cents, timestamp FROM bids ORDER BY timestamp DESC LIMIT 10;
@@ -289,10 +284,10 @@ tail -f logs/logs.txt
 ### Clear & Restart
 
 ```bash
-rm data/rtdas.db
+rm data/auction.db.sqlite
 rm -rf resources/images/* resources/thumbs/*
-mvn exec:java -Dexec.mainClass=com.auction.server.core.DemoSeeder
-mvn exec:java -Dexec.mainClass=com.auction.server.core.SeedTestImages
+mvn exec:java -Dexec.mainClass=com.auction.server.tools.DemoSeeder
+mvn exec:java -Dexec.mainClass=com.auction.server.tools.SeedTestImages
 mvn exec:java  # start server
 ```
 

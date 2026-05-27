@@ -25,7 +25,7 @@ mvn javafx:run
 |----------|---------|
 | [docs/table-of-contents.md](docs/table-of-contents.md) | Master index of all documentation |
 | [docs/RTDAS_PRD.md](docs/RTDAS_PRD.md) | Product requirements, user stories, scope |
-| [docs/DESIGN.md](docs/DESIGN.md) | UI/UX design, screen layouts, interactions |
+| [docs/UI_UX.md](docs/UI_UX.md) | UI/UX design, screen layouts, interactions |
 | [docs/architecture.md](docs/architecture.md) | System architecture (Deep Modules), RMI contract |
 | [docs/database.md](docs/database.md) | Database schema, constraints, backup strategy |
 | [docs/demo-runbook.md](docs/demo-runbook.md) | Demo day setup and troubleshooting guide |

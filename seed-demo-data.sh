@@ -16,11 +16,11 @@ if ! command -v mvn &> /dev/null; then
 fi
 
 echo "1️⃣  Running DemoSeeder..."
-mvn exec:java -Dexec.mainClass=com.auction.server.core.DemoSeeder
+mvn exec:java -Dexec.mainClass=com.auction.server.tools.DemoSeeder
 
 echo ""
 echo "2️⃣  Generating Test Images..."
-mvn exec:java -Dexec.mainClass=com.auction.server.core.SeedTestImages
+mvn exec:java -Dexec.mainClass=com.auction.server.tools.SeedTestImages
 
 echo ""
 echo "✅ Demo data setup complete!"

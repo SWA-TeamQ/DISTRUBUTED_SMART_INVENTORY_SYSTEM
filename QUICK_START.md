@@ -153,13 +153,13 @@ Check each button does what it says:
 
 ## 🔧 Troubleshooting
 
-| Issue                      | Solution                                                                                     |
-| -------------------------- | -------------------------------------------------------------------------------------------- |
-| "No auctions found"        | Run seeder: `mvn exec:java -Dexec.mainClass=com.auction.server.core.DemoSeeder`              |
-| "Images are placeholders"  | Run image generator: `mvn exec:java -Dexec.mainClass=com.auction.server.core.SeedTestImages` |
-| "Port 1099 already in use" | Kill existing server or change `rmiregistry` port                                            |
-| "Database locked"          | Close client connections, try again                                                          |
-| "Thumbnails are blurry"    | They're intentionally small (40x40px); full images are crisp (400x400px)                     |
+| Issue                      | Solution                                                                                      |
+| -------------------------- | --------------------------------------------------------------------------------------------- |
+| "No auctions found"        | Run seeder: `mvn exec:java -Dexec.mainClass=com.auction.server.tools.DemoSeeder`              |
+| "Images are placeholders"  | Run image generator: `mvn exec:java -Dexec.mainClass=com.auction.server.tools.SeedTestImages` |
+| "Port 1099 already in use" | Kill existing server or change `rmiregistry` port                                             |
+| "Database locked"          | Close client connections, try again                                                           |
+| "Thumbnails are blurry"    | They're intentionally small (40x40px); full images are crisp (400x400px)                      |
 
 ---
 
@@ -196,7 +196,7 @@ For detailed test scenarios, edge cases, and button audit:
 2. **Rapid bidding:** Test optimistic locking by bidding fast with 2 clients
 3. **Watch the Reaper:** Auction #2 & #5 expire in 5 & 3 min respectively
 4. **Seller view:** Login as seller-alice to see dashboard features
-5. **Database inspect:** `sqlite3 data/rtdas.db ".tables"` to check state
+5. **Database inspect:** `sqlite3 data/auction.db.sqlite ".tables"` to check state
 
 ---
 

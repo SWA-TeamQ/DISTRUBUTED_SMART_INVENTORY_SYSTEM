@@ -1,4 +1,4 @@
-package com.auction.tools;
+package com.auction.client.tools;
 
 import com.auction.shared.Constants;
 import com.auction.shared.interfaces.IAuctionService;
@@ -51,4 +51,3 @@ public class TestRegisterLogin {
         System.out.println("Test complete.");
     }
 }
-
