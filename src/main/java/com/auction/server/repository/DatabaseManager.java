@@ -24,6 +24,7 @@ public class DatabaseManager {
         bootstrapDirectories();
         migrateLegacyDatabaseIfNeeded(dbUrl);
         try {
+            Class.forName("org.sqlite.JDBC");
             connection = DriverManager.getConnection(dbUrl);
             try (var stmt = connection.createStatement()) {
                 stmt.execute("PRAGMA foreign_keys = ON;");
@@ -31,6 +32,8 @@ public class DatabaseManager {
             initSchema();
         } catch (SQLException e) {
             throw new RuntimeException("Failed to initialize database", e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("SQLite JDBC driver not available", e);
         }
     }
 

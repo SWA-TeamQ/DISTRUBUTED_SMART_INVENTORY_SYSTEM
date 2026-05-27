@@ -1,7 +1,7 @@
 # RTDAS — Locked Decisions, Update Checklist & Dev Roadmap
 
 Status: pre-implementation. All design questions resolved below.
-Scope: PRD, DESIGN.md, architecture.md, database.md, networking.md, ui.md, README.md, code skeleton (interfaces, models, constants, repositories, services).
+Scope: PRD, UI_UX.md, architecture.md, database.md, networking.md, README.md, code skeleton (interfaces, models, constants, repositories, services).
 Outcome target: a coherent, university-grade-but-well-implemented spec ready to code against, plus a phased roadmap that touches every inconsistent file.
 
 ---
@@ -12,8 +12,7 @@ Outcome target: a coherent, university-grade-but-well-implemented spec ready to 
 |---|---|---|
 | D1 | Default admin credentials | **`admin` / `admin`**. Update `Constants.java` (currently `abelmekonen/demo123`). PRD/README already say this. |
 | D2 | Per-call authentication on RMI | **Session tokens.** `login()` returns a UUID token; mutating calls require it; server keeps `ConcurrentHashMap<String, Session>` with TTL + `logout(token)`. No JWT. |
-| D3 | Rate limiting | **Sliding-window per-IP limiter on `login()` and `placeBid()` only.** Polling reads are unlimited. IP via `RemoteServer.getClientHost()`. |
-| D4 | Real-time update mechanism | **Keep 2 s short polling.** No long polling, no RMI callbacks. |
+| D3 | Real-time update mechanism | **Keep 2 s short polling.** No long polling, no RMI callbacks. |
 | D5 | First-bid rule | If no bids: `amount >= startingPrice`. Else: `amount >= currentBid * 1.05`. Plus `amount > 0` and `Double.isFinite(amount)`. |
 | D6 | Snipe protection cap | **Hard `cap_end_time` set at auction creation.** Default = `endTime + 10 minutes`. Extensions can never push `endTime` past `cap_end_time`. |
 | D7 | Reaper ↔ placeBid race | **Same per-auction `ReentrantLock`.** Both re-check `status == ACTIVE && now < endTime` inside the lock. |
@@ -33,7 +32,7 @@ Outcome target: a coherent, university-grade-but-well-implemented spec ready to 
 | D21 | Schema hardening | `PRAGMA foreign_keys = ON;` on every connection. Indexes: `bids(auction_id)`, `auction_items(status, end_time)`, `auction_items(seller_username)`. CHECK on `status`, `amount > 0`, prices `>= 0`. |
 | D22 | Image format | **Re-encode all uploads to JPG** on save; strip EXIF; center-crop square then scale for thumbnails. |
 | D23 | Client image cache | In-memory `Map<String, byte[]>` keyed `auctionId:index` to avoid re-downloads. Cleared on logout. |
-| D24 | Free-text gallery search | **Dropped.** Category filter + sort only. Update DESIGN.md. |
+| D24 | Free-text gallery search | **Dropped.** Category filter + sort only. Update UI_UX.md. |
 | D25 | UI animations | Stretch goals only. Core components: Card, Button, TextField, ListView, TableView, ComboBox, Alert, FileChooser. |
 | D26 | First-run filesystem | Server auto-creates `data/`, `logs/`, `resources/images/`, `resources/thumbs/`, `exports/` on startup. No manual mkdir. |
 | D27 | Seed script | **Yes.** Optional `mvn exec:java -Dexec.mainClass=...DemoSeeder` that creates 2 sellers, 3 bidders, 5 auctions with placeholder images. |
@@ -56,8 +55,7 @@ Each item lists **file → exact change**. This is the master "nothing missed" l
 - [x] **docs/architecture.md** — add: snipe cap, locking discipline, atomic bid commit, server-time clock authority. Remove "tamper-resistant" wording.
 - [x] **docs/database.md** — add full schema (tables, columns, types, indexes, CHECK constraints, FKs, `PRAGMA foreign_keys`). Add `relisted_from` column. Document online backup. Remove tamper-resistant claim.
 - [x] **docs/networking.md** — add UDP packet v1 schema, `serverTime()` method, reconnect UX, multi-NIC note.
-- [x] **docs/ui.md** — drop free-text search, drop animation requirements (mark as stretch), align with DESIGN.md component scope.
-- [x] **docs/DESIGN.md** — drop "search bar" and FAB if not implemented; reduce animation list to "stretch"; explicitly list AtlantaFX components used.
+- [x] **docs/UI_UX.md** — consolidate UI spec, drop free-text search, align component scope.
 
 ### 1.2 Code skeleton
 
@@ -66,7 +64,7 @@ Each item lists **file → exact change**. This is the master "nothing missed" l
 - [x] **`shared/models/AuctionItem.java`** — change `double startingPrice/currentBid` to `long startingPriceCents/currentBidCents`. Add `Long capEndTime` (ISO string, UTC). Add `Integer relistedFrom`. Update Javadoc to specify UTC `Z` timestamps.
 - [x] **`shared/models/Bid.java`** — `long amountCents`; UTC timestamp.
 - [ ] **`shared/models/User.java`** — confirm `passwordHash`, `roleType`. Ensure no plaintext password ever leaves the server.
-- [x] **`shared/exceptions/`** — add `UnauthorizedException` (bad/missing token), `RateLimitedException`, `SnipeCapReachedException` (optional — could fold into AuctionClosedException).
+- [x] **`shared/exceptions/`** — add `UnauthorizedException` (bad/missing token), `SnipeCapReachedException` (optional — could fold into AuctionClosedException).
 - [x] **`server/repository/DatabaseManager.java`** — set `PRAGMA foreign_keys = ON` per connection; create directories on init; create indexes; add `relisted_from` column.
 - [x] **`server/repository/AuctionRepository.java`** — long-cents columns; `findActiveExpired()` query for the reaper; update with snipe-extended `end_time`; insert-with-relisted_from; transactional `placeBidAndUpdate(...)`.
 - [x] **`server/repository/BidRepository.java`** — long-cents amount; `findByBidder(username)` for the activity view.
@@ -197,7 +195,7 @@ Concretely the very first commit-sized chunk of work is:
 
 1. README.md rewrite (short overview + pointer to PRD).
 2. PRD edits per §1.4 items 1–15.
-3. Sync architecture.md / database.md / networking.md / ui.md / DESIGN.md.
+3. Sync architecture.md / database.md / networking.md / UI_UX.md.
 
 After that, we move to Phase 1 with a clean spec to code against.
 

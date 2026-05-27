@@ -58,7 +58,7 @@ Master index of all documentation. Click any link to jump to that section.
 
 ---
 
-## docs/DESIGN.md
+## docs/UI_UX.md
 
 ### 1. Design Philosophy
 - Professional, dark-mode native
@@ -208,6 +208,6 @@ Master index of all documentation. Click any link to jump to that section.
 | Database Schema | database.md | §2 |
 | RMI Contract | RTDAS_PRD.md | §3 |
 | Concurrency Strategy | architecture.md | §6 |
-| UI Screens | DESIGN.md | §4 |
+| UI Screens | UI_UX.md | §4 |
 | Locking Discipline | architecture.md | §6 |
 | Demo Commands | demo-runbook.md | §2 |

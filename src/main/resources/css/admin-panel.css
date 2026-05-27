@@ -1,7 +1,12 @@
 /* RTDAS Admin Dashboard Theme */
 
 .admin-shell {
-    -fx-background-color: linear-gradient(to bottom right, #060b12, #0b1220 55%, #070a10);
+    -fx-background-color: linear-gradient(
+        to bottom right,
+        #060b12,
+        #0b1220 55%,
+        #070a10
+    );
 }
 
 .admin-header {
@@ -16,13 +21,13 @@
     -fx-font-size: 26px;
     -fx-font-weight: 800;
     -fx-text-fill: #f0f6fc;
-    -fx-font-family: 'Inter';
+    -fx-font-family: "Inter";
 }
 
 .page-subtitle {
     -fx-font-size: 13px;
     -fx-text-fill: #8b949e;
-    -fx-font-family: 'Inter';
+    -fx-font-family: "Inter";
 }
 
 .status-chip {
@@ -31,7 +36,7 @@
     -fx-padding: 6px 12px;
     -fx-font-size: 11px;
     -fx-font-weight: 700;
-    -fx-font-family: 'Inter';
+    -fx-font-family: "Inter";
 }
 
 .status-chip-success {
@@ -70,6 +75,74 @@
     -fx-spacing: 16px;
 }
 
+.sidebar-nav {
+    -fx-background-color: rgba(11, 15, 21, 0.95);
+    -fx-border-color: rgba(48, 54, 61, 0.7);
+    -fx-border-width: 0 1 0 0;
+    -fx-padding: 16px;
+}
+
+.sidebar-header {
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #f0f6fc;
+    -fx-font-family: "Inter";
+    -fx-padding: 0 0 8 0;
+}
+
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #c9d1d9;
+    -fx-padding: 10px 12px;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-font-family: "Inter";
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+    -fx-cursor: hand;
+}
+
+.nav-button:hover {
+    -fx-background-color: rgba(88, 166, 255, 0.12);
+    -fx-text-fill: #f0f6fc;
+}
+
+.nav-button:pressed {
+    -fx-background-color: rgba(88, 166, 255, 0.2);
+}
+
+.nav-button-accent {
+    -fx-background-color: transparent;
+    -fx-text-fill: #79c0ff;
+    -fx-padding: 10px 12px;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-font-family: "Inter";
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+    -fx-cursor: hand;
+}
+
+.nav-button-accent:hover {
+    -fx-background-color: rgba(88, 166, 255, 0.15);
+}
+
+.nav-button-danger {
+    -fx-background-color: transparent;
+    -fx-text-fill: #f85149;
+    -fx-padding: 10px 12px;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-font-family: "Inter";
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+    -fx-cursor: hand;
+}
+
+.nav-button-danger:hover {
+    -fx-background-color: rgba(248, 81, 73, 0.12);
+}
+
 .panel-card {
     -fx-background-color: rgba(13, 17, 23, 0.92);
     -fx-background-radius: 18px;
@@ -84,13 +157,13 @@
     -fx-font-size: 16px;
     -fx-font-weight: 700;
     -fx-text-fill: #f0f6fc;
-    -fx-font-family: 'Inter';
+    -fx-font-family: "Inter";
 }
 
 .panel-copy {
     -fx-font-size: 12px;
     -fx-text-fill: #8b949e;
-    -fx-font-family: 'Inter';
+    -fx-font-family: "Inter";
 }
 
 .compact-field {
@@ -103,7 +176,7 @@
     -fx-prompt-text-fill: #5b6570;
     -fx-padding: 11px 12px;
     -fx-font-size: 13px;
-    -fx-font-family: 'Inter';
+    -fx-font-family: "Inter";
 }
 
 .compact-field:focused {
@@ -116,7 +189,7 @@
     -fx-background-radius: 10px;
     -fx-border-radius: 10px;
     -fx-padding: 11px 14px;
-    -fx-font-family: 'Inter';
+    -fx-font-family: "Inter";
     -fx-font-size: 13px;
     -fx-font-weight: 700;
     -fx-cursor: hand;
@@ -155,12 +228,16 @@
 }
 
 .metric-card {
-    -fx-background-color: linear-gradient(to bottom right, rgba(13, 17, 23, 0.98), rgba(17, 24, 39, 0.92));
+    -fx-background-color: linear-gradient(
+        to bottom right,
+        rgba(13, 17, 23, 0.98),
+        rgba(17, 24, 39, 0.92)
+    );
     -fx-background-radius: 18px;
     -fx-border-color: rgba(48, 54, 61, 0.92);
     -fx-border-radius: 18px;
     -fx-border-width: 1px;
-    -fx-padding: 16px 18px;
+    -fx-padding: 20px 22px;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.32), 22, 0, 0, 7);
 }
 
@@ -175,34 +252,34 @@
 .metric-label {
     -fx-font-size: 12px;
     -fx-text-fill: #8b949e;
-    -fx-font-family: 'Inter';
+    -fx-font-family: "Inter";
     -fx-font-weight: 600;
 }
 
 .metric-value {
-    -fx-font-size: 28px;
+    -fx-font-size: 32px;
     -fx-text-fill: #f0f6fc;
-    -fx-font-family: 'Inter';
+    -fx-font-family: "Inter";
     -fx-font-weight: 800;
 }
 
 .fact-label {
     -fx-font-size: 12px;
     -fx-text-fill: #8b949e;
-    -fx-font-family: 'Inter';
+    -fx-font-family: "Inter";
 }
 
 .fact-value {
     -fx-font-size: 13px;
     -fx-text-fill: #f0f6fc;
-    -fx-font-family: 'Inter';
+    -fx-font-family: "Inter";
     -fx-font-weight: 700;
 }
 
 .status-line {
     -fx-text-fill: #8b949e;
     -fx-font-size: 12px;
-    -fx-font-family: 'Inter';
+    -fx-font-family: "Inter";
 }
 
 .users-table,
@@ -230,7 +307,7 @@
 .audit-list .label {
     -fx-text-fill: #c9d1d9;
     -fx-font-weight: 700;
-    -fx-font-family: 'Inter';
+    -fx-font-family: "Inter";
 }
 
 .users-table .table-row-cell {
@@ -248,14 +325,14 @@
 
 .users-table .table-cell {
     -fx-text-fill: #c9d1d9;
-    -fx-font-family: 'Inter';
+    -fx-font-family: "Inter";
     -fx-border-color: rgba(48, 54, 61, 0.35);
 }
 
 .audit-list .list-cell {
     -fx-background-color: #0b0f15;
     -fx-text-fill: #c9d1d9;
-    -fx-font-family: 'JetBrains Mono', 'Consolas', monospace;
+    -fx-font-family: "JetBrains Mono", "Consolas", monospace;
     -fx-padding: 8px 10px;
 }
 
@@ -269,4 +346,34 @@
 
 .scroll-pane .corner {
     -fx-background-color: transparent;
+}
+
+.action-demote {
+    -fx-padding: 6px 12px;
+    -fx-font-size: 12px;
+    -fx-background-color: transparent;
+    -fx-border-color: #da3633;
+    -fx-border-width: 1;
+    -fx-text-fill: #f85149;
+    -fx-border-radius: 6;
+    -fx-cursor: hand;
+}
+
+.action-demote:hover {
+    -fx-background-color: rgba(248, 81, 73, 0.1);
+}
+
+.action-promote {
+    -fx-padding: 6px 12px;
+    -fx-font-size: 12px;
+    -fx-background-color: transparent;
+    -fx-border-color: #2da44e;
+    -fx-border-width: 1;
+    -fx-text-fill: #3fb950;
+    -fx-border-radius: 6;
+    -fx-cursor: hand;
+}
+
+.action-promote:hover {
+    -fx-background-color: rgba(63, 185, 80, 0.1);
 }

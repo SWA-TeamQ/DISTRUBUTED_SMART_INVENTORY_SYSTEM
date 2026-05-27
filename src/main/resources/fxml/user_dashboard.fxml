@@ -8,6 +8,8 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
@@ -32,7 +34,33 @@
                 <Label text="Browse auctions, manage listings, review activity, and switch context by auction ownership." styleClass="page-subtitle" wrapText="true"/>
             </VBox>
             <Label fx:id="statusLabel" text="Ready" styleClass="status-chip status-chip-success"/>
-            <Button text="Refresh" onAction="#handleRefreshDashboard" styleClass="secondary-button"/>
+                    <Button styleClass="icon-button secondary-button" onAction="#handleRefreshDashboard">
+            <graphic>
+                <ImageView fitWidth="16" fitHeight="16">
+                    <image>
+                        <Image url="@../icons/refresh.png" />
+                    </image>
+                </ImageView>
+            </graphic>
+        </Button>
+        <Button styleClass="icon-button secondary-button" onAction="#handleProfile">
+            <graphic>
+                <ImageView fitWidth="16" fitHeight="16">
+                    <image>
+                        <Image url="@../icons/profile.png" />
+                    </image>
+                </ImageView>
+            </graphic>
+        </Button>
+        <Button styleClass="icon-button secondary-button" onAction="#handleLogout">
+            <graphic>
+                <ImageView fitWidth="16" fitHeight="16">
+                    <image>
+                        <Image url="@../icons/logout.png" />
+                    </image>
+                </ImageView>
+            </graphic>
+        </Button>
             <Button text="Logout" onAction="#handleLogout" styleClass="secondary-button"/>
         </HBox>
     </top>
@@ -63,37 +91,17 @@
             </top>
 
             <left>
-                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="content-scroll" prefWidth="410" maxWidth="460">
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="content-scroll" prefWidth="250" maxWidth="300">
                     <content>
                         <VBox spacing="16" styleClass="sidebar-stack">
-                            <VBox spacing="10" styleClass="hero-card">
-                                <Label text="Create New Auction" styleClass="section-title"/>
-                                <Label text="Use this form when the current user owns the auction being managed." styleClass="section-copy" wrapText="true"/>
-                                <TextField fx:id="titleField" promptText="Title" styleClass="compact-field"/>
-                                <TextArea fx:id="descArea" promptText="Description" prefRowCount="4" styleClass="compact-field"/>
-                                <TextField fx:id="categoryField" promptText="Category" styleClass="compact-field"/>
-                                <TextField fx:id="priceField" promptText="Starting Price (e.g. 10.50)" styleClass="compact-field"/>
-                                <TextField fx:id="endTimeField" promptText="Duration in minutes (e.g. 60)" styleClass="compact-field"/>
-
-                                <Label text="Images (Max 3)" styleClass="section-copy"/>
-                                <HBox spacing="8">
-                                    <Button text="Img 1" onAction="#handlePickImg1" styleClass="ghost-button"/>
-                                    <Button text="Img 2" onAction="#handlePickImg2" styleClass="ghost-button"/>
-                                    <Button text="Img 3" onAction="#handlePickImg3" styleClass="ghost-button"/>
-                                </HBox>
-                                <Label fx:id="imagesLabel" text="No images selected" styleClass="section-copy"/>
-
-                                <Button text="Create Auction" onAction="#handleCreateAuction" defaultButton="true" maxWidth="Infinity" styleClass="primary-button"/>
-                            </VBox>
-
                             <VBox spacing="10" styleClass="panel-card">
                                 <Label text="Actions" styleClass="section-title"/>
+                                <Button text="Create Auction" onAction="#handleCreateAuction" maxWidth="Infinity" styleClass="primary-button"/>
                                 <Button text="Open Gallery" onAction="#handleOpenGallery" maxWidth="Infinity" styleClass="secondary-button"/>
                                 <Button text="Open Auction Detail" onAction="#handleOpenAuctionDetail" maxWidth="Infinity" styleClass="secondary-button"/>
                                 <Button text="Export to CSV" onAction="#handleExportCSV" maxWidth="Infinity" styleClass="secondary-button"/>
-                                <Button text="Refresh Dashboard" onAction="#handleRefreshDashboard" maxWidth="Infinity" styleClass="secondary-button"/>
-                                <Button text="Cancel Selected Listing" onAction="#handleCancelAuction" maxWidth="Infinity" styleClass="secondary-button"/>
-                                <Button text="Relist Selected Listing" onAction="#handleRelistAuction" maxWidth="Infinity" styleClass="secondary-button"/>
+                                <Button text="Cancel Selected" onAction="#handleCancelAuction" maxWidth="Infinity" styleClass="secondary-button"/>
+                                <Button text="Relist Selected" onAction="#handleRelistAuction" maxWidth="Infinity" styleClass="secondary-button"/>
                             </VBox>
                         </VBox>
                     </content>

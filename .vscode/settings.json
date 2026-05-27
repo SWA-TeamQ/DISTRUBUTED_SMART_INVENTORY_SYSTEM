@@ -10,5 +10,10 @@
             "strings": "on",
             "other": "on"
         }
+    },
+    "chat.tools.terminal.autoApprove": {
+        "mvn compile": true,
+        "mvn exec:java": true,
+        "mvn clean": true
     }
 }

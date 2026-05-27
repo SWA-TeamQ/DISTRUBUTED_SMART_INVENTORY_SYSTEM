@@ -201,6 +201,12 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
     }
 
     @Override
+    public void demoteUserToStandard(String username, String token) throws RemoteException, AuctionException {
+        SessionContext context = sessionManager.validateRole(token, Constants.ADMIN);
+        adminManager.demoteUserToStandard(username, context);
+    }
+
+    @Override
     public List<String> getAuditLogs(int lastNLines, String token) throws RemoteException, AuctionException {
         SessionContext context = sessionManager.validateRole(token, Constants.ADMIN);
         return adminManager.getAuditLogs(lastNLines, context);

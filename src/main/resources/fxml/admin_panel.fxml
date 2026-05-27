@@ -1,152 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.PasswordField?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.SplitPane?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.cell.PropertyValueFactory?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.FlowPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.VBox?>
-<?import java.net.URL?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<BorderPane xmlns="http://javafx.com/javafx/17"
-    xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.AdminPanelController" styleClass="page-shell admin-shell">
-    
-
-    <top>
-        <HBox spacing="16" alignment="CENTER_LEFT" styleClass="admin-header">
-            <VBox spacing="4" HBox.hgrow="ALWAYS">
-                <Label text="Admin Panel" styleClass="page-title"/>
-                <Label text="Control users, inspect logs, and keep the platform healthy." styleClass="page-subtitle"/>
-            </VBox>
-
-            <VBox spacing="4" alignment="CENTER_RIGHT">
-                <Label fx:id="lastUpdatedLabel" text="Updated just now" styleClass="status-chip status-chip-accent"/>
-                <Label text="Session active" styleClass="status-chip status-chip-success"/>
-            </VBox>
-
-            <Button text="Logout" onAction="#handleLogout" styleClass="secondary-button"/>
-        </HBox>
-    </top>
-
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" 
+            fx:controller="com.auction.client.controllers.AdminPanelController" 
+            styleClass="admin-shell">
+    <left>
+        <VBox styleClass="sidebar-nav" prefWidth="200" spacing="10">
+            <Label text="Admin Console" styleClass="sidebar-header"/>
+            <Button onAction="#showUsers" styleClass="nav-button" maxWidth="Infinity">
+                <graphic>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <FontIcon iconLiteral="fas-users" iconSize="14"/>
+                        <Label text="Users"/>
+                    </HBox>
+                </graphic>
+            </Button>
+            <Button onAction="#showAuctions" styleClass="nav-button" maxWidth="Infinity">
+                <graphic>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <FontIcon iconLiteral="fas-gavel" iconSize="14"/>
+                        <Label text="Auctions"/>
+                    </HBox>
+                </graphic>
+            </Button>
+            <Button onAction="#showLogs" styleClass="nav-button" maxWidth="Infinity">
+                <graphic>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <FontIcon iconLiteral="fas-list" iconSize="14"/>
+                        <Label text="Audit Logs"/>
+                    </HBox>
+                </graphic>
+            </Button>
+            <Region VBox.vgrow="ALWAYS" />
+            <Button onAction="#handleRefreshDashboard" styleClass="nav-button-accent" maxWidth="Infinity">
+                <graphic>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <FontIcon iconLiteral="fas-sync" iconSize="14"/>
+                        <Label text="Refresh All"/>
+                    </HBox>
+                </graphic>
+            </Button>
+            <Button onAction="#handleLogout" styleClass="nav-button-danger" maxWidth="Infinity">
+                <graphic>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <FontIcon iconLiteral="fas-sign-out-alt" iconSize="14"/>
+                        <Label text="Logout"/>
+                    </HBox>
+                </graphic>
+            </Button>
+        </VBox>
+    </left>
     <center>
-        <SplitPane dividerPositions="0.31" styleClass="admin-split">
-            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="panel-scroll">
-                <content>
-                    <VBox spacing="16" styleClass="sidebar-stack">
-                        <VBox spacing="10" styleClass="panel-card">
-                            <Label text="Search Users" styleClass="panel-title"/>
-                            <Label text="Find users to view their details or manage them." styleClass="panel-copy" wrapText="true"/>
-
-                            <TextField fx:id="searchField" promptText="Username query..." styleClass="compact-field"/>
-                            <Button text="Search Users" onAction="#handleSearchUser" defaultButton="true" maxWidth="Infinity" styleClass="primary-button"/>
-                            <Label fx:id="statusLabel" wrapText="true" styleClass="status-line"/>
-                        </VBox>
-
-                        <VBox spacing="10" styleClass="panel-card">
-                            <Label text="Promote User" styleClass="panel-title"/>
-                            <Label text="Elevate a standard user to admin privileges." styleClass="panel-copy" wrapText="true"/>
-                            <TextField fx:id="promoteField" promptText="Exact username..." styleClass="compact-field"/>
-                            <Button text="Promote to Admin" onAction="#handlePromoteUser" maxWidth="Infinity" styleClass="secondary-button"/>
-                        </VBox>
-
-                        <VBox spacing="10" styleClass="panel-card">
-                            <Label text="System Tools" styleClass="panel-title"/>
-                            <Button text="Refresh Dashboard" onAction="#handleRefreshDashboard" maxWidth="Infinity" styleClass="secondary-button"/>
-                        </VBox>
-
-                        <VBox spacing="10" styleClass="panel-card">
-                            <Label text="Quick Facts" styleClass="panel-title"/>
-                            <Label text="Live counts are shown in the dashboard cards on the right." styleClass="panel-copy" wrapText="true"/>
-                            <Separator/>
-                            <Label text="Use Refresh after seeding or deleting sample data." styleClass="panel-copy" wrapText="true"/>
-                        </VBox>
-                    </VBox>
-                </content>
-            </ScrollPane>
-
-            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="panel-scroll">
-                <content>
-                    <VBox spacing="18" styleClass="main-stack">
-                        <FlowPane hgap="14" vgap="14" prefWrapLength="1000">
-                            <VBox styleClass="metric-card" HBox.hgrow="ALWAYS" prefWidth="200" maxWidth="Infinity">
-                                <Label text="Total Users" styleClass="metric-label"/>
-                                <Label fx:id="totalUsersLabel" text="0" styleClass="metric-value"/>
-                            </VBox>
-                            <VBox styleClass="metric-card metric-card-accent" HBox.hgrow="ALWAYS" prefWidth="200" maxWidth="Infinity">
-                                <Label text="Admins" styleClass="metric-label"/>
-                                <Label fx:id="adminUsersLabel" text="0" styleClass="metric-value"/>
-                            </VBox>
-                            <VBox styleClass="metric-card" HBox.hgrow="ALWAYS" prefWidth="200" maxWidth="Infinity">
-                                <Label text="Users" styleClass="metric-label"/>
-                                <Label fx:id="standardUsersLabel" text="0" styleClass="metric-value"/>
-                            </VBox>
-                            <VBox styleClass="metric-card metric-card-warm" HBox.hgrow="ALWAYS" prefWidth="200" maxWidth="Infinity">
-                                <Label text="Audit Entries" styleClass="metric-label"/>
-                                <Label fx:id="auditCountLabel" text="0" styleClass="metric-value"/>
-                            </VBox>
-                        </FlowPane>
-
-                        <VBox spacing="12" styleClass="panel-card">
-                            <HBox spacing="12" alignment="CENTER_LEFT">
-                                <VBox spacing="2" HBox.hgrow="ALWAYS">
-                                    <Label text="All Users" styleClass="panel-title"/>
-                                    <Label text="Sorted by whatever the table decides; usernames, roles, and created timestamps are visible." styleClass="panel-copy" wrapText="true"/>
-                                </VBox>
-                                <Button text="Refresh" onAction="#handleRefreshDashboard" styleClass="secondary-button"/>
-                            </HBox>
-
-                            <TableView fx:id="usersTable" VBox.vgrow="ALWAYS" styleClass="users-table">
-                                <placeholder>
-                                    <Label text="No users loaded yet"/>
-                                </placeholder>
-                                <columns>
-                                    <TableColumn text="Username" prefWidth="180">
-                                        <cellValueFactory>
-                                            <PropertyValueFactory property="username"/>
-                                        </cellValueFactory>
-                                    </TableColumn>
-                                    <TableColumn text="Role" prefWidth="110">
-                                        <cellValueFactory>
-                                            <PropertyValueFactory property="roleType"/>
-                                        </cellValueFactory>
-                                    </TableColumn>
-                                    <TableColumn text="Created At" prefWidth="220">
-                                        <cellValueFactory>
-                                            <PropertyValueFactory property="createdAt"/>
-                                        </cellValueFactory>
-                                    </TableColumn>
-                                </columns>
-                            </TableView>
-                        </VBox>
-
-                        <VBox spacing="12" styleClass="panel-card">
-                            <HBox spacing="12" alignment="CENTER_LEFT">
-                                <VBox spacing="2" HBox.hgrow="ALWAYS">
-                                    <Label text="Audit Logs" styleClass="panel-title"/>
-                                    <Label text="Recent system actions and security events." styleClass="panel-copy" wrapText="true"/>
-                                </VBox>
-                                <Button text="Refresh" onAction="#handleRefreshDashboard" styleClass="secondary-button"/>
-                            </HBox>
-
-                            <ListView fx:id="auditListView" VBox.vgrow="ALWAYS" styleClass="audit-list">
-                                <placeholder>
-                                    <Label text="No audit events yet"/>
-                                </placeholder>
-                            </ListView>
-                        </VBox>
-                    </VBox>
-                </content>
-            </ScrollPane>
-        </SplitPane>
+        <VBox fx:id="contentArea" styleClass="admin-content" spacing="20" style="-fx-padding: 25;">
+            <!-- Placeholder for dynamic content -->
+        </VBox>
     </center>
 </BorderPane>

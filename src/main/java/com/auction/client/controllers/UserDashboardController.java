@@ -1,116 +1,129 @@
 package com.auction.client.controllers;
 
+import com.auction.client.core.ClientContext;
+import com.auction.client.service.PollingService;
+import com.auction.client.service.ThumbnailExecutor;
+import com.auction.shared.Constants;
+import com.auction.shared.interfaces.IAuctionService;
+import com.auction.shared.models.AuctionItem;
+import com.auction.shared.models.Bid;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.stage.FileChooser;
 
 public class UserDashboardController {
 
   @FXML
-  private javafx.scene.control.TableView<
-    com.auction.shared.models.AuctionItem
-  > marketTable;
+  private TableView<AuctionItem> marketTable, myListingsTable, wonAuctionsTable;
 
   @FXML
-  private javafx.scene.control.TableView<
-    com.auction.shared.models.AuctionItem
-  > myListingsTable;
+  private TableView<Bid> myBidsTable;
 
   @FXML
-  private javafx.scene.control.TableView<
-    com.auction.shared.models.Bid
-  > myBidsTable;
+  private Label statusLabel, marketCountLabel, listingsCountLabel, bidsCountLabel, winsCountLabel;
 
-  @FXML
-  private javafx.scene.control.TableView<
-    com.auction.shared.models.AuctionItem
-  > wonAuctionsTable;
-
-  @FXML
-  private javafx.scene.control.TextField titleField;
-
-  @FXML
-  private javafx.scene.control.TextArea descArea;
-
-  @FXML
-  private javafx.scene.control.TextField categoryField;
-
-  @FXML
-  private javafx.scene.control.TextField priceField;
-
-  @FXML
-  private javafx.scene.control.TextField endTimeField;
-
-  @FXML
-  private javafx.scene.control.Label imagesLabel;
-
-  @FXML
-  private javafx.scene.control.Label statusLabel;
-
-  @FXML
-  private Label marketCountLabel;
-
-  @FXML
-  private Label listingsCountLabel;
-
-  @FXML
-  private Label bidsCountLabel;
-
-  @FXML
-  private Label winsCountLabel;
-
-  private byte[] img1Bytes, img2Bytes, img3Bytes;
-
-  private com.auction.client.service.PollingService pollingService;
+  private final Map<String, Image> thumbnailCache = new ConcurrentHashMap<>();
+  private static final Image PLACEHOLDER = new Image(
+    UserDashboardController.class.getResourceAsStream("/images/placeholder.png")
+  );
+  private PollingService pollingService;
 
   @FXML
   public void initialize() {
-    pollingService = new com.auction.client.service.PollingService();
-    pollingService.startPolling(() -> {
-      javafx.application.Platform.runLater(() -> refreshDashboard());
-    }, 2);
+    pollingService = new PollingService();
+    pollingService.startPolling(
+      () -> Platform.runLater(this::refreshDashboard),
+      2
+    );
+
+    setupTableThumbnails(marketTable);
+    setupRowDoubleClick(marketTable);
+    setupRowDoubleClick(myListingsTable);
+    setupRowDoubleClick(wonAuctionsTable);
+
     refreshDashboard();
+  }
+
+  private void setupTableThumbnails(TableView<AuctionItem> table) {
+    TableColumn<AuctionItem, ImageView> thumbCol = new TableColumn<>("");
+    thumbCol.setPrefWidth(80);
+    thumbCol.setCellFactory(col ->
+      new TableCell<>() {
+        private final ImageView iv = new ImageView();
+
+        {
+          iv.setFitWidth(70);
+          iv.setFitHeight(50);
+          iv.setPreserveRatio(true);
+        }
+
+        @Override
+        protected void updateItem(ImageView item, boolean empty) {
+          super.updateItem(item, empty);
+          if (empty) {
+            setGraphic(null);
+          } else {
+            AuctionItem auction = getTableView().getItems().get(getIndex());
+            loadThumbnailAsync(auction.getId(), 0, iv);
+            setGraphic(iv);
+          }
+        }
+      }
+    );
+    table.getColumns().add(0, thumbCol);
+  }
+
+  private void setupRowDoubleClick(TableView<AuctionItem> table) {
+    table.setRowFactory(tv -> {
+      TableRow<AuctionItem> row = new TableRow<>();
+      row.setOnMouseClicked(event -> {
+        if (!row.isEmpty() && event.getClickCount() == 2) {
+          handleOpenAuctionDetail();
+        }
+      });
+      return row;
+    });
   }
 
   private void refreshDashboard() {
     try {
-      com.auction.client.core.ClientContext context =
-        com.auction.client.core.ClientContext.getInstance();
-      com.auction.shared.interfaces.IAuctionService service = context
-        .getRmiProvider()
-        .getService();
-      java.util.List<com.auction.shared.models.AuctionItem> activeAuctions =
-        service.getActiveAuctions();
-      java.util.List<com.auction.shared.models.AuctionItem> mine =
-        service.getActiveAuctionsBySeller(
-          context.getUsername(),
-          context.getSessionToken()
-        );
-      java.util.List<com.auction.shared.models.Bid> bids = service.getMyBids(
-        context.getSessionToken()
-      );
-      java.util.List<com.auction.shared.models.AuctionItem> won =
-        service.getMyWonAuctions(context.getSessionToken());
+      ClientContext ctx = ClientContext.getInstance();
+      IAuctionService service = ctx.getRmiProvider().getService();
 
-      marketTable.getItems().setAll(activeAuctions);
+      List<AuctionItem> active = service.getActiveAuctions();
+      List<AuctionItem> mine = service.getActiveAuctionsBySeller(
+        ctx.getUsername(),
+        ctx.getSessionToken()
+      );
+      List<Bid> bids = service.getMyBids(ctx.getSessionToken());
+      List<AuctionItem> won = service.getMyWonAuctions(ctx.getSessionToken());
+
+      marketTable.getItems().setAll(active);
       myListingsTable.getItems().setAll(mine);
       myBidsTable.getItems().setAll(bids);
       wonAuctionsTable.getItems().setAll(won);
 
-      if (marketCountLabel != null) marketCountLabel.setText(
-        String.valueOf(activeAuctions.size())
-      );
-      if (listingsCountLabel != null) listingsCountLabel.setText(
-        String.valueOf(mine.size())
-      );
-      if (bidsCountLabel != null) bidsCountLabel.setText(
-        String.valueOf(bids.size())
-      );
-      if (winsCountLabel != null) winsCountLabel.setText(
-        String.valueOf(won.size())
-      );
-      statusLabel.setText("Dashboard refreshed successfully.");
+      updateCount(marketCountLabel, active.size());
+      updateCount(listingsCountLabel, mine.size());
+      updateCount(bidsCountLabel, bids.size());
+      updateCount(winsCountLabel, won.size());
+
+      statusLabel.setText("Dashboard updated.");
     } catch (Exception e) {
-      statusLabel.setText("Failed to load dashboard: " + e.getMessage());
+      statusLabel.setText("Update failed: " + e.getMessage());
     }
   }
 
@@ -119,217 +132,196 @@ public class UserDashboardController {
     refreshDashboard();
   }
 
-  @FXML
-  private void handleOpenGallery() {
-    try {
-      if (pollingService != null) pollingService.shutdown();
-      com.auction.client.core.ClientContext context =
-        com.auction.client.core.ClientContext.getInstance();
-      context.setPreviousViewName("user_dashboard.fxml");
-      context.getViewLoader().loadView("gallery.fxml");
-    } catch (java.io.IOException e) {
-      throw new RuntimeException(e);
-    }
+  private void updateCount(Label label, int count) {
+    if (label != null) label.setText(String.valueOf(count));
   }
 
   @FXML
   private void handleOpenAuctionDetail() {
-    com.auction.shared.models.AuctionItem selected = null;
-    
-    if (marketTable.getSelectionModel().getSelectedItem() != null) {
-        selected = marketTable.getSelectionModel().getSelectedItem();
-    } else if (myListingsTable.getSelectionModel().getSelectedItem() != null) {
-        selected = myListingsTable.getSelectionModel().getSelectedItem();
-    } else if (wonAuctionsTable.getSelectionModel().getSelectedItem() != null) {
-        selected = wonAuctionsTable.getSelectionModel().getSelectedItem();
-    }
-
+    AuctionItem selected = getSelectedAuction();
     if (selected != null) {
+      try {
+        if (pollingService != null) pollingService.shutdown();
+        ClientContext ctx = ClientContext.getInstance();
+        ctx.setCurrentAuctionId(selected.getId());
+        ctx.setPreviousViewName("user_dashboard.fxml");
+        ctx.getViewLoader().loadView("auction_detail.fxml");
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  private AuctionItem getSelectedAuction() {
+    if (
+      marketTable.getSelectionModel().getSelectedItem() != null
+    ) return marketTable.getSelectionModel().getSelectedItem();
+    if (
+      myListingsTable.getSelectionModel().getSelectedItem() != null
+    ) return myListingsTable.getSelectionModel().getSelectedItem();
+    if (
+      wonAuctionsTable.getSelectionModel().getSelectedItem() != null
+    ) return wonAuctionsTable.getSelectionModel().getSelectedItem();
+    return null;
+  }
+
+  private void loadThumbnailAsync(int auctionId, int index, ImageView target) {
+    String key = auctionId + ":" + index;
+    if (thumbnailCache.containsKey(key)) {
+      target.setImage(thumbnailCache.get(key));
+      return;
+    }
+    CompletableFuture.supplyAsync(
+      () -> {
         try {
-          if (pollingService != null) pollingService.shutdown();
-          com.auction.client.core.ClientContext context = com.auction.client.core.ClientContext.getInstance();
-          context.setCurrentAuctionId(selected.getId());
-          context.setPreviousViewName("user_dashboard.fxml");
-          context.getViewLoader().loadView("auction_detail.fxml");
-        } catch (java.io.IOException e) {
-          throw new RuntimeException(e);
+          byte[] bytes = ClientContext.getInstance()
+            .getRmiProvider()
+            .getService()
+            .getThumbnail(auctionId, index);
+          return (bytes == null || bytes.length == 0)
+            ? null
+            : new Image(new ByteArrayInputStream(bytes));
+        } catch (Exception e) {
+          return null;
         }
-    } else {
-        if (statusLabel != null) statusLabel.setText("Please select an auction first.");
+      },
+      ThumbnailExecutor.getExecutor()
+    ).thenAccept(image -> {
+      Image finalImg = (image != null) ? image : PLACEHOLDER;
+      thumbnailCache.put(key, finalImg);
+      Platform.runLater(() -> target.setImage(finalImg));
+    });
+  }
+
+  @FXML
+  private void handleProfile() {
+    try {
+      javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/profile_dialog.fxml"));
+      javafx.scene.Parent root = loader.load();
+      
+      javafx.stage.Stage dialogStage = new javafx.stage.Stage();
+      dialogStage.setTitle("User Profile");
+      dialogStage.initModality(javafx.stage.Modality.WINDOW_MODAL);
+      dialogStage.initOwner(statusLabel.getScene().getWindow());
+      javafx.scene.Scene scene = new javafx.scene.Scene(root);
+      dialogStage.setScene(scene);
+      
+      dialogStage.showAndWait();
+    } catch (IOException e) {
+      statusLabel.setText("Error opening profile: " + e.getMessage());
     }
   }
 
   @FXML
   private void handleCreateAuction() {
     try {
-      long cents = (long) (Double.parseDouble(priceField.getText()) * 100);
-      int minutes = Integer.parseInt(endTimeField.getText());
-      java.time.Instant end = java.time.Instant.now().plus(
-        java.time.Duration.ofMinutes(minutes)
-      );
+      javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/create_auction_dialog.fxml"));
+      javafx.scene.Parent root = loader.load();
+      
+      CreateAuctionDialogController controller = loader.getController();
+      
+      javafx.stage.Stage dialogStage = new javafx.stage.Stage();
+      dialogStage.setTitle("Create Auction");
+      dialogStage.initModality(javafx.stage.Modality.WINDOW_MODAL);
+      dialogStage.initOwner(statusLabel.getScene().getWindow());
+      javafx.scene.Scene scene = new javafx.scene.Scene(root);
+      dialogStage.setScene(scene);
+      
+      controller.setDialogStage(dialogStage);
+      dialogStage.showAndWait();
 
-      com.auction.shared.models.AuctionItem item =
-        new com.auction.shared.models.AuctionItem(
-          0,
-          titleField.getText(),
-          descArea.getText(),
-          categoryField.getText(),
-          cents,
-          com.auction.client.core.ClientContext.getInstance().getUsername(),
-          java.time.Instant.now().toString(),
-          end.toString(),
-          null
-        );
-
-      com.auction.client.core.ClientContext context =
-        com.auction.client.core.ClientContext.getInstance();
-      int id = context
-        .getRmiProvider()
-        .getService()
-        .createAuction(
-          item,
-          img1Bytes,
-          img2Bytes,
-          img3Bytes,
-          context.getSessionToken()
-        );
-      statusLabel.setText("Created auction #" + id);
-      refreshDashboard();
-
-      titleField.clear();
-      descArea.clear();
-      categoryField.clear();
-      priceField.clear();
-      endTimeField.clear();
-      img1Bytes = img2Bytes = img3Bytes = null;
-      imagesLabel.setText("No images selected");
-    } catch (Exception e) {
-      statusLabel.setText("Error creating: " + e.getMessage());
+      if (controller.isCreated()) {
+        com.auction.client.util.Toast.makeText((javafx.stage.Stage) statusLabel.getScene().getWindow(), "Auction Created Successfully!", 1500, 500, 500);
+        refreshDashboard();
+      }
+    } catch (IOException e) {
+      statusLabel.setText("Error opening dialog: " + e.getMessage());
+      e.printStackTrace();
     }
   }
 
   @FXML
   private void handleCancelAuction() {
-    com.auction.shared.models.AuctionItem selected = myListingsTable
-      .getSelectionModel()
-      .getSelectedItem();
-    if (selected != null) {
-      try {
-        com.auction.client.core.ClientContext context =
-          com.auction.client.core.ClientContext.getInstance();
-        context
-          .getRmiProvider()
-          .getService()
-          .cancelAuction(selected.getId(), context.getSessionToken());
-        refreshDashboard();
-      } catch (Exception e) {
-        statusLabel.setText("Cancel failed: " + e.getMessage());
-      }
-    }
+    performAction(myListingsTable.getSelectionModel().getSelectedItem(), s ->
+      ClientContext.getInstance()
+        .getRmiProvider()
+        .getService()
+        .cancelAuction(s.getId(), ClientContext.getInstance().getSessionToken())
+    );
   }
 
   @FXML
   private void handleRelistAuction() {
-    com.auction.shared.models.AuctionItem selected = myListingsTable
-      .getSelectionModel()
-      .getSelectedItem();
-    if (selected != null) {
-      try {
-        java.time.Instant newEnd = java.time.Instant.now().plus(
-          java.time.Duration.ofDays(1)
-        );
-        com.auction.client.core.ClientContext context =
-          com.auction.client.core.ClientContext.getInstance();
-        context
-          .getRmiProvider()
-          .getService()
-          .relistAuction(
-            selected.getId(),
-            newEnd.toString(),
-            context.getSessionToken()
-          );
-        refreshDashboard();
-      } catch (Exception e) {
-        statusLabel.setText("Relist failed: " + e.getMessage());
-      }
+    performAction(myListingsTable.getSelectionModel().getSelectedItem(), s ->
+      ClientContext.getInstance()
+        .getRmiProvider()
+        .getService()
+        .relistAuction(
+          s.getId(),
+          Instant.now().plus(Duration.ofDays(1)).toString(),
+          ClientContext.getInstance().getSessionToken()
+        )
+    );
+  }
+
+  private interface AuctionAction {
+    void execute(AuctionItem item) throws Exception;
+  }
+
+  private void performAction(AuctionItem item, AuctionAction action) {
+    if (item == null) return;
+    try {
+      action.execute(item);
+      refreshDashboard();
+    } catch (Exception e) {
+      statusLabel.setText("Action failed: " + e.getMessage());
+    }
+  }
+
+  @FXML
+  private void handleLogout() {
+    try {
+      ClientContext ctx = ClientContext.getInstance();
+      ctx.getRmiProvider().getService().logout(ctx.getSessionToken());
+      ctx.clearSession();
+      ctx.getViewLoader().loadView("login.fxml");
+    } catch (Exception e) {
+      statusLabel.setText("Logout failed");
+    }
+  }
+
+  @FXML
+  private void handleOpenGallery() {
+    if (pollingService != null) pollingService.shutdown();
+    try {
+      ClientContext.getInstance().getViewLoader().loadView("gallery.fxml");
+    } catch (Exception e) {
+      statusLabel.setText("Navigation failed: " + e.getMessage());
     }
   }
 
   @FXML
   private void handleExportCSV() {
     try {
-      com.auction.client.core.ClientContext context =
-        com.auction.client.core.ClientContext.getInstance();
-      byte[] csv = context
+      ClientContext ctx = ClientContext.getInstance();
+      byte[] bytes = ctx
         .getRmiProvider()
         .getService()
-        .exportAuctionsToCSV(context.getSessionToken());
-      java.io.File file = new java.io.File("my_auctions_export.csv");
-      java.nio.file.Files.write(file.toPath(), csv);
-      statusLabel.setText("Exported to " + file.getAbsolutePath());
+        .exportAuctionsToCSV(ctx.getSessionToken());
+
+      FileChooser fc = new FileChooser();
+      fc.getExtensionFilters().add(
+        new FileChooser.ExtensionFilter("CSV Files", "*.csv")
+      );
+      fc.setInitialFileName("auctions.csv");
+      File out = fc.showSaveDialog(marketTable.getScene().getWindow());
+      if (out != null) {
+        Files.write(out.toPath(), bytes);
+        statusLabel.setText("CSV exported to " + out.getName());
+      }
     } catch (Exception e) {
       statusLabel.setText("Export failed: " + e.getMessage());
     }
   }
 
-  @FXML
-  private void handlePickImg1() {
-    img1Bytes = pickImage();
-    updateImagesLabel();
-  }
-
-  @FXML
-  private void handlePickImg2() {
-    img2Bytes = pickImage();
-    updateImagesLabel();
-  }
-
-  @FXML
-  private void handlePickImg3() {
-    img3Bytes = pickImage();
-    updateImagesLabel();
-  }
-
-  private byte[] pickImage() {
-    javafx.stage.FileChooser fc = new javafx.stage.FileChooser();
-    fc
-      .getExtensionFilters()
-      .add(
-        new javafx.stage.FileChooser.ExtensionFilter("Images", "*.jpg", "*.png")
-      );
-    java.io.File f = fc.showOpenDialog(marketTable.getScene().getWindow());
-    if (f != null) {
-      if (f.length() > com.auction.shared.Constants.MAX_IMAGE_SIZE_BYTES) {
-        statusLabel.setText("Image exceeds 2MB limit.");
-        return null;
-      }
-      try {
-        return java.nio.file.Files.readAllBytes(f.toPath());
-      } catch (Exception e) {
-        statusLabel.setText("Read failed");
-      }
-    }
-    return null;
-  }
-
-  private void updateImagesLabel() {
-    int count = 0;
-    if (img1Bytes != null) count++;
-    if (img2Bytes != null) count++;
-    if (img3Bytes != null) count++;
-    imagesLabel.setText(count + " images selected");
-  }
-
-  @FXML
-  private void handleLogout() {
-    try {
-      com.auction.client.core.ClientContext context =
-        com.auction.client.core.ClientContext.getInstance();
-      context.getRmiProvider().getService().logout(context.getSessionToken());
-      context.clearSession();
-      context.getViewLoader().loadView("login.fxml");
-    } catch (Exception e) {
-      statusLabel.setText("Logout failed: " + e.getMessage());
-    }
-  }
 }
