@@ -66,12 +66,12 @@ Each item lists **file → exact change**. This is the master "nothing missed" l
 - [x] **`shared/models/AuctionItem.java`** — change `double startingPrice/currentBid` to `long startingPriceCents/currentBidCents`. Add `Long capEndTime` (ISO string, UTC). Add `Integer relistedFrom`. Update Javadoc to specify UTC `Z` timestamps.
 - [x] **`shared/models/Bid.java`** — `long amountCents`; UTC timestamp.
 - [ ] **`shared/models/User.java`** — confirm `passwordHash`, `roleType`. Ensure no plaintext password ever leaves the server.
-- [x] **`shared/exceptions/`** — add `UnauthorizedException` (bad/missing token), `RateLimitedException`, `SnipeCapReachedException` (optional — could fold into AuctionClosedException).
+- [x] **`shared/exceptions/`** — add `UnauthorizedException` (bad/missing token), `SnipeCapReachedException` (optional — could fold into AuctionClosedException).
 - [x] **`server/repository/DatabaseManager.java`** — set `PRAGMA foreign_keys = ON` per connection; create directories on init; create indexes; add `relisted_from` column.
 - [x] **`server/repository/AuctionRepository.java`** — long-cents columns; `findActiveExpired()` query for the reaper; update with snipe-extended `end_time`; insert-with-relisted_from; transactional `placeBidAndUpdate(...)`.
 - [x] **`server/repository/BidRepository.java`** — long-cents amount; `findByBidder(username)` for the activity view.
 - [x] **`server/repository/UserRepository.java`** — verify `findAll`, `findByUsername`, `insert`. Username uniqueness enforced at DB.
-- [ ] **`server/service/AuctionServiceImpl.java`** — implement: session map, rate limiter, per-auction `ReentrantLock` map, `placeBid` flow with all D5/D6/D7/D8 rules, `relistAuction`, `serverTime`, activity reads, online-backup.
+- [ ] **`server/service/AuctionServiceImpl.java`** — implement: session map, per-auction `ReentrantLock` map, `placeBid` flow with all D5/D6/D7/D8 rules, `relistAuction`, `serverTime`, activity reads, online-backup.
 - [ ] **`server/service/AuctionReaper.java`** — acquire per-auction lock before transitioning. On startup, sweep overdue ACTIVE rows.
 - [ ] **`server/repository/FileHandler.java`** (or `ImageManager.java`) — JPG re-encode, EXIF strip, center-crop thumbnail, placeholder-on-missing.
 - [ ] **`server/util/SecurityUtil.java`** — SHA-256 helper; constant-time comparison; `generateToken()`.
@@ -131,15 +131,14 @@ Goal: lock the data shape so nothing has to be re-typed later.
 - Update `Constants.java` (D1, snipe cap, session TTL).
 - Convert money to `long cents` in `AuctionItem`, `Bid`, repository signatures, SQL types (`INTEGER`).
 - Add `relisted_from`, `cap_end_time` columns; `PRAGMA foreign_keys`; indexes (D21).
-- Add new exception classes (`UnauthorizedException`, `RateLimitedException`, `SnipeCapReachedException` if used).
+- Add new exception classes (`UnauthorizedException`, `SnipeCapReachedException` if used).
 - Repository tests: schema, FK on, CHECKs.
 - **Exit criterion:** `mvn test` green on repository layer with new schema.
 
 ### Phase 2 — Auth + RMI contract update
 - Update `IAuctionService`: `login` → token, `logout`, `serverTime`, token args on mutators, money in cents, Bidder activity reads, `relistAuction`.
 - Server: `SessionManager` (token map + TTL), `SecurityUtil.generateToken`.
-- Server: `RateLimiter` for `login`/`placeBid`.
-- Tests: token lifecycle, logout, expiry, rate limiter.
+- Tests: token lifecycle, logout, expiry.
 - **Exit criterion:** all RMI methods authenticate; admin-only ones authorize.
 
 ### Phase 3 — Bidding engine (the heart)
@@ -218,7 +217,7 @@ Cross-checked against your summary and the original docs:
 - ✅ Free-text search dropped, animations as stretch — D24–D25.
 - ✅ Directory bootstrap, seed script — D26–D27.
 - ✅ Audit log honesty, CSV format, login error messaging — D28–D30.
-- ✅ Tests: race, reaper, CSV escape, auth, rate limit — §1.3.
+- ✅ Tests: race, reaper, CSV escape, auth — §1.3.
 - ✅ All seven open questions from your summary are answered in §0.
 
 Nothing material is left unspecified.

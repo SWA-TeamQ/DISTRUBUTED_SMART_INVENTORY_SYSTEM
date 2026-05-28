@@ -1,5 +1,6 @@
 package com.auction.stress;
 
+import com.auction.server.core.AdminManager;
 import com.auction.server.core.AuctionManager;
 import com.auction.server.core.ImageStore;
 import com.auction.server.core.LifecycleManager;
@@ -48,9 +49,10 @@ public class ConcurrentBiddingHighStressTest {
 
         AuctionManager auctionManager = new AuctionManager(auctionRepo, bidRepo, lockManager, txManager);
         LifecycleManager lifecycleManager = new LifecycleManager(auctionRepo, bidRepo, lockManager, txManager);
-        ImageStore imageStore = new ImageStore(auctionRepo);
+        ImageStore imageStore = new ImageStore();
+        AdminManager adminManager = new AdminManager(auctionManager, userRepo);
 
-        service = new AuctionServiceImpl(userRepo, auctionManager, lifecycleManager, imageStore);
+        service = new AuctionServiceImpl(userRepo, auctionManager, adminManager, imageStore);
     }
 
     @AfterEach
@@ -68,10 +70,9 @@ public class ConcurrentBiddingHighStressTest {
         String sellerToken = service.login("seller_high", "pw");
 
         final int bidders = 10;
-        // create a small set of tokens and reuse them to avoid tripping login rate limit
         List<String> baseTokens = new ArrayList<>();
         final int distinctTokenCount = Math.min(5, bidders);
-        // insert users directly via repository and create session tokens reflectively (avoid rate limiter)
+        // insert users directly via repository and create session tokens reflectively
         var ur = new UserRepository(dbManager.getConnection());
         for (int i = 0; i < distinctTokenCount; i++) {
             String u = "bidder_high_base_" + i;

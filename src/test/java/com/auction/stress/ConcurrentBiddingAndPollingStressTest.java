@@ -1,6 +1,7 @@
 package com.auction.stress;
 
 import com.auction.client.service.PollingService;
+import com.auction.server.core.AdminManager;
 import com.auction.server.core.AuctionManager;
 import com.auction.server.core.ImageStore;
 import com.auction.server.core.LifecycleManager;
@@ -53,9 +54,10 @@ class ConcurrentBiddingAndPollingStressTest {
 
         AuctionManager auctionManager = new AuctionManager(auctionRepo, bidRepo, lockManager, txManager);
         LifecycleManager lifecycleManager = new LifecycleManager(auctionRepo, bidRepo, lockManager, txManager);
-        ImageStore imageStore = new ImageStore(auctionRepo);
+        ImageStore imageStore = new ImageStore();
+        AdminManager adminManager = new AdminManager(auctionManager, userRepo);
 
-        service = new AuctionServiceImpl(userRepo, auctionManager, lifecycleManager, imageStore);
+        service = new AuctionServiceImpl(userRepo, auctionManager, adminManager, imageStore);
     }
 
     @AfterEach

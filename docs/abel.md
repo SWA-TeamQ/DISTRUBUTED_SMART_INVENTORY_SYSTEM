@@ -17,7 +17,6 @@ com.auction/
 │   │   ├── StaleDataException.java        # Price changed mid-bid
 │   │   ├── DuplicateBidException.java     # Already highest bidder
 │   │   ├── AuctionClosedException.java    # Auction ended/cancelled
-│   │   ├── RateLimitedException.java      # Too many requests
 │   │   ├── SnipeCapReachedException.java  # Max extension reached
 │   │   └── UnauthorizedException.java     # Invalid session
 │   └── Constants.java           # All magic values centralized
