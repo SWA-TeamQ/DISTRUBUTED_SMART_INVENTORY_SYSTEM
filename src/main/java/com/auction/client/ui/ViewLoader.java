@@ -1,14 +1,13 @@
 package com.auction.client.ui;
 
+import com.auction.client.controllers.AuctionDetailController;
+import com.auction.client.core.ClientContext;
+import java.io.IOException;
+import java.net.URL;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import com.auction.client.controllers.AuctionDetailController;
-import com.auction.client.core.ClientContext;
-
-import java.io.IOException;
-import java.net.URL;
 
 /**
  * Loads FXML views and switches scenes on the primary stage.
@@ -16,52 +15,58 @@ import java.net.URL;
  */
 public class ViewLoader {
 
-    private final Stage primaryStage;
+  private final Stage primaryStage;
 
-    public ViewLoader(Stage primaryStage) {
-        this.primaryStage = primaryStage;
+  public ViewLoader(Stage primaryStage) {
+    this.primaryStage = primaryStage;
+  }
+
+  /**
+   * Load an FXML view and switch the stage's scene.
+   * @param fxmlFile filename (e.g., "login.fxml")
+   * @return the controller instance for the loaded view
+   */
+  public <T> T loadView(String fxmlFile) throws IOException {
+    URL viewUrl = getClass().getResource("/fxml/" + fxmlFile);
+
+    // Tolerate dash/underscore naming mismatches for safer runtime navigation.
+    if (viewUrl == null) {
+      String alternate = fxmlFile.contains("_")
+        ? fxmlFile.replace('_', '-')
+        : fxmlFile.replace('-', '_');
+      viewUrl = getClass().getResource("/fxml/" + alternate);
     }
 
-    /**
-     * Load an FXML view and switch the stage's scene.
-     * @param fxmlFile filename (e.g., "login.fxml")
-     * @return the controller instance for the loaded view
-     */
-    public <T> T loadView(String fxmlFile) throws IOException {
-        URL viewUrl = getClass().getResource("/fxml/" + fxmlFile);
+    if (viewUrl == null) {
+      throw new IOException("View not found: " + fxmlFile);
+    }
 
-        // Tolerate dash/underscore naming mismatches for safer runtime navigation.
-        if (viewUrl == null) {
-            String alternate = fxmlFile.contains("_")
-                ? fxmlFile.replace('_', '-')
-                : fxmlFile.replace('-', '_');
-            viewUrl = getClass().getResource("/fxml/" + alternate);
+    FXMLLoader loader = new FXMLLoader(viewUrl);
+    Parent root = loader.load();
+    Scene scene = new Scene(root);
+    scene
+      .getStylesheets()
+      .add(getClass().getResource("/css/style.css").toExternalForm());
+    if (fxmlFile.contains("admin")) {
+      scene
+        .getStylesheets()
+        .add(getClass().getResource("/css/admin-panel.css").toExternalForm());
+    }
+    primaryStage.setScene(scene);
+    // If an AuctionDetailController was loaded, ensure it gets a deterministic return target
+    Object ctrl = loader.getController();
+    try {
+      if (ctrl instanceof AuctionDetailController adc) {
+        String prev = ClientContext.getInstance().getPreviousViewName();
+        if (prev != null && !prev.isBlank()) {
+          adc.setReturnViewName(prev);
         }
+      }
+    } catch (Exception ignored) {}
+    return loader.getController();
+  }
 
-        if (viewUrl == null) {
-            throw new IOException("View not found: " + fxmlFile);
-        }
-
-        FXMLLoader loader = new FXMLLoader(viewUrl);
-        Parent root = loader.load();
-        Scene scene = new Scene(root);
-        scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
-        primaryStage.setScene(scene);
-        // If an AuctionDetailController was loaded, ensure it gets a deterministic return target
-        Object ctrl = loader.getController();
-        try {
-            if (ctrl instanceof AuctionDetailController) {
-                AuctionDetailController adc = (AuctionDetailController) ctrl;
-                String prev = ClientContext.getInstance().getPreviousViewName();
-                if (prev != null && !prev.isBlank()) {
-                    adc.setReturnViewName(prev);
-                }
-            }
-        } catch (Exception ignored) {}
-        return loader.getController();
-    }
-
-    public Stage getStage() {
-        return primaryStage;
-    }
+  public Stage getStage() {
+    return primaryStage;
+  }
 }
