@@ -15,6 +15,9 @@ A distributed, multi-user English auction platform demonstrating advanced Java c
 # Terminal 1 - Start the server
 mvn exec:java
 
+# PowerShell - Start the server on a specific port
+.\run-server.ps1 8900
+
 # Terminal 2 - Launch a client
 mvn javafx:run
 ```
