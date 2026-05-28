@@ -19,7 +19,7 @@
         </HBox>
     </top>
     <left>
-        <VBox styleClass="sidebar-nav" prefWidth="200" spacing="12" padding="16">
+        <VBox styleClass="sidebar-nav" prefWidth="200" spacing="12" style="-fx-padding: 16;">
             <Label text="Admin Console" styleClass="sidebar-header"/>
             <Button onAction="#showUsers" styleClass="nav-button" maxWidth="Infinity">
                 <graphic>

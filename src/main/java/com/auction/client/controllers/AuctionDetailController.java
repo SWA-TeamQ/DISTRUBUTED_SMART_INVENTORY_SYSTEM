@@ -36,8 +36,7 @@ import javafx.util.Duration;
 public class AuctionDetailController {
 
   private static final NumberFormat CURRENCY = NumberFormat.getCurrencyInstance(
-    Locale.US
-  );
+      Locale.US);
 
   static {
     CURRENCY.setCurrency(java.util.Currency.getInstance("ETB"));
@@ -82,8 +81,7 @@ public class AuctionDetailController {
   @FXML
   private ListView<Image> thumbnailListView;
 
-  private final ObservableList<Image> thumbnails =
-    FXCollections.observableArrayList();
+  private final ObservableList<Image> thumbnails = FXCollections.observableArrayList();
   private PollingService pollingService;
   private AuctionItem currentAuction;
   private static final Image PLACEHOLDER = loadPlaceholder();
@@ -98,53 +96,46 @@ public class AuctionDetailController {
     }
 
     bidAmountField.setTextFormatter(
-      new TextFormatter<>(change ->
-        change.getControlNewText().matches("\\d*(?:\\.\\d{0,2})?")
-          ? change
-          : null
-      )
-    );
+        new TextFormatter<>(change -> change.getControlNewText().matches("\\d*(?:\\.\\d{0,2})?")
+            ? change
+            : null));
 
     thumbnailListView.getStyleClass().add("thumbnail-list");
 
     thumbnailListView.setItems(thumbnails);
-    thumbnailListView.setCellFactory(list ->
-      new ListCell<>() {
-        private final ImageView imageView = new ImageView();
+    thumbnailListView.setCellFactory(list -> new ListCell<>() {
+      private final ImageView imageView = new ImageView();
 
-        {
-          imageView.setFitWidth(88);
-          imageView.setFitHeight(64);
-          imageView.setPreserveRatio(true);
-          imageView.getStyleClass().add("image-thumb");
-        }
-
-        @Override
-        protected void updateItem(Image item, boolean empty) {
-          super.updateItem(item, empty);
-          if (empty || item == null) {
-            setGraphic(null);
-            return;
-          }
-          imageView.setImage(item);
-          setGraphic(imageView);
-        }
+      {
+        imageView.setFitWidth(88);
+        imageView.setFitHeight(64);
+        imageView.setPreserveRatio(true);
+        imageView.getStyleClass().add("image-thumb");
       }
-    );
 
-    thumbnailListView
-      .getSelectionModel()
-      .selectedIndexProperty()
-      .addListener((obs, oldValue, newValue) -> {
-        if (
-          newValue == null ||
-          newValue.intValue() < 0 ||
-          newValue.intValue() >= thumbnails.size()
-        ) {
+      @Override
+      protected void updateItem(Image item, boolean empty) {
+        super.updateItem(item, empty);
+        if (empty || item == null) {
+          setGraphic(null);
           return;
         }
-        heroImageView.setImage(thumbnails.get(newValue.intValue()));
-      });
+        imageView.setImage(item);
+        setGraphic(imageView);
+      }
+    });
+
+    thumbnailListView
+        .getSelectionModel()
+        .selectedIndexProperty()
+        .addListener((obs, oldValue, newValue) -> {
+          if (newValue == null ||
+              newValue.intValue() < 0 ||
+              newValue.intValue() >= thumbnails.size()) {
+            return;
+          }
+          heroImageView.setImage(thumbnails.get(newValue.intValue()));
+        });
 
     bidStatusLabel.setText("Ready to bid.");
     setBidControlsEnabled(false);
@@ -159,9 +150,7 @@ public class AuctionDetailController {
 
     // Check if current user is the seller
     String currentUser = ClientContext.getInstance().getUsername();
-    if (
-      currentUser != null && currentUser.equals(auction.getSellerUsername())
-    ) {
+    if (currentUser != null && currentUser.equals(auction.getSellerUsername())) {
       // Redirect seller to auction management view
       redirectSellerToManagement(auction);
       return;
@@ -186,8 +175,7 @@ public class AuctionDetailController {
 
       if (bidCents < minimumCents) {
         bidStatusLabel.setText(
-          "Bid must be at least " + formatCurrency(minimumCents) + "."
-        );
+            "Bid must be at least " + formatCurrency(minimumCents) + ".");
         shakeBidField();
         return;
       }
@@ -196,34 +184,32 @@ public class AuctionDetailController {
       bidStatusLabel.setText("Submitting bid...");
 
       CompletableFuture.runAsync(
-        () -> {
-          try {
-            ClientContext ctx = ClientContext.getInstance();
-            ctx
-              .getRmiProvider()
-              .getService()
-              .placeBid(
-                currentAuction.getId(),
-                bidCents,
-                currentAuction.getCurrentBidCents(),
-                ctx.getSessionToken()
-              );
-            Platform.runLater(() -> {
-              bidAmountField.clear();
-              bidStatusLabel.setText("Bid submitted successfully.");
-              refreshAuction();
-            });
-          } catch (Exception e) {
-            Platform.runLater(() -> {
-              bidStatusLabel.setText(resolveBidMessage(e));
-              shakeBidField();
-            });
-          } finally {
-            Platform.runLater(() -> setBidControlsEnabled(false));
-          }
-        },
-        ThumbnailExecutor.getExecutor()
-      );
+          () -> {
+            try {
+              ClientContext ctx = ClientContext.getInstance();
+              ctx
+                  .getRmiProvider()
+                  .getService()
+                  .placeBid(
+                      currentAuction.getId(),
+                      bidCents,
+                      currentAuction.getCurrentBidCents(),
+                      ctx.getSessionToken());
+              Platform.runLater(() -> {
+                bidAmountField.clear();
+                bidStatusLabel.setText("Bid submitted successfully.");
+                refreshAuction();
+              });
+            } catch (Exception e) {
+              Platform.runLater(() -> {
+                bidStatusLabel.setText(resolveBidMessage(e));
+                shakeBidField();
+              });
+            } finally {
+              Platform.runLater(() -> setBidControlsEnabled(false));
+            }
+          },
+          ThumbnailExecutor.getExecutor());
     } catch (Exception e) {
       bidStatusLabel.setText("Enter a numeric bid amount.");
       shakeBidField();
@@ -237,8 +223,8 @@ public class AuctionDetailController {
       ClientContext ctx = ClientContext.getInstance();
       String previous = ctx.getPreviousViewName();
       ctx
-        .getViewLoader()
-        .loadView(previous == null ? "user_dashboard.fxml" : previous);
+          .getViewLoader()
+          .loadView(previous == null ? "user_dashboard.fxml" : previous);
     } catch (Exception e) {
       bidStatusLabel.setText("Navigation failed: " + e.getMessage());
     }
@@ -252,21 +238,22 @@ public class AuctionDetailController {
     pollingService = new PollingService();
     ClientContext.getInstance().setActivePollingService(pollingService);
     pollingService.startPolling(
-      () -> {
-        try {
-          AuctionItem fresh = ClientContext.getInstance()
-            .getRmiProvider()
-            .getService()
-            .getAuctionById(auctionId);
-          if (fresh != null) {
-            Platform.runLater(() -> {
-              currentAuction = fresh;
-              applyAuction(fresh);
-            });
+        () -> {
+          try {
+            AuctionItem fresh = ClientContext.getInstance()
+                .getRmiProvider()
+                .getService()
+                .getAuctionById(auctionId);
+            if (fresh != null) {
+              Platform.runLater(() -> {
+                currentAuction = fresh;
+                applyAuction(fresh);
+              });
+            }
+          } catch (Exception ignored) {
           }
-        } catch (Exception ignored) {}
-      },
-      1 // Update every second for timer
+        },
+        1 // Update every second for timer
     );
   }
 
@@ -276,9 +263,9 @@ public class AuctionDetailController {
     }
     try {
       AuctionItem fresh = ClientContext.getInstance()
-        .getRmiProvider()
-        .getService()
-        .getAuctionById(currentAuction.getId());
+          .getRmiProvider()
+          .getService()
+          .getAuctionById(currentAuction.getId());
       if (fresh != null) {
         currentAuction = fresh;
         applyAuction(fresh);
@@ -296,8 +283,7 @@ public class AuctionDetailController {
       ctx.setCurrentAuctionId(auction.getId());
 
       // Show a message in the dashboard
-      UserDashboardController dashboardController =
-        (UserDashboardController) ctx
+      UserDashboardController dashboardController = (UserDashboardController) ctx
           .getViewLoader()
           .loadView("user_dashboard.fxml");
 
@@ -323,41 +309,33 @@ public class AuctionDetailController {
     }
 
     titleLabel.setText(
-      auction.getTitle() == null ? "Auction Detail" : auction.getTitle()
-    );
+        auction.getTitle() == null ? "Auction Detail" : auction.getTitle());
     descriptionLabel.setText(
-      auction.getDescription() == null
-        ? "No description provided."
-        : auction.getDescription()
-    );
+        auction.getDescription() == null
+            ? "No description provided."
+            : auction.getDescription());
     sellerLabel.setText(
-      auction.getSellerUsername() == null
-        ? "Seller: unknown"
-        : "Seller: " + auction.getSellerUsername()
-    );
+        auction.getSellerUsername() == null
+            ? "Seller: unknown"
+            : "Seller: " + auction.getSellerUsername());
     statusLabel.setText(
-      auction.getStatus() == null ? "STATUS" : auction.getStatus()
-    );
+        auction.getStatus() == null ? "STATUS" : auction.getStatus());
     statusLabel
-      .getStyleClass()
-      .setAll("status-chip", statusStyle(auction.getStatus()));
+        .getStyleClass()
+        .setAll("status-chip", statusStyle(auction.getStatus()));
 
     currentHighestBidLabel.setText(
-      formatCurrency(auction.getCurrentBidCents())
-    );
+        formatCurrency(auction.getCurrentBidCents()));
     highestBidderLabel.setText(
-      auction.getHighestBidderUsername() == null
-        ? "Highest bidder: No bids yet"
-        : "Highest bidder: " + auction.getHighestBidderUsername()
-    );
+        auction.getHighestBidderUsername() == null
+            ? "Highest bidder: No bids yet"
+            : "Highest bidder: " + auction.getHighestBidderUsername());
     minimumBidLabel.setText(
-      "Minimum next bid: " + formatCurrency(minimumAcceptedBid(auction))
-    );
+        "Minimum next bid: " + formatCurrency(minimumAcceptedBid(auction)));
     timeLeftLabel.setText(formatTimeLeft(auction.getEndTime()));
 
-    boolean active =
-      auction.getStatus() != null &&
-      Constants.STATUS_ACTIVE.equalsIgnoreCase(auction.getStatus());
+    boolean active = auction.getStatus() != null &&
+        Constants.STATUS_ACTIVE.equalsIgnoreCase(auction.getStatus());
     setBidControlsEnabled(!active);
     bidAmountField.setDisable(!active);
     placeBidButton.setDisable(!active);
@@ -370,51 +348,44 @@ public class AuctionDetailController {
     for (int index = 0; index < 3; index++) {
       final int thumbnailIndex = index;
       CompletableFuture.supplyAsync(
-        () -> {
-          try {
-            byte[] bytes = ClientContext.getInstance()
-              .getRmiProvider()
-              .getService()
-              .getThumbnail(auctionId, thumbnailIndex);
-            return bytes == null || bytes.length == 0
-              ? PLACEHOLDER
-              : new Image(new ByteArrayInputStream(bytes));
-          } catch (Exception e) {
-            return PLACEHOLDER;
-          }
-        },
-        ThumbnailExecutor.getExecutor()
-      ).thenAccept(image ->
-        Platform.runLater(() -> {
-          thumbnails.add(image == null ? PLACEHOLDER : image);
-          if (thumbnails.size() == 1) {
-            thumbnailListView.getSelectionModel().selectFirst();
-            heroImageView.setImage(thumbnails.get(0));
-          }
-        })
-      );
+          () -> {
+            try {
+              byte[] bytes = ClientContext.getInstance()
+                  .getRmiProvider()
+                  .getService()
+                  .getThumbnail(auctionId, thumbnailIndex);
+              return bytes == null || bytes.length == 0
+                  ? PLACEHOLDER
+                  : new Image(new ByteArrayInputStream(bytes));
+            } catch (Exception e) {
+              return PLACEHOLDER;
+            }
+          },
+          ThumbnailExecutor.getExecutor()).thenAccept(image -> Platform.runLater(() -> {
+            thumbnails.add(image == null ? PLACEHOLDER : image);
+            if (thumbnails.size() == 1) {
+              thumbnailListView.getSelectionModel().selectFirst();
+              heroImageView.setImage(thumbnails.get(0));
+            }
+          }));
     }
   }
 
   private void setBidControlsEnabled(boolean working) {
     if (placeBidButton != null) {
       placeBidButton.setDisable(
-        working || currentAuction == null || !isActive(currentAuction)
-      );
+          working || currentAuction == null || !isActive(currentAuction));
     }
     if (bidAmountField != null) {
       bidAmountField.setDisable(
-        working || currentAuction == null || !isActive(currentAuction)
-      );
+          working || currentAuction == null || !isActive(currentAuction));
     }
   }
 
   private boolean isActive(AuctionItem item) {
-    return (
-      item != null &&
-      item.getStatus() != null &&
-      Constants.STATUS_ACTIVE.equalsIgnoreCase(item.getStatus())
-    );
+    return (item != null &&
+        item.getStatus() != null &&
+        Constants.STATUS_ACTIVE.equalsIgnoreCase(item.getStatus()));
   }
 
   private long minimumAcceptedBid(AuctionItem auction) {
@@ -434,9 +405,8 @@ public class AuctionDetailController {
     try {
       java.time.Instant endTime = java.time.Instant.parse(iso);
       java.time.Duration duration = java.time.Duration.between(
-        java.time.Instant.now(),
-        endTime
-      );
+          java.time.Instant.now(),
+          endTime);
 
       if (duration.isNegative() || duration.isZero()) {
         return "Ended";
@@ -483,9 +453,7 @@ public class AuctionDetailController {
 
   private void shakeBidField() {
     PauseTransition pause = new PauseTransition(Duration.millis(120));
-    pause.setOnFinished(event ->
-      bidAmountField.setStyle("-fx-border-color: #f85149;")
-    );
+    pause.setOnFinished(event -> bidAmountField.setStyle("-fx-border-color: #f85149;"));
     pause.play();
   }
 
@@ -511,10 +479,8 @@ public class AuctionDetailController {
 
   private static Image loadPlaceholder() {
     try (
-      InputStream stream = AuctionDetailController.class.getResourceAsStream(
-        "/images/placeholder.png"
-      )
-    ) {
+        InputStream stream = AuctionDetailController.class.getResourceAsStream(
+            "/images/placeholder.png")) {
       return stream == null ? null : new Image(stream);
     } catch (IOException e) {
       return null;

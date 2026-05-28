@@ -419,7 +419,7 @@ public class AdminPanelController {
         action.execute(item);
         showAuctions();
       } catch (Exception e) {
-        showError("Action failed: " + e.getMessage());
+        showError("Action failed: " + e.getMessage(), e);
       }
     }
   }
