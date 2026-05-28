@@ -420,13 +420,9 @@ public class AuctionDetailController {
     if (auction.getHighestBidderUsername() == null) {
       return auction.getStartingPriceCents();
     }
-    long increment = Math.max(
-      1L,
-      Math.round(
-        auction.getCurrentBidCents() * Constants.MIN_BID_INCREMENT_PERCENT
-      )
-    );
-    return auction.getCurrentBidCents() + increment;
+    long current = auction.getCurrentBidCents();
+    long increment = Math.max(1L, (current + 19) / 20);
+    return current + increment;
   }
 
   private String formatCurrency(long cents) {

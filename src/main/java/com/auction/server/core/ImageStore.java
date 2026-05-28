@@ -39,8 +39,8 @@ public class ImageStore {
     public String[] stageImages(byte[] i1, byte[] i2, byte[] i3) {
         String baseId = java.util.UUID.randomUUID().toString();
         String p1 = saveProcessedToDisk(baseId, 1, i1, true);
-        String p2 = saveProcessedToDisk(baseId, 2, i2, false);
-        String p3 = saveProcessedToDisk(baseId, 3, i3, false);
+        String p2 = saveProcessedToDisk(baseId, 2, i2, true);
+        String p3 = saveProcessedToDisk(baseId, 3, i3, true);
         
         return new String[]{p1, p2, p3};
     }
@@ -52,10 +52,8 @@ public class ImageStore {
                 try {
                     Path path = Paths.get(pathStr);
                     Files.deleteIfExists(path);
-                    if (pathStr.contains("_1.jpg")) {
-                        String thumbName = path.getFileName().toString().replace(".jpg", "_thumb.jpg");
-                        Files.deleteIfExists(Paths.get(Constants.THUMBS_DIR, thumbName));
-                    }
+                    String thumbName = path.getFileName().toString().replace(".jpg", "_thumb.jpg");
+                    Files.deleteIfExists(Paths.get(Constants.THUMBS_DIR, thumbName));
                 } catch (IOException e) {
                     System.err.println("Failed to delete orphaned image: " + pathStr);
                 }
@@ -67,10 +65,10 @@ public class ImageStore {
         return readBytes(path, true);
     }
 
-    public byte[] loadThumbnail(String img1Path) {
-        if (img1Path == null) return PLACEHOLDER_BYTES;
+    public byte[] loadThumbnail(String imagePath) {
+        if (imagePath == null) return PLACEHOLDER_BYTES;
         try {
-            String thumbName = Paths.get(img1Path).getFileName().toString().replace(".jpg", "_thumb.jpg");
+            String thumbName = Paths.get(imagePath).getFileName().toString().replace(".jpg", "_thumb.jpg");
             Path path = Paths.get(Constants.THUMBS_DIR, thumbName);
             return readBytes(path.toString(), false);
         } catch (Exception e) {

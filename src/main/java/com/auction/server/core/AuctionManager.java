@@ -333,7 +333,7 @@ public class AuctionManager {
       );
     }
 
-    if (Duration.between(now, endTime).getSeconds() < 30) {
+    if (Duration.between(now, endTime).getSeconds() <= Constants.SNIPE_PROTECTION_SECONDS) {
       Instant extendedTime = now.plusSeconds(30);
       if (extendedTime.isAfter(capEndTime)) {
         extendedTime = capEndTime;

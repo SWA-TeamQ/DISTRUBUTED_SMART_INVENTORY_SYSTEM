@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.rmi.RemoteException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +59,7 @@ class ConcurrentBiddingAndPollingStressTest {
         ImageStore imageStore = new ImageStore(auctionRepo);
         
         SessionManager sessionManager = new SessionManager(userRepo);
-        AdminManager adminManager = new AdminManager(auctionRepo, userRepo, bidRepo);
+        AdminManager adminManager = new AdminManager(auctionManager, userRepo);
 
         service = new AuctionServiceImpl(auctionManager, sessionManager, adminManager, imageStore);
     }
@@ -78,15 +79,14 @@ class ConcurrentBiddingAndPollingStressTest {
 
     @Test
     void concurrentBiddingShouldKeepConsistentHighestBid() throws Exception {
-        String adminToken = service.login(Constants.DEFAULT_ADMIN_USERNAME, Constants.DEFAULT_ADMIN_PASSWORD);
-        service.createUser("seller_stress", "pw", Constants.USER, adminToken);
+        service.register("seller_stress", "pw", Constants.USER);
         String sellerToken = service.login("seller_stress", "pw");
 
         int bidders = 2;
         List<String> bidderTokens = new ArrayList<>();
         for (int i = 0; i < bidders; i++) {
             String u = "bidder_stress_" + i;
-            service.createUser(u, "pw", Constants.USER, adminToken);
+            service.register(u, "pw", Constants.USER);
             bidderTokens.add(service.login(u, "pw"));
         }
 
@@ -160,6 +160,7 @@ class ConcurrentBiddingAndPollingStressTest {
             @Override public String serverTime() { throw new UnsupportedOperationException(); }
             @Override public List<AuctionItem> getActiveAuctions() { throw new UnsupportedOperationException(); }
             @Override public List<AuctionItem> getActiveAuctionsBySeller(String sellerUsername, String token) { throw new UnsupportedOperationException(); }
+            @Override public List<AuctionItem> getAuctionsBySeller(String sellerUsername, String token) { throw new UnsupportedOperationException(); }
             @Override public void placeBid(int auctionId, long amountCents, long clientExpectedPriceCents, String token) { throw new UnsupportedOperationException(); }
             @Override public List<Bid> getBidHistory(int auctionId) { throw new UnsupportedOperationException(); }
             @Override public int createAuction(AuctionItem item, byte[] image1, byte[] image2, byte[] image3, String token) { throw new UnsupportedOperationException(); }
@@ -170,14 +171,22 @@ class ConcurrentBiddingAndPollingStressTest {
             @Override public byte[] getThumbnail(int auctionId, int imageIndex) { throw new UnsupportedOperationException(); }
             @Override public byte[] getFullImage(int auctionId, int imageIndex) { throw new UnsupportedOperationException(); }
             @Override public byte[] exportAuctionsToCSV(String token) { throw new UnsupportedOperationException(); }
-            @Override public void createUser(String newUsername, String password, String role, String token) { throw new UnsupportedOperationException(); }
             @Override public List<User> getAllUsers(String token) { throw new UnsupportedOperationException(); }
-            @Override public byte[] backupDatabase(String token) { throw new UnsupportedOperationException(); }
+            @Override public List<User> searchUsers(String query, String token) { throw new UnsupportedOperationException(); }
+            @Override public void promoteUserToAdmin(String username, String token) { throw new UnsupportedOperationException(); }
+            @Override public void demoteUserToStandard(String username, String token) { throw new UnsupportedOperationException(); }
             @Override public List<String> getAuditLogs(int lastNLines, String token) { throw new UnsupportedOperationException(); }
         };
 
-        PollingService polling = new PollingService(fake);
-        polling.startPolling(1, item -> updates.incrementAndGet());
+        PollingService polling = new PollingService();
+        polling.startPolling(() -> {
+            try {
+                fake.getAuctionById(1);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+            updates.incrementAndGet();
+        }, 1);
 
         Thread.sleep(2300); // immediate tick + ~1 scheduled tick
         int beforeShutdownCalls = calls.get();

@@ -16,5 +16,8 @@ public enum EventType {
     IMAGE_SAVE_FAILED,
     TRANSACTION_FAILED,
     CSV_EXPORT,
-    DB_BACKUP
+    DB_BACKUP,
+    USER_REGISTERED,
+    PROMOTE_USER,
+    DEMOTE_USER
 }

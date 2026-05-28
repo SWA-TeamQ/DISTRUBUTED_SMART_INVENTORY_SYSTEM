@@ -1,5 +1,15 @@
 package com.auction.client.controllers;
 
+import atlantafx.base.theme.Styles;
+import com.auction.client.core.ClientContext;
+import com.auction.client.service.ThumbnailExecutor;
+import com.auction.client.state.AuctionUiState;
+import com.auction.client.util.Toast;
+import com.auction.shared.Constants;
+import com.auction.shared.exceptions.AuctionException;
+import com.auction.shared.interfaces.IAuctionService;
+import com.auction.shared.models.AuctionItem;
+import com.auction.shared.models.User;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
@@ -8,17 +18,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-
-import com.auction.client.core.ClientContext;
-import com.auction.client.service.ThumbnailExecutor;
-import com.auction.client.state.AuctionUiState;
-import com.auction.shared.Constants;
-import com.auction.shared.exceptions.AuctionException;
-import com.auction.shared.interfaces.IAuctionService;
-import com.auction.shared.models.AuctionItem;
-import com.auction.shared.models.User;
-
-import atlantafx.base.theme.Styles;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.ObservableList;
@@ -64,7 +63,7 @@ public class AdminPanelController {
           buildUsersTable(users)
         );
     } catch (Exception e) {
-      showError("Failed to load users: " + e.getMessage());
+      showError("Failed to load users", e);
     }
   }
 
@@ -89,7 +88,7 @@ public class AdminPanelController {
           buildAuctionsTable(shared)
         );
     } catch (Exception e) {
-      showError("Failed to load auctions: " + e.getMessage());
+      showError("Failed to load auctions", e);
     }
   }
 
@@ -125,10 +124,15 @@ public class AdminPanelController {
 
       contentArea.getChildren().setAll(logsBox);
     } catch (AuctionException e) {
-      showError("Failed to load logs: " + e.getMessage());
+      showError("Failed to load logs", e);
     } catch (Exception e) {
-      showError("Failed to load logs: " + e.getMessage());
+      showError("Failed to load logs", e);
     }
+  }
+
+  @FXML
+  private void handleRefresh() {
+    showUsers();
   }
 
   @FXML
@@ -144,7 +148,7 @@ public class AdminPanelController {
       ctx.clearSession();
       ctx.getViewLoader().loadView("login.fxml");
     } catch (Exception e) {
-      showError("Logout failed: " + e.getMessage());
+      showError("Logout failed", e);
     }
   }
 
@@ -450,7 +454,7 @@ public class AdminPanelController {
         .<AuctionDetailController>loadView("auction_detail.fxml");
       controller.setAuction(item);
     } catch (Exception e) {
-      showError("Open detail failed: " + e.getMessage());
+      showError("Open detail failed", e);
     }
   }
 
@@ -458,7 +462,13 @@ public class AdminPanelController {
     void execute(AuctionItem item) throws Exception;
   }
 
-  private void showError(String message) {
-    contentArea.getChildren().setAll(buildHeader("Admin Panel", message));
+  private void showError(String message, Exception error) {
+    if (contentArea != null) {
+      contentArea.getChildren().setAll(buildHeader("Admin Panel", message));
+    }
+    Toast.show(contentArea, message, Toast.Type.ERROR);
+    if (error != null) {
+      System.err.println(message + ": " + error.getMessage());
+    }
   }
 }

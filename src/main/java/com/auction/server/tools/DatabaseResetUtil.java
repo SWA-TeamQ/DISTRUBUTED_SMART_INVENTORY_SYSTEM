@@ -3,8 +3,7 @@ package com.auction.server.tools;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.Instant;
 
 import com.auction.server.repository.DatabaseManager;
 import com.auction.shared.Constants;
@@ -86,7 +85,7 @@ public class DatabaseResetUtil {
     }
 
     private static void seedDatabase(Connection conn) throws SQLException {
-        String now = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        String now = Instant.now().toString();
 
         // 1. Create Users
         try (PreparedStatement pstmt = conn.prepareStatement("INSERT INTO users VALUES (?, ?, ?, ?)")) {
@@ -133,7 +132,7 @@ public class DatabaseResetUtil {
 
     private static void addBids(Connection conn, int auctionId) throws SQLException {
         try (PreparedStatement pstmt = conn.prepareStatement("INSERT INTO bids (auction_item_id, bidder_username, amount_cents, timestamp) VALUES (?,?,?,?)")) {
-            String now = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+            String now = Instant.now().toString();
             for (int i = 1; i <= 3; i++) {
                 pstmt.setInt(1, auctionId);
                 pstmt.setString(2, "bidder");

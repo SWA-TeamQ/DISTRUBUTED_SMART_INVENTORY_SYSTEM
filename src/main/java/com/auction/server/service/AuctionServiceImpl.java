@@ -166,17 +166,24 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
     public byte[] getThumbnail(int auctionId, int imageIndex) throws RemoteException {
         AuctionItem item = auctionManager.getAuctionById(auctionId);
         if (item == null) return new byte[0];
-        return imageStore.loadThumbnail(item.getImg1());
+        String path = resolveImagePath(item, imageIndex);
+        return imageStore.loadThumbnail(path);
+    }
+
+    private String resolveImagePath(AuctionItem item, int index) {
+        return switch (index) {
+            case 0 -> item.getImg1();
+            case 1 -> item.getImg2();
+            case 2 -> item.getImg3();
+            default -> null;
+        };
     }
 
     @Override
     public byte[] getFullImage(int auctionId, int imageIndex) throws RemoteException {
         AuctionItem item = auctionManager.getAuctionById(auctionId);
         if (item == null) return new byte[0];
-        String path = null;
-        if (imageIndex == 1) path = item.getImg1();
-        else if (imageIndex == 2) path = item.getImg2();
-        else if (imageIndex == 3) path = item.getImg3();
+        String path = resolveImagePath(item, imageIndex);
         return imageStore.loadFullImage(path);
     }
 

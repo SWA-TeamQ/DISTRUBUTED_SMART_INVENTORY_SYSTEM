@@ -63,7 +63,7 @@ public class AdminManager {
             throw new AuctionException("User not found");
         }
         userRepo.promoteUserToAdmin(username);
-        AsyncLogger.log(LogCategory.SECURITY, EventType.LOGIN,
+        AsyncLogger.log(LogCategory.SECURITY, EventType.PROMOTE_USER,
                 "Admin=" + context.username() + " PromotedUser=" + username);
     }
 
@@ -72,7 +72,7 @@ public class AdminManager {
             throw new AuctionException("User not found");
         }
         userRepo.demoteUserToStandard(username);
-        AsyncLogger.log(LogCategory.SECURITY, EventType.LOGIN,
+        AsyncLogger.log(LogCategory.SECURITY, EventType.DEMOTE_USER,
                 "Admin=" + context.username() + " DemotedUser=" + username);
     }
 }

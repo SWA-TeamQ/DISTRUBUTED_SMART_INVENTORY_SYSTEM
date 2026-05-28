@@ -55,7 +55,7 @@ public class SessionManager {
         }
         String hash = SecurityUtil.hashPassword(password);
         userRepo.insertUser(username, hash, role);
-        AsyncLogger.log(LogCategory.SECURITY, EventType.CREATE_AUCTION, "New User Registered: " + username + " Role=" + role);
+        AsyncLogger.log(LogCategory.SECURITY, EventType.USER_REGISTERED, "New User Registered: " + username + " Role=" + role);
     }
 
     public SessionContext validateSession(String token) throws AuctionException {
