@@ -122,4 +122,5 @@ class GalleryDetailBidIntegrationTest {
         assertEquals(bidAmount, history.get(0).getAmountCents());
         assertEquals("bidder_int_2", history.get(0).getBidderUsername());
     }
+
 }

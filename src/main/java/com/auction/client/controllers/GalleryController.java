@@ -33,6 +33,7 @@ public class GalleryController {
     @FXML private FlowPane auctionFlow;
     @FXML private TextField searchField;
     @FXML private ComboBox<String> categoryCombo;
+    @FXML private ChoiceBox<String> statusChoice;
     @FXML private ChoiceBox<String> sortChoice;
     @FXML private Label auctionCountLabel;
 
@@ -47,6 +48,11 @@ public class GalleryController {
     @FXML
     public void initialize() {
         try {
+            if (statusChoice != null && statusChoice.getItems().isEmpty()) {
+                statusChoice.getItems().addAll("Active & Upcoming", "Active", "Scheduled", "All", "Archived");
+                statusChoice.setValue("Active & Upcoming");
+                statusChoice.getSelectionModel().selectedItemProperty().addListener((a, b, c) -> fetchAndRenderAuctionsAsync());
+            }
             if (sortChoice != null && sortChoice.getItems().isEmpty()) {
                 sortChoice.getItems().addAll("Newest", "Price: Low → High", "Price: High → Low");
                 sortChoice.setValue("Newest");
@@ -88,7 +94,7 @@ public class GalleryController {
         CompletableFuture.supplyAsync(() -> {
             try {
                 var service = ClientContext.getInstance().getRmiProvider().getService();
-                return service.getActiveAuctions();
+                return service.getAllAuctions();
             } catch (Exception e) {
                 e.printStackTrace();
                 return java.util.List.<AuctionItem>of();
@@ -127,15 +133,50 @@ public class GalleryController {
         final String c = selectedCategory;
         final String s = sortBy;
 
+        // Default: show ACTIVE + SCHEDULED auctions. The server's default searchAllAuctions
+        // may only return active items, so request all and filter client-side by status.
         CompletableFuture.supplyAsync(() -> {
             try {
                 var service = ClientContext.getInstance().getRmiProvider().getService();
-                return service.searchActiveAuctions(q, c, s);
+                return service.getAllAuctions();
             } catch (Exception e) {
                 e.printStackTrace();
-                return fallbackFilterAndSort(allAuctions, q, c, s);
+                return allAuctions == null ? java.util.List.<AuctionItem>of() : allAuctions;
             }
-        }, ThumbnailExecutor.getExecutor()).thenAccept(items -> Platform.runLater(() -> renderAuctions(items == null ? java.util.List.of() : items)));
+        }, ThumbnailExecutor.getExecutor()).thenAccept(items -> {
+                java.util.List<AuctionItem> base = (items == null) ? java.util.List.of() : items;
+                String statusFilter = statusChoice == null ? "Active & Upcoming" : statusChoice.getValue();
+                java.util.List<AuctionItem> filteredByStatus;
+                if ("Active & Upcoming".equalsIgnoreCase(statusFilter)) {
+                filteredByStatus = base.stream()
+                    .filter(a -> a != null && (
+                        com.auction.shared.Constants.STATUS_ACTIVE.equalsIgnoreCase(a.getStatus()) ||
+                        com.auction.shared.Constants.STATUS_SCHEDULED.equalsIgnoreCase(a.getStatus())
+                    ))
+                    .toList();
+                } else if ("Active".equalsIgnoreCase(statusFilter)) {
+                filteredByStatus = base.stream()
+                    .filter(a -> a != null && com.auction.shared.Constants.STATUS_ACTIVE.equalsIgnoreCase(a.getStatus()))
+                    .toList();
+                } else if ("Scheduled".equalsIgnoreCase(statusFilter)) {
+                filteredByStatus = base.stream()
+                    .filter(a -> a != null && com.auction.shared.Constants.STATUS_SCHEDULED.equalsIgnoreCase(a.getStatus()))
+                    .toList();
+                } else if ("Archived".equalsIgnoreCase(statusFilter)) {
+                filteredByStatus = base.stream()
+                    .filter(a -> a != null && (
+                        com.auction.shared.Constants.STATUS_SOLD.equalsIgnoreCase(a.getStatus()) ||
+                        com.auction.shared.Constants.STATUS_CANCELLED.equalsIgnoreCase(a.getStatus()) ||
+                        com.auction.shared.Constants.STATUS_EXPIRED.equalsIgnoreCase(a.getStatus())
+                    ))
+                    .toList();
+                } else {
+                filteredByStatus = base;
+                }
+
+                java.util.List<AuctionItem> finalList = fallbackFilterAndSort(filteredByStatus, q, c, s);
+                Platform.runLater(() -> renderAuctions(finalList == null ? java.util.List.of() : finalList));
+        });
     }
 
     private java.util.List<AuctionItem> fallbackFilterAndSort(java.util.List<AuctionItem> base, String query, String category, String sortBy) {
@@ -234,11 +275,28 @@ public class GalleryController {
 
         Label price = new Label(String.format("%s", com.auction.shared.Constants.formatCents(item.getCurrentBidCents())));
         price.getStyleClass().add("section-copy");
+
+        Label status = new Label(item.getStatus() == null ? "ACTIVE" : item.getStatus());
+        status.getStyleClass().add("status-chip");
+        // apply semantic styling for common statuses
+        try {
+            String st = item.getStatus() == null ? "ACTIVE" : item.getStatus();
+            if (com.auction.shared.Constants.STATUS_ACTIVE.equalsIgnoreCase(st)) {
+                status.getStyleClass().add("status-chip-success");
+            } else if (com.auction.shared.Constants.STATUS_SCHEDULED.equalsIgnoreCase(st)) {
+                status.getStyleClass().add("status-chip-warning");
+            } else if (com.auction.shared.Constants.STATUS_SOLD.equalsIgnoreCase(st)) {
+                status.getStyleClass().add("status-chip-accent");
+            } else if (com.auction.shared.Constants.STATUS_CANCELLED.equalsIgnoreCase(st) || com.auction.shared.Constants.STATUS_EXPIRED.equalsIgnoreCase(st)) {
+                status.getStyleClass().add("status-chip-warning");
+            }
+        } catch (Exception ignored) {}
         ImageView thumbView = new ImageView();
         thumbView.setFitWidth(220);
         thumbView.setFitHeight(140);
         thumbView.setPreserveRatio(true);
-        thumbView.getStyleClass().add("image-placeholder");
+        thumbView.setVisible(false);
+        thumbView.setManaged(false);
 
         loadThumbnailAsync(item.getId(), 0, thumbView);
 
@@ -248,36 +306,42 @@ public class GalleryController {
             openAuctionDetail(item, 0);
         });
 
-        // small thumbnail rail (up to 3 thumbnails)
+        // small thumbnail rail (up to 3 thumbnails) - include primary image as the first slot
         javafx.scene.layout.HBox rail = new javafx.scene.layout.HBox(6);
-        for (int i = 0; i < 3; i++) {
+        int[] railSlots = new int[] {0, 1, 2};
+        for (int slot : railSlots) {
             ImageView small = new ImageView();
             small.setFitWidth(64);
             small.setFitHeight(48);
             small.setPreserveRatio(true);
-            small.getStyleClass().add("image-thumb");
-            final int idx = i;
-            small.setOnMouseClicked(e -> {
-                openAuctionDetail(item, idx);
-            });
-            // prefetch hero on hover for snappier detail view
-            small.setOnMouseEntered(e -> loadThumbnailToCache(item.getId(), 0));
-            loadThumbnailAsync(item.getId(), i, small);
+            small.setVisible(false);
+            small.setManaged(false);
+            if (slot >= 0) {
+                final int idx = slot;
+                small.setOnMouseClicked(e -> openAuctionDetail(item, idx));
+                small.setOnMouseEntered(e -> loadThumbnailToCache(item.getId(), idx));
+                loadThumbnailAsync(item.getId(), idx, small);
+            } else {
+                small.setVisible(false);
+                small.setManaged(false);
+            }
             rail.getChildren().add(small);
         }
 
-        card.getChildren().addAll(thumbView, rail, title, price, view);
+        card.getChildren().addAll(thumbView, rail, title, status, price, view);
         return card;
     }
 
     private void openAuctionDetail(AuctionItem item, int heroIndex) {
         try {
             ClientContext context = ClientContext.getInstance();
+            // Diagnostic log: record gallery->detail navigation attempts
+            System.out.println("[RTDAS][Gallery] openAuctionDetail called; auctionId=" + item.getId() + ", heroIndex=" + heroIndex + ", currentAuctionId=" + context.getCurrentAuctionId() + ", previousViewName=" + context.getPreviousViewName());
             context.setCurrentAuctionId(item.getId());
-            context.setPreviousViewName("gallery.fxml");
             Object ctrl = context.getViewLoader().loadView("auction_detail.fxml");
             if (ctrl instanceof AuctionDetailController) {
                 AuctionDetailController detailController = (AuctionDetailController) ctrl;
+                detailController.setReturnViewName("gallery.fxml");
                 if (heroIndex >= 0) {
                     Platform.runLater(() -> detailController.showHeroImageIndex(heroIndex));
                 }
@@ -304,10 +368,24 @@ public class GalleryController {
     }
 
     private void loadThumbnailAsync(int auctionId, int index, ImageView target) {
+        if (index < 0) {
+            Platform.runLater(() -> {
+                target.setImage(null);
+                target.setVisible(false);
+                target.setManaged(false);
+                target.setStyle(null);
+            });
+            return;
+        }
         String key = auctionId + ":" + index;
         Image cached = thumbnailCache.get(key);
         if (cached != null) {
-            target.setImage(cached);
+            Platform.runLater(() -> {
+                target.setImage(cached);
+                target.setVisible(true);
+                target.setManaged(true);
+                target.setStyle(null);
+            });
             return;
         }
 
@@ -326,11 +404,15 @@ public class GalleryController {
                 thumbnailCache.put(key, image);
                 Platform.runLater(() -> {
                     target.setImage(image);
+                    target.setVisible(true);
+                    target.setManaged(true);
                     target.setStyle(null);
                 });
             } else {
                 Platform.runLater(() -> {
                     target.setImage(PLACEHOLDER_IMAGE);
+                    target.setVisible(true);
+                    target.setManaged(true);
                     target.setStyle(null);
                 });
             }
@@ -369,10 +451,13 @@ public class GalleryController {
             stopPolling();
 
             ClientContext context = ClientContext.getInstance();
-            String targetView = context.getPreviousViewName();
-            if (targetView == null || targetView.isBlank()) {
-                targetView = "user_dashboard.fxml";
-            }
+            // If previousViewName is missing or points at the gallery itself,
+            // prefer returning to the user dashboard so the button doesn't just reload the gallery.
+            String prev = context.getPreviousViewName();
+            System.out.println("[RTDAS][Gallery] handleBackToDashboard: previousViewName=" + prev);
+            String targetView = (prev == null || prev.isBlank() || "gallery.fxml".equalsIgnoreCase(prev))
+                ? "user_dashboard.fxml"
+                : prev;
             context.getViewLoader().loadView(targetView);
         } catch (IOException e) {
             e.printStackTrace();

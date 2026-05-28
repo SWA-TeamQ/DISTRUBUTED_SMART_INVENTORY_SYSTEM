@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 /**
- * Polls the server every 2 seconds for auction updates.
+ * Polls the server every 1 second for auction updates.
  * Results dispatched to a callback (should use Platform.runLater in controller).
  * Auto-stops when shutdown() is called.
  */
@@ -30,7 +30,7 @@ public class PollingService {
     private volatile boolean running = false;
 
     public PollingService(IAuctionService service) {
-        this(service, 2, 3, 32);
+        this(service, 1, 3, 32);
     }
 
     /**

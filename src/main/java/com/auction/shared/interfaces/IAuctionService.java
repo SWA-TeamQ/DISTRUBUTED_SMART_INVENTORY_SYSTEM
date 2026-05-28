@@ -27,6 +27,7 @@ public interface IAuctionService extends Remote {
 
     // --- Auction Browsing ---
     List<AuctionItem> getActiveAuctions() throws RemoteException;
+        List<AuctionItem> getAllAuctions() throws RemoteException;
         /**
          * Server-side active auction query.
          * @param query free-text query over title/description/category (nullable)
@@ -67,6 +68,13 @@ public interface IAuctionService extends Remote {
                                 .toList();
         }
 
+        /**
+         * Backward-compatible default for implementations that do not yet override all-auction search.
+         */
+        default List<AuctionItem> searchAllAuctions(String query, String category, String sortBy) throws RemoteException {
+                return searchActiveAuctions(query, category, sortBy);
+        }
+
         private static boolean containsIgnoreCase(String value, String needleLower) {
                 return value != null && value.toLowerCase().contains(needleLower);
         }
@@ -88,6 +96,9 @@ public interface IAuctionService extends Remote {
             throws RemoteException, AuctionException;
     void relistAuction(int auctionId, String newEndTimeIso, String token)
             throws RemoteException, AuctionException;
+
+        /** Start a scheduled auction immediately (seller or admin only) */
+        void startAuction(int auctionId, String token) throws RemoteException, AuctionException;
 
     // --- Bidder Activity ---
     List<Bid> getMyBids(String token) throws RemoteException, AuctionException;

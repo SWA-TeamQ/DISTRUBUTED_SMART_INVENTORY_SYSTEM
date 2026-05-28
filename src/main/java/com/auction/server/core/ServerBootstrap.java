@@ -37,7 +37,7 @@ public class ServerBootstrap {
         
         AuctionManager auctionManager = new AuctionManager(auctionRepo, bidRepo, lockManager, txManager);
         LifecycleManager lifecycleManager = new LifecycleManager(auctionRepo, bidRepo, lockManager, txManager);
-        ImageStore imageStore = new ImageStore(auctionRepo);
+        ImageStore imageStore = new ImageStore();
 
         // 4. Init Service
         this.service = new AuctionServiceImpl(userRepo, auctionManager, lifecycleManager, imageStore);

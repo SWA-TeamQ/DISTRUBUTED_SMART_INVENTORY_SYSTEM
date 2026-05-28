@@ -71,6 +71,12 @@
             <artifactId>ikonli-fontawesome5-pack</artifactId>
             <version>12.3.1</version>
         </dependency>
+        <!-- AVIF reader for user-uploaded images -->
+        <dependency>
+            <groupId>io.github.nemanjastokuca</groupId>
+            <artifactId>avif-imageio-native-reader</artifactId>
+            <version>0.1.0</version>
+        </dependency>
     </dependencies>
 
     <build>

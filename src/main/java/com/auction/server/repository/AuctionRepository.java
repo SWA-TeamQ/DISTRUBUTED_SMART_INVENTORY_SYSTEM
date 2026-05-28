@@ -14,8 +14,8 @@ public class AuctionRepository {
 
     public int insertAuction(AuctionItem item) {
         String sql = "INSERT INTO auction_items (title, description, category, starting_price_cents, current_bid_cents, " +
-                "seller_username, start_time, end_time, cap_end_time, status, img1, img2, img3, relisted_from) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "seller_username, start_time, end_time, cap_end_time, status, start_mode, min_increment_percent, img1, img2, img3, relisted_from) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (var pstmt = connection.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, item.getTitle());
             pstmt.setString(2, item.getDescription());
@@ -27,13 +27,15 @@ public class AuctionRepository {
             pstmt.setString(8, item.getEndTime());
             pstmt.setString(9, item.getCapEndTime());
             pstmt.setString(10, item.getStatus());
-            pstmt.setString(11, item.getImg1());
-            pstmt.setString(12, item.getImg2());
-            pstmt.setString(13, item.getImg3());
+            pstmt.setString(11, item.getStartMode() == null ? com.auction.shared.Constants.START_MODE_AUTO : item.getStartMode());
+            pstmt.setDouble(12, item.getMinIncrementPercent());
+            pstmt.setString(13, item.getImg1());
+            pstmt.setString(14, item.getImg2());
+            pstmt.setString(15, item.getImg3());
             if (item.getRelistedFrom() != null) {
-                pstmt.setInt(14, item.getRelistedFrom());
+                pstmt.setInt(16, item.getRelistedFrom());
             } else {
-                pstmt.setNull(14, java.sql.Types.INTEGER);
+                pstmt.setNull(16, java.sql.Types.INTEGER);
             }
             pstmt.executeUpdate();
             try (var rs = pstmt.getGeneratedKeys()) {
@@ -63,9 +65,14 @@ public class AuctionRepository {
         item.setEndTime(rs.getString("end_time"));
         item.setCapEndTime(rs.getString("cap_end_time"));
         item.setStatus(rs.getString("status"));
+        item.setStartMode(rs.getString("start_mode"));
         item.setImg1(rs.getString("img1"));
         item.setImg2(rs.getString("img2"));
         item.setImg3(rs.getString("img3"));
+        try {
+            double p = rs.getDouble("min_increment_percent");
+            if (!rs.wasNull()) item.setMinIncrementPercent(p);
+        } catch (Exception ignored) {}
         int relistedFromVal = rs.getInt("relisted_from");
         item.setRelistedFrom(rs.wasNull() ? null : relistedFromVal);
         return item;
@@ -86,7 +93,7 @@ public class AuctionRepository {
 
     public List<AuctionItem> findActiveAuctions() {
         List<AuctionItem> list = new java.util.ArrayList<>();
-        String sql = "SELECT * FROM auction_items WHERE status = 'ACTIVE'";
+        String sql = "SELECT * FROM auction_items WHERE status IN ('ACTIVE','SCHEDULED')";
         try (var stmt = connection.createStatement();
              var rs = stmt.executeQuery(sql)) {
             while (rs.next()) list.add(mapRowToAuction(rs));
@@ -96,10 +103,22 @@ public class AuctionRepository {
         return list;
     }
 
+    public List<AuctionItem> findAllAuctions() {
+        List<AuctionItem> list = new java.util.ArrayList<>();
+        String sql = "SELECT * FROM auction_items";
+        try (var stmt = connection.createStatement();
+             var rs = stmt.executeQuery(sql)) {
+            while (rs.next()) list.add(mapRowToAuction(rs));
+        } catch (java.sql.SQLException e) {
+            throw new RuntimeException("Failed to fetch all auctions", e);
+        }
+        return list;
+    }
+
     public List<AuctionItem> searchActiveAuctions(String query, String category, String sortBy) {
         List<AuctionItem> list = new java.util.ArrayList<>();
 
-        StringBuilder sql = new StringBuilder("SELECT * FROM auction_items WHERE status = 'ACTIVE'");
+        StringBuilder sql = new StringBuilder("SELECT * FROM auction_items WHERE status IN ('ACTIVE','SCHEDULED')");
         java.util.List<Object> params = new java.util.ArrayList<>();
 
         if (query != null && !query.trim().isBlank()) {
@@ -139,6 +158,49 @@ public class AuctionRepository {
         return list;
     }
 
+    public List<AuctionItem> searchAllAuctions(String query, String category, String sortBy) {
+        List<AuctionItem> list = new java.util.ArrayList<>();
+
+        StringBuilder sql = new StringBuilder("SELECT * FROM auction_items WHERE 1=1");
+        java.util.List<Object> params = new java.util.ArrayList<>();
+
+        if (query != null && !query.trim().isBlank()) {
+            sql.append(" AND (LOWER(title) LIKE ? OR LOWER(description) LIKE ? OR LOWER(category) LIKE ?)");
+            String like = "%" + query.trim().toLowerCase() + "%";
+            params.add(like);
+            params.add(like);
+            params.add(like);
+        }
+
+        if (category != null && !category.trim().isBlank()) {
+            sql.append(" AND LOWER(category) = LOWER(?)");
+            params.add(category.trim());
+        }
+
+        String orderBy;
+        switch (sortBy == null ? "" : sortBy) {
+            case "price_asc" -> orderBy = " ORDER BY current_bid_cents ASC, end_time ASC";
+            case "price_desc" -> orderBy = " ORDER BY current_bid_cents DESC, end_time ASC";
+            default -> orderBy = " ORDER BY end_time DESC";
+        }
+        sql.append(orderBy);
+
+        try (var pstmt = connection.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                pstmt.setObject(i + 1, params.get(i));
+            }
+            try (var rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapRowToAuction(rs));
+                }
+            }
+        } catch (java.sql.SQLException e) {
+            throw new RuntimeException("Failed to search all auctions", e);
+        }
+
+        return list;
+    }
+
     public List<AuctionItem> findActiveExpiredAuctions(String nowTimeIso) {
         List<AuctionItem> list = new java.util.ArrayList<>();
         String sql = "SELECT * FROM auction_items WHERE status = 'ACTIVE' AND end_time <= ?";
@@ -149,6 +211,34 @@ public class AuctionRepository {
             }
         } catch (java.sql.SQLException e) {
             throw new RuntimeException("Failed to fetch active expired auctions", e);
+        }
+        return list;
+    }
+
+    public List<AuctionItem> findScheduledAuctionsToStart(String nowTimeIso) {
+        List<AuctionItem> list = new java.util.ArrayList<>();
+        String sql = "SELECT * FROM auction_items WHERE status = 'SCHEDULED' AND start_time <= ? AND COALESCE(start_mode, 'AUTO') = 'AUTO'";
+        try (var pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, nowTimeIso);
+            try (var rs = pstmt.executeQuery()) {
+                while (rs.next()) list.add(mapRowToAuction(rs));
+            }
+        } catch (java.sql.SQLException e) {
+            throw new RuntimeException("Failed to fetch scheduled auctions", e);
+        }
+        return list;
+    }
+
+    public List<AuctionItem> findManualScheduledAuctionsOverdue(String cutoffIso) {
+        List<AuctionItem> list = new java.util.ArrayList<>();
+        String sql = "SELECT * FROM auction_items WHERE status = 'SCHEDULED' AND start_time < ? AND COALESCE(start_mode, 'AUTO') = 'MANUAL'";
+        try (var pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, cutoffIso);
+            try (var rs = pstmt.executeQuery()) {
+                while (rs.next()) list.add(mapRowToAuction(rs));
+            }
+        } catch (java.sql.SQLException e) {
+            throw new RuntimeException("Failed to fetch overdue manual auctions", e);
         }
         return list;
     }
@@ -201,6 +291,28 @@ public class AuctionRepository {
         }
     }
 
+    public void updateAuctionCapEndTime(int auctionId, String newCapEndTime) {
+        String sql = "UPDATE auction_items SET cap_end_time = ? WHERE id = ?";
+        try (var pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, newCapEndTime);
+            pstmt.setInt(2, auctionId);
+            pstmt.executeUpdate();
+        } catch (java.sql.SQLException e) {
+            throw new RuntimeException("Failed to update cap end time", e);
+        }
+    }
+
+    public void updateAuctionStartTime(int auctionId, String newStartTime) {
+        String sql = "UPDATE auction_items SET start_time = ? WHERE id = ?";
+        try (var pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, newStartTime);
+            pstmt.setInt(2, auctionId);
+            pstmt.executeUpdate();
+        } catch (java.sql.SQLException e) {
+            throw new RuntimeException("Failed to update start time", e);
+        }
+    }
+
     public void updateAuctionImages(int auctionId, String img1, String img2, String img3) {
         String sql = "UPDATE auction_items SET img1 = ?, img2 = ?, img3 = ? WHERE id = ?";
         try (var pstmt = connection.prepareStatement(sql)) {
@@ -213,8 +325,6 @@ public class AuctionRepository {
             throw new RuntimeException("Failed to update images", e);
         }
     }
-
-
 
     public List<AuctionItem> findWonAuctionsByBidder(String bidderUsername) {
         List<AuctionItem> list = new java.util.ArrayList<>();

@@ -197,6 +197,16 @@
     -fx-font-family: "Inter";
 }
 
+/* Inline next-min label shown beside bid input */
+.inline-next-min {
+    -fx-font-size: 12px;
+    -fx-text-fill: #8b949e;
+    -fx-font-family: "Inter";
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 0 0 0 8px; /* space from input */
+    -fx-min-height: 44px; /* match input height */
+}
+
 /* Reconnect banner shown on polling failures */
 .reconnect-banner {
     -fx-background-color: linear-gradient(to right, rgba(210,153,34,0.12), rgba(210,153,34,0.18));
@@ -428,6 +438,15 @@
 .form-stack {
     -fx-spacing: 16px;
     -fx-padding: 18px;
+}
+
+.hero-card,
+.panel-card {
+    -fx-min-width: 0;
+}
+
+.compact-field {
+    -fx-max-width: Infinity;
 }
 
 /* Metric Card Variants */

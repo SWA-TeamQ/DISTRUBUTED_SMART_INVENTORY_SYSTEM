@@ -32,8 +32,16 @@ public class AuctionManager {
         return auctionRepo.findActiveAuctions();
     }
 
+    public List<AuctionItem> getAllAuctions() {
+        return auctionRepo.findAllAuctions();
+    }
+
     public List<AuctionItem> searchActiveAuctions(String query, String category, String sortBy) {
         return auctionRepo.searchActiveAuctions(query, category, sortBy);
+    }
+
+    public List<AuctionItem> searchAllAuctions(String query, String category, String sortBy) {
+        return auctionRepo.searchAllAuctions(query, category, sortBy);
     }
 
     public List<AuctionItem> findActiveAuctionsBySeller(String sellerUsername) {
@@ -101,7 +109,26 @@ public class AuctionManager {
 
     public int createAuction(AuctionItem item, SessionContext user, String[] imagePaths) throws Exception {
         item.setSellerUsername(user.username());
-        item.setStatus(Constants.STATUS_ACTIVE);
+        if (item.getStartMode() == null || item.getStartMode().isBlank()) {
+            item.setStartMode(Constants.START_MODE_AUTO);
+        }
+
+        // Honor manual start intent: manual auctions remain scheduled until user starts them.
+        if (Constants.START_MODE_MANUAL.equalsIgnoreCase(item.getStartMode())) {
+            item.setStatus(Constants.STATUS_SCHEDULED);
+        } else {
+            // AUTO mode: scheduled if startTime is in the future, otherwise active immediately.
+            if (item.getStartTime() != null) {
+                Instant start = Instant.parse(item.getStartTime());
+                if (Instant.now().isBefore(start)) {
+                    item.setStatus(Constants.STATUS_SCHEDULED);
+                } else {
+                    item.setStatus(Constants.STATUS_ACTIVE);
+                }
+            } else {
+                item.setStatus(Constants.STATUS_ACTIVE);
+            }
+        }
         if (item.getEndTime() != null) {
             Instant endTime = Instant.parse(item.getEndTime());
             Instant capEndTime = endTime.plus(Duration.ofMinutes(Constants.SNIPE_CAP_DEFAULT_MINUTES));
@@ -181,6 +208,7 @@ public class AuctionManager {
                 child.setEndTime(newEndTimeIso);
                 child.setCapEndTime(newEndTime.plus(Duration.ofMinutes(Constants.SNIPE_CAP_DEFAULT_MINUTES)).toString());
                 child.setStatus(Constants.STATUS_ACTIVE);
+                child.setStartMode(Constants.START_MODE_AUTO);
                 child.setImg1(parent.getImg1());
                 child.setImg2(parent.getImg2());
                 child.setImg3(parent.getImg3());
@@ -190,6 +218,76 @@ public class AuctionManager {
                 AsyncLogger.log(LogCategory.AUDIT, EventType.RELIST_AUCTION, 
                     "User=" + user.username() + " OldAuction=" + auctionId + " NewAuction=" + newId);
                 return newId;
+            });
+        } finally {
+            lockManager.unlock(auctionId);
+        }
+    }
+
+    public void startAuction(int auctionId, SessionContext user) throws Exception {
+        lockManager.lock(auctionId);
+        try {
+            txManager.executeWithoutResult(() -> {
+                AuctionItem item = auctionRepo.findAuctionById(auctionId);
+                if (item == null) throw new AuctionException("Auction not found");
+
+                if (!item.getSellerUsername().equals(user.username()) && !Constants.ADMIN.equals(user.role())) {
+                    throw new AuctionException("Only the seller or an admin can start this auction");
+                }
+
+                if (!Constants.STATUS_SCHEDULED.equals(item.getStatus())) {
+                    throw new AuctionException("Only scheduled auctions can be started manually");
+                }
+                // Only allow manual start if the auction was created with manual start mode
+                String mode = item.getStartMode();
+                if (mode == null || !Constants.START_MODE_MANUAL.equalsIgnoreCase(mode)) {
+                    throw new AuctionException("Auction is not configured for manual start");
+                }
+
+                if (item.getStartTime() == null || item.getStartTime().isBlank()) {
+                    throw new AuctionException("Auction start time is missing");
+                }
+
+                Instant start = Instant.parse(item.getStartTime());
+                Instant manualCutoff = start.plus(Duration.ofMinutes(5));
+                Instant now = Instant.now();
+
+                if (now.isAfter(manualCutoff)) {
+                    auctionRepo.updateAuctionStatus(auctionId, Constants.STATUS_CANCELLED);
+                    AsyncLogger.log(LogCategory.SYSTEM, EventType.CANCEL_AUCTION,
+                            "Auction=" + auctionId + " Reason=manual-start-time-expired");
+                    throw new AuctionException("Manual start window expired. Please update the start time and try again.");
+                }
+
+                Instant startInstant = Instant.parse(item.getStartTime());
+                Instant endInstant = Instant.parse(item.getEndTime());
+                java.time.Duration auctionDuration = java.time.Duration.between(startInstant, endInstant);
+                if (auctionDuration.isNegative() || auctionDuration.isZero()) {
+                    auctionDuration = java.time.Duration.ofMinutes(1);
+                }
+
+                // Activate auction
+                auctionRepo.updateAuctionStatus(auctionId, Constants.STATUS_ACTIVE);
+                Instant activatedStart = now;
+                Instant activatedEnd = activatedStart.plus(auctionDuration);
+                auctionRepo.updateAuctionStartTime(auctionId, activatedStart.toString());
+                auctionRepo.updateAuctionEndTime(auctionId, activatedEnd.toString());
+
+                if (item.getCapEndTime() != null && !item.getCapEndTime().isBlank()) {
+                    Instant originalCap = Instant.parse(item.getCapEndTime());
+                    java.time.Duration capGap = java.time.Duration.between(endInstant, originalCap);
+                    Instant newCap = activatedEnd.plus(capGap.isNegative() ? java.time.Duration.ZERO : capGap);
+                    auctionRepo.updateAuctionCapEndTime(auctionId, newCap.toString());
+                    item.setCapEndTime(newCap.toString());
+                } else {
+                    Instant newCap = activatedEnd.plus(java.time.Duration.ofMinutes(Constants.SNIPE_CAP_DEFAULT_MINUTES));
+                    auctionRepo.updateAuctionCapEndTime(auctionId, newCap.toString());
+                    item.setCapEndTime(newCap.toString());
+                }
+                item.setStartTime(activatedStart.toString());
+                item.setEndTime(activatedEnd.toString());
+                item.setStatus(Constants.STATUS_ACTIVE);
+                AsyncLogger.log(LogCategory.AUDIT, EventType.RELIST_AUCTION, "User=" + user.username() + " StartedScheduledAuction=" + auctionId);
             });
         } finally {
             lockManager.unlock(auctionId);
@@ -229,9 +327,13 @@ public class AuctionManager {
                 throw new InsufficientBidException("Bid must be at least the starting price of " + Constants.formatCents(item.getStartingPriceCents()));
             }
         } else {
-            long minBidCents = item.getCurrentBidCents() + (item.getCurrentBidCents() + 19) / 20;
+            double percent = item.getMinIncrementPercent();
+            if (percent <= 0) percent = Constants.MIN_BID_INCREMENT_PERCENT;
+            long current = item.getCurrentBidCents();
+            long increment = Math.max(1, Math.round(current * percent));
+            long minBidCents = current + increment;
             if (amountCents < minBidCents) {
-                throw new InsufficientBidException("Bid must be at least " + Constants.formatCents(minBidCents) + " (5% increment)");
+                throw new InsufficientBidException("Bid must be at least " + Constants.formatCents(minBidCents) + " (" + String.format("%.2f", percent * 100) + "% increment)");
             }
         }
     }

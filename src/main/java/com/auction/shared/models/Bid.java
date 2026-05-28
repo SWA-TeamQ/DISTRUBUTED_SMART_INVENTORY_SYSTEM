@@ -1,6 +1,12 @@
 package com.auction.shared.models;
 
+import com.auction.shared.Constants;
+
 import java.io.Serializable;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Records a single bid on an auction item. Serializable for RMI transport.
@@ -8,6 +14,8 @@ import java.io.Serializable;
  */
 public class Bid implements Serializable {
     private static final long serialVersionUID = 1L;
+    private static final DateTimeFormatter TIMESTAMP_FORMATTER =
+        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     private int id;
     private int auctionItemId;
@@ -30,7 +38,20 @@ public class Bid implements Serializable {
     public int getAuctionItemId() { return auctionItemId; }
     public String getBidderUsername() { return bidderUsername; }
     public long getAmountCents() { return amountCents; }
+    public String getAmountFormatted() { return Constants.formatCents(amountCents); }
     public String getTimestamp() { return timestamp; }
+    public String getTimestampFormatted() {
+        if (timestamp == null || timestamp.isBlank()) {
+            return "";
+        }
+        try {
+            Instant instant = Instant.parse(timestamp);
+            ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault());
+            return zonedDateTime.format(TIMESTAMP_FORMATTER);
+        } catch (Exception ignored) {
+            return timestamp;
+        }
+    }
 
     // --- Setters ---
     public void setId(int id) { this.id = id; }

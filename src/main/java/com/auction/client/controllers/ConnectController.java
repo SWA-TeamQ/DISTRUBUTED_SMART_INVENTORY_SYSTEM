@@ -12,9 +12,15 @@ public class ConnectController {
     @FXML
     public void initialize() {
         com.auction.client.core.ClientContext context = com.auction.client.core.ClientContext.getInstance();
-        context.getUdpClient().startListening();
+        boolean discoveryStarted = context.getUdpClient().startListening();
 
-        javafx.application.Platform.runLater(() -> statusLabel.setText("Waiting for discovered servers. You can edit IP and port manually."));
+        javafx.application.Platform.runLater(() -> {
+            if (discoveryStarted) {
+                statusLabel.setText("Waiting for discovered servers. You can edit IP and port manually.");
+            } else {
+                statusLabel.setText("Automatic discovery unavailable here. Use manual IP and port.");
+            }
+        });
 
         // Start a background thread to update the list view
         Thread updateThread = new Thread(() -> {

@@ -6,6 +6,7 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.cell.PropertyValueFactory?>
 <?import javafx.collections.FXCollections?>
 <?import javafx.scene.layout.BorderPane?>
@@ -37,7 +38,18 @@
                 <Label text="Filters" styleClass="section-title"/>
                 <HBox spacing="10">
                     <TextField fx:id="searchField" promptText="Search title, description, category" styleClass="search-field" HBox.hgrow="ALWAYS" onAction="#handleSearch"/>
-                    <ComboBox fx:id="categoryCombo" promptText="Category" styleClass="select-field" HBox.hgrow="ALWAYS" />
+                        <ComboBox fx:id="categoryCombo" promptText="Category" styleClass="select-field" HBox.hgrow="ALWAYS" />
+                        <ChoiceBox fx:id="statusChoice" styleClass="select-field">
+                            <items>
+                                <FXCollections fx:factory="observableArrayList">
+                                    <String fx:value="Active &amp; Upcoming"/>
+                                    <String fx:value="Active"/>
+                                    <String fx:value="Scheduled"/>
+                                    <String fx:value="All"/>
+                                    <String fx:value="Archived"/>
+                                </FXCollections>
+                            </items>
+                        </ChoiceBox>
                     <ChoiceBox fx:id="sortChoice" styleClass="select-field">
                         <items>
                             <FXCollections fx:factory="observableArrayList">
@@ -61,12 +73,16 @@
                     <Label fx:id="auctionCountLabel" text="0 auctions" styleClass="status-chip status-chip-accent"/>
                 </HBox>
 
-                <FlowPane fx:id="auctionFlow" hgap="14" vgap="14" prefWrapLength="1200">
-                    <VBox styleClass="metric-card" prefWidth="240">
-                        <Label text="No auctions loaded" styleClass="metric-label"/>
-                        <Label text="Use refresh or connect to a live server." styleClass="section-copy" wrapText="true"/>
-                    </VBox>
-                </FlowPane>
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="panel-scroll" VBox.vgrow="ALWAYS">
+                    <content>
+                        <FlowPane fx:id="auctionFlow" hgap="14" vgap="14" prefWrapLength="1200">
+                            <VBox styleClass="metric-card" prefWidth="240">
+                                <Label text="No auctions loaded" styleClass="metric-label"/>
+                                <Label text="Use refresh or connect to a live server." styleClass="section-copy" wrapText="true"/>
+                            </VBox>
+                        </FlowPane>
+                    </content>
+                </ScrollPane>
             </VBox>
         </VBox>
     </center>

@@ -4,6 +4,7 @@ import com.auction.shared.Constants;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -26,18 +27,32 @@ public class UdpDiscoveryClient {
     private volatile boolean running;
     private Thread listenerThread;
 
-    /** Start listening for server broadcasts. */
-    public void startListening() {
-        if (running) return;
+    /**
+     * Start listening for server broadcasts.
+     * @return true if discovery listening started, false if the port is already in use.
+     */
+    public boolean startListening() {
+        if (running) return true;
         running = true;
+        final DatagramSocket socket;
+        try {
+            socket = new DatagramSocket(null);
+            socket.setReuseAddress(true);
+            socket.bind(new InetSocketAddress(Constants.UDP_BROADCAST_PORT));
+            socket.setSoTimeout(1000); // 1 second timeout to allow interrupt checking
+        } catch (Exception e) {
+            running = false;
+            System.err.println("[RTDAS] UDP discovery unavailable: " + e.getMessage());
+            return false;
+        }
+
         listenerThread = new Thread(() -> {
-            try (DatagramSocket socket = new DatagramSocket(Constants.UDP_BROADCAST_PORT)) {
-                socket.setSoTimeout(1000); // 1 second timeout to allow interrupt checking
+            try (DatagramSocket boundSocket = socket) {
                 byte[] buffer = new byte[1024];
                 while (running) {
                     try {
                         DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-                        socket.receive(packet);
+                        boundSocket.receive(packet);
                         String data = new String(packet.getData(), 0, packet.getLength()).trim();
                         // Format: RTDAS|<ServerName>|<RmiPort>
                         if (data.startsWith(Constants.UDP_PREFIX + "|")) {
@@ -58,12 +73,13 @@ public class UdpDiscoveryClient {
                 }
             } catch (Exception e) {
                 if (running) {
-                    e.printStackTrace();
+                    System.err.println("[RTDAS] UDP discovery unavailable: " + e.getMessage());
                 }
             }
         });
         listenerThread.setDaemon(true);
         listenerThread.start();
+        return true;
     }
 
     /** Stop listening. */

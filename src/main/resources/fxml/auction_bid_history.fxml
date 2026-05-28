@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+    xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.AuctionBidHistoryController" styleClass="page-shell">
+
+    <top>
+        <HBox spacing="16" alignment="CENTER_LEFT" styleClass="page-header">
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label fx:id="titleLabel" text="Bid History" styleClass="page-title"/>
+                <Label fx:id="subtitleLabel" text="Full bid history for the selected auction." styleClass="page-subtitle" wrapText="true"/>
+                <Label fx:id="auctionIdLabel" text="Auction #" styleClass="status-chip status-chip-accent"/>
+            </VBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Back to Auction Detail" onAction="#handleBackToDetail" styleClass="secondary-button"/>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox spacing="12" styleClass="main-stack">
+            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="panel-card">
+                <VBox spacing="2" HBox.hgrow="ALWAYS">
+                    <Label text="All Bids" styleClass="section-title"/>
+                    <Label text="This page shows the full bid list without clipping." styleClass="section-copy" wrapText="true"/>
+                </VBox>
+                <Label fx:id="statusLabel" text="Ready" styleClass="status-chip status-chip-success"/>
+                <Button text="Refresh" onAction="#handleRefreshHistory" styleClass="secondary-button"/>
+            </HBox>
+
+            <TableView fx:id="bidHistoryTable" VBox.vgrow="ALWAYS" styleClass="data-table">
+                <placeholder>
+                    <Label text="No bid history loaded" styleClass="empty-state"/>
+                </placeholder>
+                <columns>
+                    <TableColumn fx:id="timeColumn" text="Time" prefWidth="240">
+                        <cellValueFactory>
+                            <PropertyValueFactory property="timestamp"/>
+                        </cellValueFactory>
+                    </TableColumn>
+                    <TableColumn fx:id="userColumn" text="User" prefWidth="160">
+                        <cellValueFactory>
+                            <PropertyValueFactory property="bidderUsername"/>
+                        </cellValueFactory>
+                    </TableColumn>
+                    <TableColumn fx:id="amountColumn" text="Amount" prefWidth="140">
+                        <cellValueFactory>
+                            <PropertyValueFactory property="amountCents"/>
+                        </cellValueFactory>
+                    </TableColumn>
+                </columns>
+            </TableView>
+        </VBox>
+    </center>
+</BorderPane>

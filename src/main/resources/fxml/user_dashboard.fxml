@@ -8,6 +8,8 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
@@ -42,6 +44,10 @@
             <top>
                 <VBox spacing="14" styleClass="main-stack">
                     <FlowPane hgap="14" vgap="14" prefWrapLength="1200">
+                        <VBox styleClass="metric-card metric-card-warm" prefWidth="220" maxWidth="Infinity">
+                            <Label text="Total Sales" styleClass="metric-label"/>
+                            <Label fx:id="totalSalesLabel" text="0.00" styleClass="metric-value"/>
+                        </VBox>
                         <VBox styleClass="metric-card" prefWidth="220" maxWidth="Infinity">
                             <Label text="Market Auctions" styleClass="metric-label"/>
                             <Label fx:id="marketCountLabel" text="0" styleClass="metric-value"/>
@@ -63,35 +69,63 @@
             </top>
 
             <left>
-                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="content-scroll" prefWidth="410" maxWidth="460">
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="content-scroll" prefWidth="540" maxWidth="620">
                     <content>
-                        <VBox spacing="16" styleClass="sidebar-stack">
-                            <VBox spacing="10" styleClass="hero-card">
+                        <VBox spacing="16" styleClass="sidebar-stack" prefWidth="540" maxWidth="620" fillWidth="true">
+                            <VBox spacing="10" styleClass="hero-card" prefWidth="540" maxWidth="620" fillWidth="true">
                                 <Label text="Create New Auction" styleClass="section-title"/>
                                 <Label text="Use this form when the current user owns the auction being managed." styleClass="section-copy" wrapText="true"/>
-                                <TextField fx:id="titleField" promptText="Title" styleClass="compact-field"/>
-                                <TextArea fx:id="descArea" promptText="Description" prefRowCount="4" styleClass="compact-field"/>
-                                <TextField fx:id="categoryField" promptText="Category" styleClass="compact-field"/>
-                                <TextField fx:id="priceField" promptText="Starting Price (e.g. 10.50)" styleClass="compact-field"/>
-                                <TextField fx:id="endTimeField" promptText="Duration in minutes (e.g. 60)" styleClass="compact-field"/>
+                                <TextField fx:id="titleField" promptText="Title" maxWidth="Infinity" styleClass="compact-field"/>
+                                <TextArea fx:id="descArea" promptText="Description" prefRowCount="4" maxWidth="Infinity" styleClass="compact-field"/>
+                                <TextField fx:id="categoryField" promptText="Category" maxWidth="Infinity" styleClass="compact-field"/>
+                                <TextField fx:id="priceField" promptText="Starting Price (e.g. 10.50)" maxWidth="Infinity" styleClass="compact-field"/>
+                                <HBox spacing="10">
+                                    <VBox spacing="6" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                                        <Label text="Start" styleClass="section-copy"/>
+                                        <DatePicker fx:id="startDatePicker" maxWidth="Infinity" styleClass="compact-field"/>
+                                        <TextField fx:id="startTimeField" promptText="HH:mm (24h)" maxWidth="Infinity" styleClass="compact-field"/>
+                                    </VBox>
+                                    <VBox spacing="6" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                                        <Label text="End" styleClass="section-copy"/>
+                                        <DatePicker fx:id="endDatePicker" maxWidth="Infinity" styleClass="compact-field"/>
+                                        <TextField fx:id="endTimeField" promptText="HH:mm (24h)" maxWidth="Infinity" styleClass="compact-field"/>
+                                    </VBox>
+                                    <VBox spacing="6" prefWidth="180" maxWidth="180">
+                                        <Label text="Start Mode" styleClass="section-copy"/>
+                                        <ChoiceBox fx:id="startModeChoice" prefWidth="180" maxWidth="180" />
+                                    </VBox>
+                                </HBox>
 
-                                <Label text="Images (Max 3)" styleClass="section-copy"/>
+                                <Label text="Images (JPG, JPEG, PNG; max 2 MB; max 2000x2000; up to 3)" styleClass="section-copy" wrapText="true"/>
                                 <HBox spacing="8">
-                                    <Button text="Img 1" onAction="#handlePickImg1" styleClass="ghost-button"/>
-                                    <Button text="Img 2" onAction="#handlePickImg2" styleClass="ghost-button"/>
-                                    <Button text="Img 3" onAction="#handlePickImg3" styleClass="ghost-button"/>
+                                    <Button text="Img 1" onAction="#handlePickImg1" maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="ghost-button"/>
+                                    <Button text="Img 2" onAction="#handlePickImg2" maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="ghost-button"/>
+                                    <Button text="Img 3" onAction="#handlePickImg3" maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="ghost-button"/>
                                 </HBox>
                                 <Label fx:id="imagesLabel" text="No images selected" styleClass="section-copy"/>
+
+                                <HBox spacing="8" alignment="CENTER_LEFT">
+                                    <Label text="Min Increment %" styleClass="section-copy"/>
+                                    <TextField fx:id="minIncrementField" promptText="e.g. 5" prefWidth="120" maxWidth="120" styleClass="compact-field"/>
+                                    <Label text="(default 5%)" styleClass="section-copy"/>
+                                </HBox>
+
+                                <HBox spacing="8" alignment="CENTER_LEFT">
+                                    <Label text="Snipe Cap (minutes)" styleClass="section-copy"/>
+                                    <TextField fx:id="capEndMinutesField" promptText="e.g. 10" prefWidth="140" maxWidth="140" styleClass="compact-field"/>
+                                    <Label text="(default 10 minutes)" styleClass="section-copy"/>
+                                </HBox>
 
                                 <Button text="Create Auction" onAction="#handleCreateAuction" defaultButton="true" maxWidth="Infinity" styleClass="primary-button"/>
                             </VBox>
 
-                            <VBox spacing="10" styleClass="panel-card">
+                            <VBox spacing="10" styleClass="panel-card" prefWidth="540" maxWidth="620" fillWidth="true">
                                 <Label text="Actions" styleClass="section-title"/>
                                 <Button text="Open Gallery" onAction="#handleOpenGallery" maxWidth="Infinity" styleClass="secondary-button"/>
                                 <Button text="Open Auction Detail" onAction="#handleOpenAuctionDetail" maxWidth="Infinity" styleClass="secondary-button"/>
                                 <Button text="Export to CSV" onAction="#handleExportCSV" maxWidth="Infinity" styleClass="secondary-button"/>
                                 <Button text="Refresh Dashboard" onAction="#handleRefreshDashboard" maxWidth="Infinity" styleClass="secondary-button"/>
+                                <Button text="Start Selected Listing" onAction="#handleStartAuction" maxWidth="Infinity" styleClass="secondary-button"/>
                                 <Button text="Cancel Selected Listing" onAction="#handleCancelAuction" maxWidth="Infinity" styleClass="secondary-button"/>
                                 <Button text="Relist Selected Listing" onAction="#handleRelistAuction" maxWidth="Infinity" styleClass="secondary-button"/>
                             </VBox>
@@ -135,9 +169,14 @@
                                                     <PropertyValueFactory property="status"/>
                                                 </cellValueFactory>
                                             </TableColumn>
-                                            <TableColumn text="Current Bid" prefWidth="120">
+                                            <TableColumn fx:id="myListingsCurrentBidColumn" text="Current Bid" prefWidth="120">
                                                 <cellValueFactory>
                                                     <PropertyValueFactory property="currentBidCents"/>
+                                                </cellValueFactory>
+                                            </TableColumn>
+                                            <TableColumn text="Ended At" prefWidth="180">
+                                                <cellValueFactory>
+                                                    <PropertyValueFactory property="endTime"/>
                                                 </cellValueFactory>
                                             </TableColumn>
                                         </columns>
@@ -148,9 +187,14 @@
                         <Tab text="My Listings">
                             <content>
                                 <VBox spacing="12" styleClass="main-stack">
-                                    <VBox spacing="4">
-                                        <Label text="My Listings" styleClass="section-title"/>
-                                        <Label text="Auctions owned by the current user." styleClass="section-copy" wrapText="true"/>
+                                    <VBox spacing="8">
+                                        <HBox spacing="10" alignment="CENTER_LEFT">
+                                            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                                                <Label text="My Listings" styleClass="section-title"/>
+                                                <Label text="Auctions owned by the current user." styleClass="section-copy" wrapText="true"/>
+                                            </VBox>
+                                            <ChoiceBox fx:id="listingsStatusChoice" prefWidth="180" />
+                                        </HBox>
                                     </VBox>
                                     <TableView fx:id="myListingsTable" VBox.vgrow="ALWAYS" styleClass="auction-table">
                                         <placeholder>
@@ -172,9 +216,14 @@
                                                     <PropertyValueFactory property="status"/>
                                                 </cellValueFactory>
                                             </TableColumn>
-                                            <TableColumn text="Current Bid" prefWidth="120">
+                                            <TableColumn fx:id="marketCurrentBidColumn" text="Current Bid" prefWidth="120">
                                                 <cellValueFactory>
                                                     <PropertyValueFactory property="currentBidCents"/>
+                                                </cellValueFactory>
+                                            </TableColumn>
+                                            <TableColumn fx:id="endedAtColumn" text="Ended At" prefWidth="180">
+                                                <cellValueFactory>
+                                                    <PropertyValueFactory property="endTime"/>
                                                 </cellValueFactory>
                                             </TableColumn>
                                         </columns>
@@ -209,14 +258,14 @@
                                                     <PropertyValueFactory property="bidderUsername"/>
                                                 </cellValueFactory>
                                             </TableColumn>
-                                            <TableColumn text="Amount" prefWidth="120">
+                                            <TableColumn fx:id="myBidsAmountColumn" text="Amount" prefWidth="120">
                                                 <cellValueFactory>
-                                                    <PropertyValueFactory property="amountCents"/>
+                                                    <PropertyValueFactory property="amountFormatted"/>
                                                 </cellValueFactory>
                                             </TableColumn>
                                             <TableColumn text="Timestamp" prefWidth="220">
                                                 <cellValueFactory>
-                                                    <PropertyValueFactory property="timestamp"/>
+                                                    <PropertyValueFactory property="timestampFormatted"/>
                                                 </cellValueFactory>
                                             </TableColumn>
                                         </columns>
@@ -251,7 +300,7 @@
                                                     <PropertyValueFactory property="status"/>
                                                 </cellValueFactory>
                                             </TableColumn>
-                                            <TableColumn text="Current Bid" prefWidth="120">
+                                            <TableColumn fx:id="wonAuctionsCurrentBidColumn" text="Current Bid" prefWidth="120">
                                                 <cellValueFactory>
                                                     <PropertyValueFactory property="currentBidCents"/>
                                                 </cellValueFactory>

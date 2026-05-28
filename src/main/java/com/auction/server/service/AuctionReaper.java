@@ -32,8 +32,14 @@ public class AuctionReaper {
             t.setDaemon(true);
             return t;
         });
-        scheduler.scheduleAtFixedRate(lifecycleManager::sweepOverdue, 0,
-                Constants.REAPER_INTERVAL_SECONDS, TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(() -> {
+            try {
+                lifecycleManager.activateScheduled();
+            } catch (Exception e) {
+                System.err.println("Error activating scheduled auctions: " + e.getMessage());
+            }
+            lifecycleManager.sweepOverdue();
+        }, 0, Constants.REAPER_INTERVAL_SECONDS, TimeUnit.SECONDS);
     }
 
     /** Stop the reaper. Call on server shutdown. */

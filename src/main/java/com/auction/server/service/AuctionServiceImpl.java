@@ -173,14 +173,24 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
     }
 
     @Override
+    public List<AuctionItem> getAllAuctions() throws RemoteException {
+        return auctionManager.getAllAuctions();
+    }
+
+    @Override
     public List<AuctionItem> searchActiveAuctions(String query, String category, String sortBy) throws RemoteException {
         return auctionManager.searchActiveAuctions(query, category, sortBy);
     }
 
     @Override
+    public List<AuctionItem> searchAllAuctions(String query, String category, String sortBy) throws RemoteException {
+        return auctionManager.searchAllAuctions(query, category, sortBy);
+    }
+
+    @Override
     public List<AuctionItem> getActiveAuctionsBySeller(String sellerUsername, String token) throws RemoteException, AuctionException {
         validateSession(token);
-        return auctionManager.findActiveAuctionsBySeller(sellerUsername);
+        return auctionManager.findAuctionsBySeller(sellerUsername);
     }
 
     @Override
@@ -257,6 +267,18 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
         }
     }
 
+    @Override
+    public void startAuction(int auctionId, String token) throws RemoteException, AuctionException {
+        SessionContext context = validateRole(token, Constants.USER, Constants.ADMIN);
+        try {
+            auctionManager.startAuction(auctionId, context);
+        } catch (AuctionException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new AuctionException("Internal error starting auction: " + e.getMessage());
+        }
+    }
+
     // --- Bidder Activity ---
 
     @Override
@@ -277,7 +299,11 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
     public byte[] getThumbnail(int auctionId, int imageIndex) throws RemoteException {
         AuctionItem item = auctionManager.getAuctionById(auctionId);
         if (item == null) return new byte[0];
-        return imageStore.loadThumbnail(item.getImg1());
+        String path = null;
+        if (imageIndex == 0) path = item.getImg1();
+        else if (imageIndex == 1) path = item.getImg2();
+        else if (imageIndex == 2) path = item.getImg3();
+        return imageStore.loadThumbnail(path);
     }
 
     @Override
@@ -285,9 +311,9 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
         AuctionItem item = auctionManager.getAuctionById(auctionId);
         if (item == null) return new byte[0];
         String path = null;
-        if (imageIndex == 1) path = item.getImg1();
-        else if (imageIndex == 2) path = item.getImg2();
-        else if (imageIndex == 3) path = item.getImg3();
+        if (imageIndex == 0) path = item.getImg1();
+        else if (imageIndex == 1) path = item.getImg2();
+        else if (imageIndex == 2) path = item.getImg3();
         return imageStore.loadFullImage(path);
     }
 

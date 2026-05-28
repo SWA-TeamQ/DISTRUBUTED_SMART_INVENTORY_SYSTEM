@@ -2,6 +2,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
@@ -10,6 +11,7 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import java.net.URL?>
@@ -19,103 +21,122 @@
     
     
     <top>
-        <HBox spacing="16" alignment="CENTER_LEFT" styleClass="page-header">
-            <VBox spacing="4" HBox.hgrow="ALWAYS">
-                <Label fx:id="auctionTitleLabel" text="Auction Detail" styleClass="page-title"/>
-                <Label fx:id="auctionDescriptionLabel" text="Bid context, image focus, and live auction actions belong here." styleClass="page-subtitle" wrapText="true"/>
-            </VBox>
-            <Button text="Back to Gallery" onAction="#handleBackToGallery" styleClass="secondary-button"/>
-        </HBox>
-        <!-- Reconnect banner shown when polling fails repeatedly -->
-        <HBox fx:id="reconnectBanner" spacing="8" alignment="CENTER" visible="false" managed="false" style="-fx-background-color: rgba(255,200,0,0.95); -fx-padding:8px;">
-            <Label fx:id="reconnectLabel" text="Disconnected — retrying..." />
-        </HBox>
+        <VBox spacing="10">
+            <HBox spacing="16" alignment="CENTER_LEFT" styleClass="page-header">
+                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                    <Label fx:id="auctionTitleLabel" text="Auction Detail" styleClass="page-title"/>
+                    <Label fx:id="auctionDescriptionLabel" text="Bid context, image focus, and live auction actions belong here." styleClass="page-subtitle" wrapText="true"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button fx:id="backButton" text="Back" onAction="#handleBackToGallery" styleClass="secondary-button"/>
+            </HBox>
+            <!-- Reconnect banner shown when polling fails repeatedly -->
+            <HBox fx:id="reconnectBanner" spacing="8" alignment="CENTER" visible="false" managed="false" style="-fx-background-color: rgba(255,200,0,0.95); -fx-padding:8px;">
+                <Label fx:id="reconnectLabel" text="Disconnected — retrying..." />
+            </HBox>
+        </VBox>
     </top>
 
     <center>
-        <VBox spacing="16" styleClass="main-stack">
-            <FlowPane hgap="14" vgap="14" prefWrapLength="1200">
-                <VBox styleClass="metric-card" prefWidth="220">
-                    <Label text="Current Bid" styleClass="metric-label"/>
-                    <Label fx:id="currentBidLabel" text="0.00" styleClass="metric-value"/>
-                </VBox>
-                <VBox styleClass="metric-card metric-card-accent" prefWidth="220">
-                    <Label text="Time Left" styleClass="metric-label"/>
-                    <Label fx:id="timeLeftLabel" text="--:--" styleClass="metric-value"/>
-                </VBox>
-                <VBox styleClass="metric-card metric-card-warm" prefWidth="220">
-                    <Label text="Highest Bidder" styleClass="metric-label"/>
-                    <Label fx:id="highestBidderLabel" text="N/A" styleClass="metric-value"/>
-                </VBox>
-            </FlowPane>
+        <ScrollPane fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" pannable="true" styleClass="page-scroll">
+            <content>
+                <VBox spacing="16" styleClass="main-stack">
+                    <FlowPane hgap="14" vgap="14" prefWrapLength="1200">
+                        <VBox styleClass="metric-card" prefWidth="220">
+                            <Label text="Current Bid" styleClass="metric-label"/>
+                            <Label fx:id="currentBidLabel" text="0.00" styleClass="metric-value"/>
+                        </VBox>
+                        <VBox styleClass="metric-card metric-card-accent" prefWidth="220">
+                            <Label text="Min Increment" styleClass="metric-label"/>
+                            <Label fx:id="minIncrementPercentLabel" text="5.0%" styleClass="metric-value"/>
+                            <Label fx:id="nextMinimumBidLabel" text="Next: $0.00" styleClass="section-copy" wrapText="true"/>
+                            <Label fx:id="finalSaleLabel" text="" styleClass="section-copy" visible="false" managed="false" wrapText="true"/>
+                        </VBox>
+                        <VBox styleClass="metric-card metric-card-accent" prefWidth="220">
+                            <Label fx:id="timeContextLabel" text="Time Left" styleClass="metric-label"/>
+                            <Label fx:id="timeLeftLabel" text="--:--" styleClass="metric-value"/>
+                            <Label fx:id="endTimestampLabel" text="" styleClass="section-copy" visible="false" managed="false"/>
+                        </VBox>
+                        <VBox styleClass="metric-card metric-card-warm" prefWidth="220">
+                            <Label text="Highest Bidder" styleClass="metric-label"/>
+                            <Label fx:id="highestBidderLabel" text="N/A" styleClass="metric-value"/>
+                        </VBox>
+                    </FlowPane>
 
-            <HBox spacing="16" VBox.vgrow="ALWAYS">
-                <VBox spacing="12" styleClass="panel-card" HBox.hgrow="ALWAYS">
-                    <Label text="Images" styleClass="section-title"/>
-                    <Label text="Primary image placeholder with thumbnail rail below." styleClass="section-copy" wrapText="true"/>
-                    <VBox styleClass="hero-card" prefHeight="320">
-                        <ImageView fx:id="heroImageView" fitWidth="560" fitHeight="320" preserveRatio="true" pickOnBounds="true"/>
-                    </VBox>
-                    <HBox spacing="10">
-                        <ImageView fx:id="thumb1View" fitWidth="120" fitHeight="80" preserveRatio="true" onMouseClicked="#handleThumb1Click"/>
-                        <ImageView fx:id="thumb2View" fitWidth="120" fitHeight="80" preserveRatio="true" onMouseClicked="#handleThumb2Click"/>
-                        <ImageView fx:id="thumb3View" fitWidth="120" fitHeight="80" preserveRatio="true" onMouseClicked="#handleThumb3Click"/>
+                    <HBox spacing="16" VBox.vgrow="ALWAYS">
+                        <VBox spacing="12" styleClass="panel-card" HBox.hgrow="ALWAYS">
+                            <Label text="Images" styleClass="section-title"/>
+                            <Label text="Primary image placeholder with thumbnail rail below." styleClass="section-copy" wrapText="true"/>
+                            <VBox styleClass="hero-card" prefHeight="320">
+                                <ImageView fx:id="heroImageView" fitWidth="560" fitHeight="320" preserveRatio="true" pickOnBounds="true"/>
+                            </VBox>
+                            <HBox spacing="10">
+                                <ImageView fx:id="thumb1View" fitWidth="120" fitHeight="80" preserveRatio="true" onMouseClicked="#handleThumb1Click"/>
+                                <ImageView fx:id="thumb2View" fitWidth="120" fitHeight="80" preserveRatio="true" onMouseClicked="#handleThumb2Click"/>
+                                <ImageView fx:id="thumb3View" fitWidth="120" fitHeight="80" preserveRatio="true" onMouseClicked="#handleThumb3Click"/>
+                            </HBox>
+                        </VBox>
+
+                        <VBox spacing="12" styleClass="panel-card" prefWidth="520" maxWidth="620" HBox.hgrow="ALWAYS">
+                            <Label fx:id="controlsTitleLabel" text="Auction Controls" styleClass="section-title"/>
+                            <Label fx:id="controlsDescLabel" text="Action panel based on your role." styleClass="section-copy" wrapText="true"/>
+
+                            <VBox fx:id="bidderControls" styleClass="hero-card" spacing="10">
+                                <Label text="Place bid" styleClass="section-title"/>
+                                <VBox spacing="4">
+                                    <TextField fx:id="bidAmountField" promptText="Amount (e.g. 12.50)"/>
+                                    <Label fx:id="inlineNextMinLabel" text="" styleClass="section-copy inline-next-min" wrapText="true" visible="false" managed="false"/>
+                                </VBox>
+                                <HBox spacing="8">
+                                    <Button fx:id="placeBidButton" text="Place Bid" styleClass="primary-button" maxWidth="Infinity" onAction="#handlePlaceBid"/>
+                                    <ProgressIndicator fx:id="bidSpinner" visible="false" prefWidth="24" prefHeight="24"/>
+                                </HBox>
+                                <Label fx:id="bidStatusLabel" text="" styleClass="section-copy" wrapText="true"/>
+
+                                <VBox spacing="8" styleClass="panel-card">
+                                    <BorderPane>
+                                        <left>
+                                            <VBox spacing="2" BorderPane.alignment="CENTER_LEFT">
+                                                <Label fx:id="recentBidsTitleLabel" text="Bid History" styleClass="section-title"/>
+                                                <Label fx:id="recentBidsSubtitleLabel" text="Chronological history for the selected auction." styleClass="section-copy" wrapText="true"/>
+                                            </VBox>
+                                        </left>
+                                        <right>
+                                            <Button text="Open Full History" onAction="#handleOpenBidHistoryPage" styleClass="secondary-button" BorderPane.alignment="CENTER_RIGHT"/>
+                                        </right>
+                                    </BorderPane>
+                                    <Label text="The full bid history is available on a dedicated page to avoid clipping in this layout." styleClass="section-copy" wrapText="true"/>
+                                    <TableView fx:id="recentBidsTable" prefHeight="225" minHeight="225" maxWidth="Infinity" styleClass="data-table">
+                                        <columns>
+                                            <TableColumn text="Time" prefWidth="140">
+                                                <cellValueFactory>
+                                                    <PropertyValueFactory property="timestamp"/>
+                                                </cellValueFactory>
+                                            </TableColumn>
+                                            <TableColumn text="User" prefWidth="200">
+                                                <cellValueFactory>
+                                                    <PropertyValueFactory property="bidderUsername"/>
+                                                </cellValueFactory>
+                                            </TableColumn>
+                                            <TableColumn text="Amount" prefWidth="140">
+                                                <cellValueFactory>
+                                                    <PropertyValueFactory property="amountCents"/>
+                                                </cellValueFactory>
+                                            </TableColumn>
+                                        </columns>
+                                    </TableView>
+                                </VBox>
+                            </VBox>
+
+                            <VBox fx:id="sellerControls" styleClass="hero-card" spacing="10" managed="false" visible="false">
+                                <Label text="Management Settings" styleClass="section-title"/>
+                                <Button text="Cancel Auction" onAction="#handleCancelAuction" styleClass="secondary-button" maxWidth="Infinity"/>
+                                <Button text="Relist Auction" onAction="#handleRelistAuction" styleClass="secondary-button" maxWidth="Infinity"/>
+                            </VBox>
+                        </VBox>
                     </HBox>
                 </VBox>
-
-                <VBox spacing="12" styleClass="panel-card" prefWidth="420">
-                    <Label fx:id="controlsTitleLabel" text="Auction Controls" styleClass="section-title"/>
-                    <Label fx:id="controlsDescLabel" text="Action panel based on your role." styleClass="section-copy" wrapText="true"/>
-                    
-                    <VBox fx:id="bidderControls" styleClass="hero-card" spacing="10">
-                        <Label text="Place bid" styleClass="section-title"/>
-                        <TextField fx:id="bidAmountField" promptText="Amount (e.g. 12.50)"/>
-                        <HBox spacing="8">
-                            <Button fx:id="placeBidButton" text="Place Bid" styleClass="primary-button" maxWidth="Infinity" onAction="#handlePlaceBid"/>
-                            <ProgressIndicator fx:id="bidSpinner" visible="false" prefWidth="24" prefHeight="24"/>
-                        </HBox>
-                        <Label fx:id="bidStatusLabel" text="" styleClass="section-copy"/>
-                    </VBox>
-
-                    <VBox fx:id="sellerControls" styleClass="hero-card" spacing="10" managed="false" visible="false">
-                        <Label text="Management Settings" styleClass="section-title"/>
-                        <Button text="Cancel Auction" onAction="#handleCancelAuction" styleClass="secondary-button" maxWidth="Infinity"/>
-                        <Button text="Relist Auction" onAction="#handleRelistAuction" styleClass="secondary-button" maxWidth="Infinity"/>
-                    </VBox>
-                </VBox>
-            </HBox>
-
-            <VBox spacing="10" styleClass="panel-card">
-                <HBox spacing="10" alignment="CENTER_LEFT">
-                    <VBox spacing="2" HBox.hgrow="ALWAYS">
-                        <Label text="Bid History" styleClass="section-title"/>
-                        <Label text="Chronological history for the selected auction." styleClass="section-copy" wrapText="true"/>
-                    </VBox>
-                    <Label text="Live context" styleClass="status-chip status-chip-success"/>
-                </HBox>
-                <TableView fx:id="bidHistoryTable" VBox.vgrow="ALWAYS" styleClass="data-table">
-                    <placeholder>
-                        <Label text="No bid history loaded" styleClass="empty-state"/>
-                    </placeholder>
-                    <columns>
-                        <TableColumn text="Time" prefWidth="220">
-                            <cellValueFactory>
-                                <PropertyValueFactory property="timestamp"/>
-                            </cellValueFactory>
-                        </TableColumn>
-                        <TableColumn text="User" prefWidth="150">
-                            <cellValueFactory>
-                                <PropertyValueFactory property="bidderUsername"/>
-                            </cellValueFactory>
-                        </TableColumn>
-                        <TableColumn fx:id="amountColumn" text="Amount" prefWidth="120">
-                            <cellValueFactory>
-                                <PropertyValueFactory property="amountCents"/>
-                            </cellValueFactory>
-                        </TableColumn>
-                    </columns>
-                </TableView>
-            </VBox>
-        </VBox>
+            </content>
+        </ScrollPane>
     </center>
 </BorderPane>

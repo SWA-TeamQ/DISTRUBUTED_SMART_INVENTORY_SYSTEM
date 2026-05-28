@@ -4,6 +4,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import com.auction.client.controllers.AuctionDetailController;
+import com.auction.client.core.ClientContext;
 
 import java.io.IOException;
 import java.net.URL;
@@ -45,6 +47,17 @@ public class ViewLoader {
         Scene scene = new Scene(root);
         scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
         primaryStage.setScene(scene);
+        // If an AuctionDetailController was loaded, ensure it gets a deterministic return target
+        Object ctrl = loader.getController();
+        try {
+            if (ctrl instanceof AuctionDetailController) {
+                AuctionDetailController adc = (AuctionDetailController) ctrl;
+                String prev = ClientContext.getInstance().getPreviousViewName();
+                if (prev != null && !prev.isBlank()) {
+                    adc.setReturnViewName(prev);
+                }
+            }
+        } catch (Exception ignored) {}
         return loader.getController();
     }
 

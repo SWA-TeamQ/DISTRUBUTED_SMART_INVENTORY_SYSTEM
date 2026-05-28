@@ -22,10 +22,12 @@ public class AuctionItem implements Serializable, Comparable<AuctionItem> {
     private String endTime;           // ISO-8601 UTC
     private String capEndTime;        // ISO-8601 UTC (snipe cap)
     private String status;            // from AuctionStatus enum
+    private String startMode;         // AUTO or MANUAL
     private String img1;              // filename or null
     private String img2;
     private String img3;
     private Integer relistedFrom;     // ID of parent auction if relisted, else null
+    private double minIncrementPercent; // seller-configurable minimum increment (0.05 = 5%)
 
     public AuctionItem() {}
 
@@ -44,7 +46,9 @@ public class AuctionItem implements Serializable, Comparable<AuctionItem> {
         this.endTime = endTime;
         this.capEndTime = capEndTime;
         this.status = "ACTIVE";
+        this.startMode = "AUTO";
         this.relistedFrom = null;
+        this.minIncrementPercent = com.auction.shared.Constants.MIN_BID_INCREMENT_PERCENT;
     }
 
     @Override
@@ -65,10 +69,12 @@ public class AuctionItem implements Serializable, Comparable<AuctionItem> {
     public String getEndTime() { return endTime; }
     public String getCapEndTime() { return capEndTime; }
     public String getStatus() { return status; }
+    public String getStartMode() { return startMode; }
     public String getImg1() { return img1; }
     public String getImg2() { return img2; }
     public String getImg3() { return img3; }
     public Integer getRelistedFrom() { return relistedFrom; }
+    public double getMinIncrementPercent() { return minIncrementPercent; }
 
     // --- Setters ---
     public void setId(int id) { this.id = id; }
@@ -83,10 +89,12 @@ public class AuctionItem implements Serializable, Comparable<AuctionItem> {
     public void setEndTime(String endTime) { this.endTime = endTime; }
     public void setCapEndTime(String capEndTime) { this.capEndTime = capEndTime; }
     public void setStatus(String status) { this.status = status; }
+    public void setStartMode(String startMode) { this.startMode = startMode; }
     public void setImg1(String img1) { this.img1 = img1; }
     public void setImg2(String img2) { this.img2 = img2; }
     public void setImg3(String img3) { this.img3 = img3; }
     public void setRelistedFrom(Integer relistedFrom) { this.relistedFrom = relistedFrom; }
+    public void setMinIncrementPercent(double minIncrementPercent) { this.minIncrementPercent = minIncrementPercent; }
 
     @Override
     public String toString() {

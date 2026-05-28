@@ -32,7 +32,10 @@ public final class Constants {
     // --- Images ---
     public static final int MAX_IMAGES_PER_AUCTION = 3;
     public static final long MAX_IMAGE_SIZE_BYTES = 2 * 1024 * 1024; // 2MB
+    public static final int MAX_IMAGE_WIDTH = 2000;
+    public static final int MAX_IMAGE_HEIGHT = 2000;
     public static final int THUMBNAIL_SIZE = 40;
+    public static final java.util.Set<String> SUPPORTED_IMAGE_FORMATS = java.util.Set.of("jpg", "jpeg", "png");
 
     // --- Paths ---
     public static final String DB_PATH = "data/auction.db.sqlite";
@@ -46,9 +49,14 @@ public final class Constants {
 
     // --- Auction Status ---
     public static final String STATUS_ACTIVE = "ACTIVE";
+    public static final String STATUS_SCHEDULED = "SCHEDULED";
     public static final String STATUS_SOLD = "SOLD";
     public static final String STATUS_EXPIRED = "EXPIRED";
     public static final String STATUS_CANCELLED = "CANCELLED";
+
+    // --- Start Modes ---
+    public static final String START_MODE_AUTO = "AUTO";
+    public static final String START_MODE_MANUAL = "MANUAL";
 
     // --- Money Helper ---
     public static String formatCents(long cents) {
