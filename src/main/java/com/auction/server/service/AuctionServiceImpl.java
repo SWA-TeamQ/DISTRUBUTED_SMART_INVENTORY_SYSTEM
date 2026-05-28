@@ -241,6 +241,26 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
     }
 
     @Override
+    public void updateAuction(int auctionId, AuctionItem item, byte[] image1, byte[] image2, byte[] image3, String token)
+            throws RemoteException, AuctionException {
+        SessionContext context = validateRole(token, Constants.USER, Constants.ADMIN);
+
+        String[] stagedPaths = null;
+        try {
+            stagedPaths = (image1 != null || image2 != null || image3 != null)
+                ? imageStore.stageImages(image1, image2, image3)
+                : null;
+            auctionManager.updateAuction(auctionId, item, context, stagedPaths);
+        } catch (AuctionException e) {
+            imageStore.deleteStagedImages(stagedPaths);
+            throw e;
+        } catch (Exception e) {
+            imageStore.deleteStagedImages(stagedPaths);
+            throw new AuctionException("Internal error updating auction: " + e.getMessage());
+        }
+    }
+
+    @Override
     public void cancelAuction(int auctionId, String token) throws RemoteException, AuctionException {
         SessionContext context = validateRole(token, Constants.USER, Constants.ADMIN);
 

@@ -148,6 +148,76 @@ public class AuctionManager {
         });
     }
 
+    public void updateAuction(int auctionId, AuctionItem updatedItem, SessionContext user, String[] imagePaths) throws Exception {
+        lockManager.lock(auctionId);
+        try {
+            txManager.executeWithoutResult(() -> {
+                AuctionItem current = auctionRepo.findAuctionById(auctionId);
+                if (current == null) throw new AuctionException("Auction not found");
+
+                if (!current.getSellerUsername().equals(user.username()) && !Constants.ADMIN.equals(user.role())) {
+                    throw new AuctionException("Only the seller or an admin can edit this auction");
+                }
+
+                if (!Constants.STATUS_SCHEDULED.equals(current.getStatus())) {
+                    throw new AuctionException("Only scheduled auctions can be edited before they start");
+                }
+
+                if (bidRepo.countBidsByAuctionId(auctionId) > 0) {
+                    throw new AuctionException("Cannot edit an auction that already has bids");
+                }
+
+                if (updatedItem == null) {
+                    throw new AuctionException("Auction update data is missing");
+                }
+
+                if (updatedItem.getTitle() == null || updatedItem.getTitle().isBlank()) {
+                    throw new AuctionException("Title is required");
+                }
+                if (updatedItem.getCategory() == null || updatedItem.getCategory().isBlank()) {
+                    throw new AuctionException("Category is required");
+                }
+                if (updatedItem.getDescription() == null) {
+                    updatedItem.setDescription("");
+                }
+
+                Instant start = Instant.parse(updatedItem.getStartTime());
+                Instant end = Instant.parse(updatedItem.getEndTime());
+                if (!end.isAfter(start)) {
+                    throw new AuctionException("End time must be after start time");
+                }
+
+                AuctionItem toSave = new AuctionItem();
+                toSave.setId(auctionId);
+                toSave.setTitle(updatedItem.getTitle().trim());
+                toSave.setDescription(updatedItem.getDescription());
+                toSave.setCategory(updatedItem.getCategory().trim());
+                toSave.setStartingPriceCents(updatedItem.getStartingPriceCents());
+                toSave.setCurrentBidCents(updatedItem.getStartingPriceCents());
+                toSave.setHighestBidderUsername(null);
+                toSave.setSellerUsername(current.getSellerUsername());
+                toSave.setStartTime(updatedItem.getStartTime());
+                toSave.setEndTime(updatedItem.getEndTime());
+                toSave.setCapEndTime(updatedItem.getCapEndTime());
+                toSave.setStatus(Constants.STATUS_SCHEDULED);
+                toSave.setStartMode(updatedItem.getStartMode() == null || updatedItem.getStartMode().isBlank()
+                    ? current.getStartMode()
+                    : updatedItem.getStartMode());
+                toSave.setMinIncrementPercent(updatedItem.getMinIncrementPercent());
+                toSave.setRelistedFrom(current.getRelistedFrom());
+                toSave.setImg1(imagePaths != null && imagePaths.length > 0 && imagePaths[0] != null ? imagePaths[0] : current.getImg1());
+                toSave.setImg2(imagePaths != null && imagePaths.length > 1 && imagePaths[1] != null ? imagePaths[1] : current.getImg2());
+                toSave.setImg3(imagePaths != null && imagePaths.length > 2 && imagePaths[2] != null ? imagePaths[2] : current.getImg3());
+
+                auctionRepo.updateAuctionDetails(toSave);
+                AsyncLogger.log(LogCategory.AUDIT, EventType.CREATE_AUCTION,
+                    "User=" + user.username() + " EditedAuction=" + auctionId);
+            });
+        } finally {
+            lockManager.unlock(auctionId);
+        }
+    }
+
     public void cancelAuction(int auctionId, SessionContext user) throws Exception {
         lockManager.lock(auctionId);
         try {

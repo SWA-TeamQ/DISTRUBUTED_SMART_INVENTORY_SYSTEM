@@ -116,11 +116,15 @@
                                     <Label text="(default 10 minutes)" styleClass="section-copy"/>
                                 </HBox>
 
-                                <Button text="Create Auction" onAction="#handleCreateAuction" defaultButton="true" maxWidth="Infinity" styleClass="primary-button"/>
+                                <HBox spacing="8">
+                                    <Button fx:id="createAuctionButton" text="Create Auction" onAction="#handleCreateAuction" defaultButton="true" maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="primary-button"/>
+                                    <Button text="Cancel Edit" onAction="#handleCancelEditMode" maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="secondary-button"/>
+                                </HBox>
                             </VBox>
 
                             <VBox spacing="10" styleClass="panel-card" prefWidth="540" maxWidth="620" fillWidth="true">
                                 <Label text="Actions" styleClass="section-title"/>
+                                <Button text="Edit Selected Listing" onAction="#handlePrepareEditAuction" maxWidth="Infinity" styleClass="secondary-button"/>
                                 <Button text="Open Gallery" onAction="#handleOpenGallery" maxWidth="Infinity" styleClass="secondary-button"/>
                                 <Button text="Open Auction Detail" onAction="#handleOpenAuctionDetail" maxWidth="Infinity" styleClass="secondary-button"/>
                                 <Button text="Export to CSV" onAction="#handleExportCSV" maxWidth="Infinity" styleClass="secondary-button"/>

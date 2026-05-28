@@ -326,6 +326,38 @@ public class AuctionRepository {
         }
     }
 
+    public void updateAuctionDetails(AuctionItem item) {
+        String sql = "UPDATE auction_items SET title = ?, description = ?, category = ?, starting_price_cents = ?, current_bid_cents = ?, " +
+            "highest_bidder_username = ?, seller_username = ?, start_time = ?, end_time = ?, cap_end_time = ?, status = ?, start_mode = ?, min_increment_percent = ?, img1 = ?, img2 = ?, img3 = ?, relisted_from = ? WHERE id = ?";
+        try (var pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, item.getTitle());
+            pstmt.setString(2, item.getDescription());
+            pstmt.setString(3, item.getCategory());
+            pstmt.setLong(4, item.getStartingPriceCents());
+            pstmt.setLong(5, item.getCurrentBidCents());
+            pstmt.setString(6, item.getHighestBidderUsername());
+            pstmt.setString(7, item.getSellerUsername());
+            pstmt.setString(8, item.getStartTime());
+            pstmt.setString(9, item.getEndTime());
+            pstmt.setString(10, item.getCapEndTime());
+            pstmt.setString(11, item.getStatus());
+            pstmt.setString(12, item.getStartMode() == null ? com.auction.shared.Constants.START_MODE_AUTO : item.getStartMode());
+            pstmt.setDouble(13, item.getMinIncrementPercent());
+            pstmt.setString(14, item.getImg1());
+            pstmt.setString(15, item.getImg2());
+            pstmt.setString(16, item.getImg3());
+            if (item.getRelistedFrom() != null) {
+                pstmt.setInt(17, item.getRelistedFrom());
+            } else {
+                pstmt.setNull(17, java.sql.Types.INTEGER);
+            }
+            pstmt.setInt(18, item.getId());
+            pstmt.executeUpdate();
+        } catch (java.sql.SQLException e) {
+            throw new RuntimeException("Failed to update auction details", e);
+        }
+    }
+
     public List<AuctionItem> findWonAuctionsByBidder(String bidderUsername) {
         List<AuctionItem> list = new java.util.ArrayList<>();
         String sql = "SELECT * FROM auction_items WHERE highest_bidder_username = ? AND status = 'SOLD'";

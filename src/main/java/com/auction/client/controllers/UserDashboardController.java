@@ -4,6 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 
 import java.io.File;
@@ -65,6 +66,9 @@ public class UserDashboardController {
   private javafx.scene.control.TextField capEndMinutesField;
 
   @FXML
+  private Button createAuctionButton;
+
+  @FXML
   private javafx.scene.control.Label imagesLabel;
 
   @FXML
@@ -109,6 +113,8 @@ public class UserDashboardController {
 
   private java.util.List<com.auction.shared.models.AuctionItem> allMyListings = java.util.List.of();
 
+  private Integer editingAuctionId = null;
+
   private byte[] img1Bytes;
   private byte[] img2Bytes;
   private byte[] img3Bytes;
@@ -129,6 +135,7 @@ public class UserDashboardController {
     // Default seller min increment percent to 5 for convenience
     try { if (minIncrementField != null && (minIncrementField.getText() == null || minIncrementField.getText().isBlank())) minIncrementField.setText("5"); } catch (Exception ignored) {}
     try { if (capEndMinutesField != null && (capEndMinutesField.getText() == null || capEndMinutesField.getText().isBlank())) capEndMinutesField.setText(String.valueOf(com.auction.shared.Constants.SNIPE_CAP_DEFAULT_MINUTES)); } catch (Exception ignored) {}
+    updateEditMode(false, null);
     refreshDashboard();
   }
 
@@ -205,6 +212,159 @@ public class UserDashboardController {
       .getSelectionModel()
       .selectedItemProperty()
       .addListener((obs, oldValue, newValue) -> applyListingsFilter());
+  }
+
+  @FXML
+  private void handlePrepareEditAuction() {
+    com.auction.shared.models.AuctionItem selected = myListingsTable == null ? null : myListingsTable.getSelectionModel().getSelectedItem();
+    if (selected == null) {
+      if (statusLabel != null) statusLabel.setText("Select one of your scheduled listings to edit.");
+      return;
+    }
+
+    if (!com.auction.shared.Constants.STATUS_SCHEDULED.equalsIgnoreCase(selected.getStatus())) {
+      if (statusLabel != null) statusLabel.setText("Only scheduled listings can be edited before they start.");
+      return;
+    }
+
+    if (selected.getSellerUsername() != null && !selected.getSellerUsername().equalsIgnoreCase(com.auction.client.core.ClientContext.getInstance().getUsername())) {
+      if (statusLabel != null) statusLabel.setText("You can only edit your own listings.");
+      return;
+    }
+
+    populateEditForm(selected);
+    updateEditMode(true, selected.getId());
+    if (statusLabel != null) statusLabel.setText("Editing auction #" + selected.getId());
+  }
+
+  @FXML
+  private void handleCancelEditMode() {
+    clearEditMode();
+  }
+
+  private void updateEditMode(boolean editing, Integer auctionId) {
+    editingAuctionId = editing ? auctionId : null;
+    if (createAuctionButton != null) {
+      createAuctionButton.setText(editing ? "Save Changes" : "Create Auction");
+    }
+  }
+
+  private void clearEditMode() {
+    updateEditMode(false, null);
+    clearAuctionForm();
+    if (statusLabel != null) statusLabel.setText("Edit cancelled.");
+  }
+
+  private void clearAuctionForm() {
+    if (titleField != null) titleField.clear();
+    if (descArea != null) descArea.clear();
+    if (categoryField != null) categoryField.clear();
+    if (priceField != null) priceField.clear();
+    if (startDatePicker != null) startDatePicker.setValue(null);
+    if (startTimeField != null) startTimeField.clear();
+    if (endDatePicker != null) endDatePicker.setValue(null);
+    if (endTimeField != null) endTimeField.clear();
+    if (startModeChoice != null) startModeChoice.setValue("Automatic");
+    if (minIncrementField != null) minIncrementField.setText("5");
+    if (capEndMinutesField != null) capEndMinutesField.setText(String.valueOf(com.auction.shared.Constants.SNIPE_CAP_DEFAULT_MINUTES));
+    img1Bytes = img2Bytes = img3Bytes = null;
+    if (imagesLabel != null) imagesLabel.setText("No images selected");
+  }
+
+  private void populateEditForm(com.auction.shared.models.AuctionItem item) {
+    if (item == null) return;
+    if (titleField != null) titleField.setText(item.getTitle());
+    if (descArea != null) descArea.setText(item.getDescription());
+    if (categoryField != null) categoryField.setText(item.getCategory());
+    if (priceField != null) priceField.setText(String.format(java.util.Locale.ROOT, "%.2f", item.getStartingPriceCents() / 100.0));
+
+    try {
+      java.time.ZoneId zoneId = java.time.ZoneId.systemDefault();
+      if (item.getStartTime() != null && !item.getStartTime().isBlank()) {
+        java.time.LocalDateTime startDateTime = java.time.LocalDateTime.ofInstant(java.time.Instant.parse(item.getStartTime()), zoneId);
+        if (startDatePicker != null) startDatePicker.setValue(startDateTime.toLocalDate());
+        if (startTimeField != null) startTimeField.setText(startDateTime.toLocalTime().withSecond(0).withNano(0).toString());
+      }
+      if (item.getEndTime() != null && !item.getEndTime().isBlank()) {
+        java.time.LocalDateTime endDateTime = java.time.LocalDateTime.ofInstant(java.time.Instant.parse(item.getEndTime()), zoneId);
+        if (endDatePicker != null) endDatePicker.setValue(endDateTime.toLocalDate());
+        if (endTimeField != null) endTimeField.setText(endDateTime.toLocalTime().withSecond(0).withNano(0).toString());
+      }
+      if (item.getCapEndTime() != null && !item.getCapEndTime().isBlank() && item.getEndTime() != null && !item.getEndTime().isBlank()) {
+        java.time.Duration capOffset = java.time.Duration.between(java.time.Instant.parse(item.getEndTime()), java.time.Instant.parse(item.getCapEndTime()));
+        long capMinutes = Math.max(0L, capOffset.toMinutes());
+        if (capEndMinutesField != null) capEndMinutesField.setText(String.valueOf(capMinutes));
+      }
+    } catch (Exception ignored) {}
+
+    if (startModeChoice != null) {
+      startModeChoice.setValue(com.auction.shared.Constants.START_MODE_MANUAL.equalsIgnoreCase(item.getStartMode()) ? "Manual" : "Automatic");
+    }
+    if (minIncrementField != null) {
+      long pct = Math.round(item.getMinIncrementPercent() * 100.0);
+      minIncrementField.setText(String.valueOf(pct));
+    }
+    if (imagesLabel != null) {
+      imagesLabel.setText("Current images retained unless changed.");
+    }
+    img1Bytes = img2Bytes = img3Bytes = null;
+  }
+
+  private com.auction.shared.models.AuctionItem buildAuctionFromForm() {
+    long cents = (long) (Double.parseDouble(priceField.getText()) * 100);
+    java.time.Instant now = java.time.Instant.now();
+    java.time.Instant startInstant = now;
+    if (startDatePicker != null && startDatePicker.getValue() != null && startTimeField != null && !startTimeField.getText().isBlank()) {
+      java.time.LocalDate d = startDatePicker.getValue();
+      java.time.LocalTime t = java.time.LocalTime.parse(startTimeField.getText());
+      startInstant = java.time.ZonedDateTime.of(d, t, java.time.ZoneId.systemDefault()).toInstant();
+    }
+
+    java.time.Instant endInstant = startInstant.plus(java.time.Duration.ofHours(1));
+    if (endDatePicker != null && endDatePicker.getValue() != null && endTimeField != null && !endTimeField.getText().isBlank()) {
+      java.time.LocalDate ed = endDatePicker.getValue();
+      java.time.LocalTime et = java.time.LocalTime.parse(endTimeField.getText());
+      endInstant = java.time.ZonedDateTime.of(ed, et, java.time.ZoneId.systemDefault()).toInstant();
+    }
+
+    com.auction.shared.models.AuctionItem item = new com.auction.shared.models.AuctionItem();
+    item.setTitle(titleField.getText());
+    item.setDescription(descArea.getText());
+    item.setCategory(categoryField.getText());
+    item.setStartingPriceCents(cents);
+    item.setCurrentBidCents(cents);
+    item.setSellerUsername(com.auction.client.core.ClientContext.getInstance().getUsername());
+    item.setStartTime(startInstant.toString());
+    item.setEndTime(endInstant.toString());
+
+    if (capEndMinutesField != null && capEndMinutesField.getText() != null && !capEndMinutesField.getText().isBlank()) {
+      int minutes = Integer.parseInt(capEndMinutesField.getText().trim());
+      if (minutes < 0 || minutes > 24 * 60) {
+        throw new IllegalArgumentException("Snipe cap minutes must be between 0 and 1440");
+      }
+      item.setCapEndTime(endInstant.plus(java.time.Duration.ofMinutes(minutes)).toString());
+    } else {
+      item.setCapEndTime(null);
+    }
+
+    String mode = startModeChoice == null ? "Automatic" : startModeChoice.getValue();
+    if ("Manual".equalsIgnoreCase(mode)) {
+      item.setStartMode(com.auction.shared.Constants.START_MODE_MANUAL);
+      item.setStatus(com.auction.shared.Constants.STATUS_SCHEDULED);
+    } else {
+      item.setStartMode(com.auction.shared.Constants.START_MODE_AUTO);
+      item.setStatus(startInstant.isAfter(now) ? com.auction.shared.Constants.STATUS_SCHEDULED : com.auction.shared.Constants.STATUS_ACTIVE);
+    }
+
+    if (minIncrementField != null && minIncrementField.getText() != null && !minIncrementField.getText().isBlank()) {
+      double pct = Double.parseDouble(minIncrementField.getText().trim());
+      if (pct < 0 || pct > 100) {
+        throw new IllegalArgumentException("Min increment percent must be between 0 and 100");
+      }
+      item.setMinIncrementPercent(pct / 100.0);
+    }
+
+    return item;
   }
 
   private void refreshDashboard() {
@@ -347,121 +507,52 @@ public class UserDashboardController {
   @FXML
   private void handleCreateAuction() {
     try {
-      long cents = (long) (Double.parseDouble(priceField.getText()) * 100);
-      // Parse start datetime
-      java.time.Instant now = java.time.Instant.now();
-      java.time.Instant startInstant = now;
-      if (startDatePicker != null && startDatePicker.getValue() != null && startTimeField != null && !startTimeField.getText().isBlank()) {
-        java.time.LocalDate d = startDatePicker.getValue();
-        java.time.LocalTime t = java.time.LocalTime.parse(startTimeField.getText());
-        java.time.ZonedDateTime zdt = java.time.ZonedDateTime.of(d, t, java.time.ZoneId.systemDefault());
-        startInstant = zdt.toInstant();
-      }
-
-      // Parse end datetime
-      java.time.Instant endInstant = startInstant.plus(java.time.Duration.ofHours(1));
-      if (endDatePicker != null && endDatePicker.getValue() != null && endTimeField != null && !endTimeField.getText().isBlank()) {
-        java.time.LocalDate ed = endDatePicker.getValue();
-        java.time.LocalTime et = java.time.LocalTime.parse(endTimeField.getText());
-        java.time.ZonedDateTime zdt2 = java.time.ZonedDateTime.of(ed, et, java.time.ZoneId.systemDefault());
-        endInstant = zdt2.toInstant();
-      }
-
-      // Validate times
-      if (!endInstant.isAfter(startInstant)) {
+      com.auction.shared.models.AuctionItem item = buildAuctionFromForm();
+      if (!java.time.Instant.parse(item.getEndTime()).isAfter(java.time.Instant.parse(item.getStartTime()))) {
         statusLabel.setText("End time must be after start time");
         return;
       }
 
-      com.auction.shared.models.AuctionItem item = new com.auction.shared.models.AuctionItem();
-      item.setTitle(titleField.getText());
-      item.setDescription(descArea.getText());
-      item.setCategory(categoryField.getText());
-      item.setStartingPriceCents(cents);
-      item.setCurrentBidCents(cents);
-      item.setSellerUsername(com.auction.client.core.ClientContext.getInstance().getUsername());
-      item.setStartTime(startInstant.toString());
-      item.setEndTime(endInstant.toString());
-      // Parse optional snipe cap (minutes) — seller may leave blank to use server default
-      if (capEndMinutesField != null && capEndMinutesField.getText() != null && !capEndMinutesField.getText().isBlank()) {
-        try {
-          int minutes = Integer.parseInt(capEndMinutesField.getText().trim());
-          if (minutes < 0 || minutes > 24 * 60) {
-            statusLabel.setText("Snipe cap minutes must be between 0 and 1440");
-            return;
-          }
-          java.time.Instant capInstant = endInstant.plus(java.time.Duration.ofMinutes(minutes));
-          item.setCapEndTime(capInstant.toString());
-        } catch (NumberFormatException nfe) {
-          statusLabel.setText("Invalid snipe cap format");
-          return;
-        }
-      } else {
-        item.setCapEndTime(null);
-      }
-
-      String mode = startModeChoice == null ? "Automatic" : startModeChoice.getValue();
-      if ("Manual".equalsIgnoreCase(mode)) {
-        item.setStartMode(com.auction.shared.Constants.START_MODE_MANUAL);
-        item.setStatus(com.auction.shared.Constants.STATUS_SCHEDULED);
-      } else {
+      if (item.getStartMode() == null || item.getStartMode().isBlank()) {
         item.setStartMode(com.auction.shared.Constants.START_MODE_AUTO);
-        if (startInstant.isAfter(now)) {
-          item.setStatus(com.auction.shared.Constants.STATUS_SCHEDULED);
-        } else {
-          item.setStatus(com.auction.shared.Constants.STATUS_ACTIVE);
-        }
-
-        // Parse seller-specified minimum increment percent (optional)
-        if (minIncrementField != null && minIncrementField.getText() != null && !minIncrementField.getText().isBlank()) {
-          try {
-            double pct = Double.parseDouble(minIncrementField.getText().trim());
-            if (pct < 0 || pct > 100) {
-              statusLabel.setText("Min increment percent must be between 0 and 100");
-              return;
-            }
-            item.setMinIncrementPercent(pct / 100.0);
-          } catch (NumberFormatException nfe) {
-            statusLabel.setText("Invalid min increment percent format");
-            return;
-          }
-        }
       }
 
-      com.auction.client.core.ClientContext context =
-        com.auction.client.core.ClientContext.getInstance();
-      int id = context
-        .getRmiProvider()
-        .getService()
-        .createAuction(
-          item,
-          img1Bytes,
-          img2Bytes,
-          img3Bytes,
-          context.getSessionToken()
-        );
-      statusLabel.setText("Created auction #" + id);
-      Alert alert = new Alert(Alert.AlertType.INFORMATION);
-      alert.setTitle("Auction Created");
-      alert.setHeaderText("Auction created successfully");
-      alert.setContentText("Your auction #" + id + " is ready.");
-      alert.showAndWait();
-      refreshDashboard();
-      selectCreatedAuction(id);
+      if (editingAuctionId != null) {
+        com.auction.client.core.ClientContext context = com.auction.client.core.ClientContext.getInstance();
+        context.getRmiProvider().getService().updateAuction(editingAuctionId, item, img1Bytes, img2Bytes, img3Bytes, context.getSessionToken());
+        statusLabel.setText("Updated auction #" + editingAuctionId);
+      } else {
+        com.auction.client.core.ClientContext context =
+          com.auction.client.core.ClientContext.getInstance();
+        int id = context
+          .getRmiProvider()
+          .getService()
+          .createAuction(
+            item,
+            img1Bytes,
+            img2Bytes,
+            img3Bytes,
+            context.getSessionToken()
+          );
+        statusLabel.setText("Created auction #" + id);
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Auction Created");
+        alert.setHeaderText("Auction created successfully");
+        alert.setContentText("Your auction #" + id + " is ready.");
+        alert.showAndWait();
+        refreshDashboard();
+        selectCreatedAuction(id);
 
-      titleField.clear();
-      descArea.clear();
-      categoryField.clear();
-      priceField.clear();
-      if (startDatePicker != null) startDatePicker.setValue(null);
-      if (startTimeField != null) startTimeField.clear();
-      if (endDatePicker != null) endDatePicker.setValue(null);
-      if (endTimeField != null) endTimeField.clear();
-      if (startModeChoice != null) startModeChoice.setValue("Automatic");
-      img1Bytes = img2Bytes = img3Bytes = null;
-      imagesLabel.setText("No images selected");
+        clearAuctionForm();
+        return;
+      }
+
+      refreshDashboard();
+      clearEditMode();
+    } catch (IllegalArgumentException e) {
+      statusLabel.setText(e.getMessage());
     } catch (Exception e) {
-      statusLabel.setText("Error creating: " + e.getMessage());
+      statusLabel.setText(editingAuctionId != null ? "Error saving: " + e.getMessage() : "Error creating: " + e.getMessage());
     }
   }
 
@@ -548,11 +639,35 @@ public class UserDashboardController {
         .getRmiProvider()
         .getService()
         .exportAuctionsToCSV(context.getSessionToken());
-      java.io.File file = new java.io.File("my_auctions_export.csv");
-      java.nio.file.Files.write(file.toPath(), csv);
-      statusLabel.setText("Exported to " + file.getAbsolutePath());
+
+      javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+      fileChooser.setTitle("Save Auction CSV Export");
+      fileChooser.getExtensionFilters().add(
+        new javafx.stage.FileChooser.ExtensionFilter("CSV Files", "*.csv")
+      );
+      fileChooser.setInitialFileName("my_auctions_export.csv");
+
+      java.io.File exportsDir = new java.io.File("exports");
+      if (!exportsDir.exists() && !exportsDir.mkdirs()) {
+        throw new IOException("Unable to create exports directory");
+      }
+      fileChooser.setInitialDirectory(exportsDir);
+
+      java.io.File file = fileChooser.showSaveDialog(marketTable.getScene().getWindow());
+      if (file == null) {
+        if (statusLabel != null) statusLabel.setText("Export cancelled.");
+        return;
+      }
+
+      String fileName = file.getName().toLowerCase(java.util.Locale.ROOT).endsWith(".csv")
+        ? file.getName()
+        : file.getName() + ".csv";
+      java.io.File targetFile = new java.io.File(exportsDir, fileName);
+
+      java.nio.file.Files.write(targetFile.toPath(), csv);
+      if (statusLabel != null) statusLabel.setText("Exported to " + targetFile.getAbsolutePath());
     } catch (Exception e) {
-      statusLabel.setText("Export failed: " + e.getMessage());
+      if (statusLabel != null) statusLabel.setText("Export failed: " + e.getMessage());
     }
   }
 

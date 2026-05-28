@@ -92,6 +92,10 @@ public interface IAuctionService extends Remote {
     /** Returns the new auction's ID. image bytes may be null if no image provided. */
     int createAuction(AuctionItem item, byte[] image1, byte[] image2, byte[] image3, String token)
             throws RemoteException, AuctionException;
+    default void updateAuction(int auctionId, AuctionItem item, byte[] image1, byte[] image2, byte[] image3, String token)
+            throws RemoteException, AuctionException {
+        throw new AuctionException("Auction editing is not supported by this implementation");
+    }
     void cancelAuction(int auctionId, String token)
             throws RemoteException, AuctionException;
     void relistAuction(int auctionId, String newEndTimeIso, String token)
