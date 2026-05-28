@@ -451,16 +451,19 @@
 .toast-info {
     -fx-background-color: rgba(88, 166, 255, 0.14);
     -fx-border-color: rgba(88, 166, 255, 0.28);
+    -fx-text-fill: #79c0ff;
 }
 
 .toast-success {
     -fx-background-color: rgba(46, 160, 67, 0.16);
     -fx-border-color: rgba(46, 160, 67, 0.28);
+    -fx-text-fill: #7ee787;
 }
 
 .toast-error {
     -fx-background-color: rgba(248, 81, 73, 0.16);
     -fx-border-color: rgba(248, 81, 73, 0.28);
+    -fx-text-fill: #ff7b72;
 }
 
 /* Footer Elements */
