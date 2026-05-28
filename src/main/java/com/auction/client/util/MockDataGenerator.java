@@ -33,9 +33,9 @@ public final class MockDataGenerator {
         Constants.STATUS_ACTIVE,
         now.minus(Duration.ofHours(4)),
         now.plus(Duration.ofHours(16)),
-        null,
-        null,
-        null
+        "auction_1_img_1.jpg",
+        "auction_1_img_2.jpg",
+        "auction_1_img_3.jpg"
       )
     );
 
@@ -52,9 +52,9 @@ public final class MockDataGenerator {
         Constants.STATUS_ACTIVE,
         now.minus(Duration.ofHours(2)),
         now.plus(Duration.ofHours(8)),
-        null,
-        null,
-        null
+        "auction_2_img_1.jpg",
+        "auction_2_img_2.jpg",
+        "auction_2_img_3.jpg"
       )
     );
 
@@ -71,9 +71,9 @@ public final class MockDataGenerator {
         Constants.STATUS_ACTIVE,
         now.minus(Duration.ofHours(1)),
         now.plus(Duration.ofDays(1)),
-        null,
-        "mock-103-a.png",
-        "mock-103-b.png"
+        "auction_3_img_1.jpg",
+        "auction_3_img_2.jpg",
+        "auction_3_img_3.jpg"
       )
     );
 
@@ -90,9 +90,9 @@ public final class MockDataGenerator {
         Constants.STATUS_CANCELLED,
         now.minus(Duration.ofDays(2)),
         now.minus(Duration.ofHours(4)),
-        null,
-        null,
-        null
+        "auction_4_img_1.jpg",
+        "auction_4_img_2.jpg",
+        "auction_4_img_3.jpg"
       )
     );
 
@@ -109,9 +109,9 @@ public final class MockDataGenerator {
         "ENDED",
         now.minus(Duration.ofDays(3)),
         now.minus(Duration.ofHours(12)),
-        null,
-        null,
-        null
+        "auction_5_img_1.jpg",
+        "auction_5_img_2.jpg",
+        "auction_5_img_3.jpg"
       )
     );
 
@@ -128,9 +128,9 @@ public final class MockDataGenerator {
         Constants.STATUS_ACTIVE,
         now.minus(Duration.ofHours(8)),
         now.plus(Duration.ofDays(2)),
-        null,
-        null,
-        null
+        "auction_6_img_1.jpg",
+        "auction_6_img_2.jpg",
+        "auction_6_img_3.jpg"
       )
     );
 
@@ -147,9 +147,9 @@ public final class MockDataGenerator {
         Constants.STATUS_CANCELLED,
         now.minus(Duration.ofDays(1)),
         now.minus(Duration.ofHours(6)),
-        null,
-        null,
-        null
+        "auction_1_img_1.jpg",
+        "auction_1_img_2.jpg",
+        "auction_1_img_3.jpg"
       )
     );
 
@@ -166,9 +166,9 @@ public final class MockDataGenerator {
         Constants.STATUS_ACTIVE,
         now.minus(Duration.ofHours(6)),
         now.plus(Duration.ofHours(6)),
-        "mock-108.png",
-        null,
-        null
+        "auction_2_img_1.jpg",
+        "auction_2_img_2.jpg",
+        "auction_2_img_3.jpg"
       )
     );
 
@@ -185,9 +185,9 @@ public final class MockDataGenerator {
         Constants.STATUS_ACTIVE,
         now.minus(Duration.ofHours(3)),
         now.plus(Duration.ofHours(3)),
-        null,
-        null,
-        null
+        "auction_3_img_1.jpg",
+        "auction_3_img_2.jpg",
+        "auction_3_img_3.jpg"
       )
     );
 
@@ -204,9 +204,9 @@ public final class MockDataGenerator {
         Constants.STATUS_EXPIRED,
         now.minus(Duration.ofDays(5)),
         now.minus(Duration.ofHours(10)),
-        null,
-        null,
-        null
+        "auction_4_img_1.jpg",
+        "auction_4_img_2.jpg",
+        "auction_4_img_3.jpg"
       )
     );
 
@@ -223,9 +223,9 @@ public final class MockDataGenerator {
         Constants.STATUS_ACTIVE,
         now.minus(Duration.ofHours(1)),
         now.plus(Duration.ofHours(18)),
-        null,
-        null,
-        null
+        "auction_5_img_1.jpg",
+        "auction_5_img_2.jpg",
+        "auction_5_img_3.jpg"
       )
     );
 
@@ -242,9 +242,9 @@ public final class MockDataGenerator {
         Constants.STATUS_CANCELLED,
         now.minus(Duration.ofDays(4)),
         now.minus(Duration.ofHours(2)),
-        null,
-        null,
-        null
+        "auction_6_img_1.jpg",
+        "auction_6_img_2.jpg",
+        "auction_6_img_3.jpg"
       )
     );
 
@@ -261,9 +261,9 @@ public final class MockDataGenerator {
         Constants.STATUS_ACTIVE,
         now.minus(Duration.ofHours(9)),
         now.plus(Duration.ofDays(3)),
-        null,
-        "mock-113.png",
-        null
+        "c0a465b1-fc59-4765-b63f-b5d7dcd961c2_1.jpg",
+        "auction_1_img_1.jpg",
+        "auction_2_img_1.jpg"
       )
     );
 
@@ -280,9 +280,9 @@ public final class MockDataGenerator {
         "ENDED",
         now.minus(Duration.ofDays(2)),
         now.minus(Duration.ofHours(1)),
-        null,
-        null,
-        null
+        "auction_3_img_1.jpg",
+        "auction_3_img_2.jpg",
+        "auction_3_img_3.jpg"
       )
     );
 
@@ -299,9 +299,9 @@ public final class MockDataGenerator {
         Constants.STATUS_ACTIVE,
         now.minus(Duration.ofHours(12)),
         now.plus(Duration.ofDays(1)),
-        "mock-115-a.png",
-        "mock-115-b.png",
-        "mock-115-c.png"
+        "auction_4_img_1.jpg",
+        "auction_4_img_2.jpg",
+        "auction_4_img_3.jpg"
       )
     );
 

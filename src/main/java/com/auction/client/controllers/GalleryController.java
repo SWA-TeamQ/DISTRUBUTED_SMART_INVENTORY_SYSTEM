@@ -14,6 +14,7 @@ import com.auction.client.core.ClientContext;
 import com.auction.client.service.PollingService;
 import com.auction.client.service.ThumbnailExecutor;
 import com.auction.client.state.AuctionUiState;
+import com.auction.client.util.Toast;
 import com.auction.shared.models.AuctionItem;
 
 import atlantafx.base.theme.Styles;
@@ -97,8 +98,9 @@ public class GalleryController {
         .loadView("user_dashboard.fxml");
     } catch (Exception e) {
       if (auctionCountLabel != null) {
-        auctionCountLabel.setText("Navigation failed: " + e.getMessage());
+        auctionCountLabel.setText("Navigation failed");
       }
+      Toast.show(auctionGrid, "Navigation failed", Toast.Type.ERROR);
     }
   }
 
@@ -250,8 +252,9 @@ public class GalleryController {
       controller.setAuction(item);
     } catch (Exception e) {
       if (auctionCountLabel != null) {
-        auctionCountLabel.setText("Open failed: " + e.getMessage());
+        auctionCountLabel.setText("Open failed");
       }
+      Toast.show(auctionGrid, "Open failed", Toast.Type.ERROR);
     }
   }
 

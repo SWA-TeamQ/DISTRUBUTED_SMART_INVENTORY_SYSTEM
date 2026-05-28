@@ -13,7 +13,7 @@
             </VBox>
             <Region HBox.hgrow="ALWAYS" />
             <HBox spacing="8" alignment="CENTER_RIGHT">
-                <Button onAction="#handleRefresh" styleClass="secondary-button">Refresh</Button>
+                <Button onAction="#handleRefreshDashboard" styleClass="secondary-button">Refresh</Button>
                 <Button onAction="#handleLogout" styleClass="button-danger">Logout</Button>
             </HBox>
         </HBox>
