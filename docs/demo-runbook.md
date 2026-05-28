@@ -67,8 +67,11 @@ mvn javafx:run
 ### Quick Seed Script
 
 ```bash
-# Optional: run seeder to create demo users/auctions
-mvn exec:java -Dexec.mainClass="com.auction.server.tools.DemoSeeder"
+# 1. Run seeder to create demo users, auctions, and bids
+mvn exec:java "-Dexec.mainClass=com.auction.server.tools.DemoSeeder"
+
+# 2. Run image generator to create placeholder images for the seeded auctions
+mvn exec:java "-Dexec.mainClass=com.auction.server.tools.SeedTestImages"
 ```
 
 Creates:

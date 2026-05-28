@@ -19,6 +19,17 @@ mvn exec:java
 mvn javafx:run
 ```
 
+### Seeding Sample Data
+
+To populate the database with sample users, auctions, and test images:
+
+```bash
+# 1. Seed database with users, auctions, and bids
+mvn exec:java "-Dexec.mainClass=com.auction.server.tools.DemoSeeder"
+
+# 2. Generate test placeholder images for the seeded auctions
+mvn exec:java "-Dexec.mainClass=com.auction.server.tools.SeedTestImages"
+
 ## Documentation
 
 | Document | Purpose |
