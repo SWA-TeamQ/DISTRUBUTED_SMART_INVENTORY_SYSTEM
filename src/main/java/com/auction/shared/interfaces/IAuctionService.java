@@ -35,6 +35,9 @@ public interface IAuctionService extends Remote {
         List<AuctionItem> getActiveAuctionsBySeller(String sellerUsername, String token)
                         throws RemoteException, AuctionException;
 
+        List<AuctionItem> getAuctionsBySeller(String sellerUsername, String token)
+                        throws RemoteException, AuctionException;
+
         AuctionItem getAuctionById(int auctionId) throws RemoteException;
 
         // --- Bidding ---

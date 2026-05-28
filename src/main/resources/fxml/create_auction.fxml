@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import java.net.URL?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+    xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.CreateAuctionDialogController" spacing="12" styleClass="panel-card dialog-surface form-stack">
+    <stylesheets>
+        <URL value="@../css/style.css" />
+    </stylesheets>
+
+    <VBox spacing="4">
+        <Label text="Create Auction" styleClass="section-title" />
+        <Label text="Create a new listing with optional images. The form validates locally before the dialog closes." styleClass="section-copy" wrapText="true" />
+    </VBox>
+
+    <TextField fx:id="titleField" promptText="Title" styleClass="compact-field" />
+    <TextArea fx:id="descriptionField" promptText="Description" prefRowCount="5" styleClass="compact-field" wrapText="true" />
+    <TextField fx:id="categoryField" promptText="Category" styleClass="compact-field" />
+    <TextField fx:id="startingPriceField" promptText="Starting Price" styleClass="compact-field" />
+    <TextField fx:id="durationField" promptText="Duration in minutes" styleClass="compact-field" />
+
+    <VBox spacing="8">
+        <Label text="Images (max 3)" styleClass="section-copy" />
+        <HBox spacing="8">
+            <Button fx:id="pickImage1Button" text="Img 1" onAction="#handlePickImage1" styleClass="ghost-button" />
+            <Button fx:id="pickImage2Button" text="Img 2" onAction="#handlePickImage2" styleClass="ghost-button" />
+            <Button fx:id="pickImage3Button" text="Img 3" onAction="#handlePickImage3" styleClass="ghost-button" />
+        </HBox>
+        <Label fx:id="imageSummaryLabel" text="No images selected" styleClass="section-copy" wrapText="true" />
+    </VBox>
+
+    <Label fx:id="validationLabel" text="" styleClass="section-copy" wrapText="true" />
+</VBox>

@@ -377,3 +377,55 @@
 .action-promote:hover {
     -fx-background-color: rgba(63, 185, 80, 0.1);
 }
+
+/* Premium header & buttons tweaks */
+.admin-header {
+    -fx-padding: 20px 28px;
+    -fx-alignment: center-left;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.55), 28, 0, 0, 10);
+}
+
+.admin-header .primary-button {
+    -fx-background-color: linear-gradient(to bottom, #2b75f6, #1a5cc7);
+    -fx-text-fill: white;
+    -fx-font-weight: 800;
+    -fx-background-radius: 10px;
+    -fx-padding: 10px 14px;
+}
+
+.admin-header .nav-button-danger {
+    -fx-background-color: transparent;
+    -fx-text-fill: #ff6b6b;
+    -fx-border-color: transparent;
+}
+
+.admin-content {
+    -fx-padding: 28px;
+}
+
+/* Auction table visual parity with dashboard */
+.auction-table .column-header-background {
+    -fx-background-color: linear-gradient(to bottom, #161b22, #0f1318);
+    -fx-background-radius: 12px 12px 0 0;
+}
+
+.auction-table .column-header .label,
+.auction-table .filler .label {
+    -fx-text-fill: #c9d1d9;
+    -fx-font-weight: 700;
+    -fx-font-family: "Inter";
+}
+
+.auction-table .table-row-cell:filled:hover {
+    -fx-background-color: rgba(88, 166, 255, 0.06);
+}
+
+.auction-table .table-row-cell:filled:selected {
+    -fx-background-color: rgba(88, 166, 255, 0.12);
+}
+
+/* Thumbnails */
+.image-thumb {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.45), 8, 0, 0, 2);
+    -fx-background-radius: 8px;
+}

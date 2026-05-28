@@ -3,11 +3,23 @@
 <?import javafx.scene.layout.*?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" 
-            fx:controller="com.auction.client.controllers.AdminPanelController" 
-            styleClass="admin-shell">
+<BorderPane xmlns="http://javafx.com/javafx/17"
+    xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.AdminPanelController" styleClass="admin-shell">
+    <top>
+        <HBox styleClass="page-header" spacing="16" alignment="CENTER_LEFT" BorderPane.alignment="CENTER">
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Admin Console" styleClass="page-title"/>
+                <Label text="Manage users, auctions and system audits." styleClass="page-subtitle" wrapText="true"/>
+            </VBox>
+            <Region HBox.hgrow="ALWAYS" />
+            <HBox spacing="8" alignment="CENTER_RIGHT">
+                <Button onAction="#handleRefresh" styleClass="secondary-button">Refresh</Button>
+                <Button onAction="#handleLogout" styleClass="button-danger">Logout</Button>
+            </HBox>
+        </HBox>
+    </top>
     <left>
-        <VBox styleClass="sidebar-nav" prefWidth="200" spacing="10">
+        <VBox styleClass="sidebar-nav" prefWidth="200" spacing="12" padding="16">
             <Label text="Admin Console" styleClass="sidebar-header"/>
             <Button onAction="#showUsers" styleClass="nav-button" maxWidth="Infinity">
                 <graphic>
@@ -34,22 +46,25 @@
                 </graphic>
             </Button>
             <Region VBox.vgrow="ALWAYS" />
-            <Button onAction="#handleRefreshDashboard" styleClass="nav-button-accent" maxWidth="Infinity">
-                <graphic>
-                    <HBox spacing="8" alignment="CENTER_LEFT">
-                        <FontIcon iconLiteral="fas-sync" iconSize="14"/>
-                        <Label text="Refresh All"/>
-                    </HBox>
-                </graphic>
-            </Button>
-            <Button onAction="#handleLogout" styleClass="nav-button-danger" maxWidth="Infinity">
-                <graphic>
-                    <HBox spacing="8" alignment="CENTER_LEFT">
-                        <FontIcon iconLiteral="fas-sign-out-alt" iconSize="14"/>
-                        <Label text="Logout"/>
-                    </HBox>
-                </graphic>
-            </Button>
+            <VBox spacing="8">
+                <Separator styleClass="sidebar-separator"/>
+                <Button onAction="#handleRefreshDashboard" styleClass="secondary-button" maxWidth="Infinity">
+                    <graphic>
+                        <HBox spacing="8" alignment="CENTER_LEFT">
+                            <FontIcon iconLiteral="fas-sync" iconSize="14"/>
+                            <Label text="Refresh All"/>
+                        </HBox>
+                    </graphic>
+                </Button>
+                <Button onAction="#handleLogout" styleClass="button-danger" maxWidth="Infinity">
+                    <graphic>
+                        <HBox spacing="8" alignment="CENTER_LEFT">
+                            <FontIcon iconLiteral="fas-sign-out-alt" iconSize="14"/>
+                            <Label text="Logout"/>
+                        </HBox>
+                    </graphic>
+                </Button>
+            </VBox>
         </VBox>
     </left>
     <center>

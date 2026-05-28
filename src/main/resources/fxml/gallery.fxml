@@ -1,57 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?import java.net.URL?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.cell.PropertyValueFactory?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.FlowPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.TilePane?>
 <?import javafx.scene.layout.VBox?>
-<?import java.net.URL?>
 
 <BorderPane xmlns="http://javafx.com/javafx/17"
     xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.GalleryController" styleClass="page-shell">
-    
-    
+    <stylesheets>
+        <URL value="@../css/style.css" />
+    </stylesheets>
+
     <top>
-        <HBox spacing="16" alignment="CENTER_LEFT" styleClass="page-header">
-            <VBox spacing="4" HBox.hgrow="ALWAYS">
-                <Label text="Gallery" styleClass="page-title"/>
-                <Label text="Browse active auctions in a card-like workspace." styleClass="page-subtitle" wrapText="true"/>
+        <VBox spacing="14" styleClass="page-header">
+            <BorderPane>
+                <left>
+                    <VBox spacing="4">
+                        <Label text="Gallery" styleClass="page-title" />
+                        <Label text="A card-based view over the exact same shared auction list used by the dashboard table." styleClass="page-subtitle" wrapText="true" />
+                    </VBox>
+                </left>
+                <right>
+                    <Button fx:id="backButton" text="Back to Dashboard" onAction="#handleBackToDashboard" styleClass="secondary-button" />
+                </right>
+            </BorderPane>
+            <VBox spacing="10" styleClass="panel-card">
+                <Label text="Filters" styleClass="section-title" />
+                <TextField fx:id="searchField" promptText="Search auctions" styleClass="search-field" onAction="#handleSearch" />
             </VBox>
-            <Button text="Back to Dashboard" onAction="#handleBackToDashboard" styleClass="secondary-button"/>
-        </HBox>
+        </VBox>
     </top>
 
     <center>
-        <VBox spacing="16" styleClass="main-stack">
-            <VBox spacing="10" styleClass="panel-card">
-                <Label text="Filters" styleClass="section-title"/>
-                <HBox spacing="10">
-                    <TextField fx:id="searchField" promptText="Search auctions" styleClass="search-field" HBox.hgrow="ALWAYS" onAction="#handleSearch"/>
-                    <Button text="Search" styleClass="primary-button" onAction="#handleSearch"/>
-                </HBox>
-            </VBox>
-
-            <VBox spacing="10" styleClass="panel-card" VBox.vgrow="ALWAYS">
-                <HBox spacing="10" alignment="CENTER_LEFT">
-                    <VBox spacing="2" HBox.hgrow="ALWAYS">
-                        <Label text="Auction Grid" styleClass="section-title"/>
-                        <Label text="This surface is ready for auction cards and quick actions." styleClass="section-copy" wrapText="true"/>
+        <VBox spacing="12" styleClass="main-stack">
+            <BorderPane styleClass="panel-card">
+                <left>
+                    <VBox spacing="4">
+                        <Label text="Auction Grid" styleClass="section-title" />
+                        <Label text="Cards update when the shared ObservableList changes, so the table and gallery never drift." styleClass="section-copy" wrapText="true" />
                     </VBox>
-                    <Label fx:id="auctionCountLabel" text="0 auctions" styleClass="status-chip status-chip-accent"/>
-                </HBox>
+                </left>
+                <right>
+                    <Label fx:id="auctionCountLabel" text="0 auction(s)" styleClass="status-chip status-chip-accent" />
+                </right>
+            </BorderPane>
 
-                <FlowPane fx:id="auctionFlow" hgap="14" vgap="14" prefWrapLength="1200">
-                    <VBox styleClass="metric-card" prefWidth="240">
-                        <Label text="No auctions loaded" styleClass="metric-label"/>
-                        <Label text="Use refresh or connect to a live server." styleClass="section-copy" wrapText="true"/>
-                    </VBox>
-                </FlowPane>
-            </VBox>
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="content-scroll" VBox.vgrow="ALWAYS">
+                <content>
+                    <TilePane fx:id="auctionGrid" hgap="16" vgap="16" prefColumns="4" styleClass="main-stack" />
+                </content>
+            </ScrollPane>
         </VBox>
     </center>
 </BorderPane>

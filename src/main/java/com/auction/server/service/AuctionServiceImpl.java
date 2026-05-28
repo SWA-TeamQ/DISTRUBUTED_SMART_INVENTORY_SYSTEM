@@ -76,6 +76,12 @@ public class AuctionServiceImpl extends UnicastRemoteObject implements IAuctionS
     }
 
     @Override
+    public List<AuctionItem> getAuctionsBySeller(String sellerUsername, String token) throws RemoteException, AuctionException {
+        sessionManager.validateSession(token);
+        return auctionManager.findAuctionsBySeller(sellerUsername);
+    }
+
+    @Override
     public AuctionItem getAuctionById(int auctionId) throws RemoteException {
         return auctionManager.getAuctionById(auctionId);
     }

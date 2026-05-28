@@ -1,18 +1,43 @@
 package com.auction.client.controllers;
 
+import atlantafx.base.theme.Styles;
 import com.auction.client.core.ClientContext;
+import com.auction.client.service.ThumbnailExecutor;
+import com.auction.client.state.AuctionUiState;
 import com.auction.shared.Constants;
 import com.auction.shared.exceptions.AuctionException;
 import com.auction.shared.interfaces.IAuctionService;
 import com.auction.shared.models.AuctionItem;
 import com.auction.shared.models.User;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
 
 public class AdminPanelController {
@@ -48,6 +73,11 @@ public class AdminPanelController {
     try {
       IAuctionService service = getService();
       List<AuctionItem> auctions = service.getActiveAuctions();
+
+      // Sync server-provided auctions into the shared client UI state
+      ObservableList<AuctionItem> shared = AuctionUiState.getInstance().getActiveAuctions();
+      shared.setAll(auctions);
+
       contentArea
         .getChildren()
         .setAll(
@@ -55,7 +85,7 @@ public class AdminPanelController {
             "Auctions",
             "Active auctions visible to the admin account."
           ),
-          buildAuctionsTable(auctions)
+          buildAuctionsTable(shared)
         );
     } catch (Exception e) {
       showError("Failed to load auctions: " + e.getMessage());
@@ -158,10 +188,25 @@ public class AdminPanelController {
   }
 
   private TableView<AuctionItem> buildAuctionsTable(
-    List<AuctionItem> auctions
+    ObservableList<AuctionItem> auctions
   ) {
     TableView<AuctionItem> table = new TableView<>();
     table.getStyleClass().add("auction-table");
+
+    // double-click to open detail
+    table.setRowFactory(tv -> {
+      TableRow<AuctionItem> row = new TableRow<>();
+      row.setOnMouseClicked(event -> {
+        if (
+          event.getButton() == MouseButton.PRIMARY &&
+          event.getClickCount() == 2 &&
+          !row.isEmpty()
+        ) {
+          openAuctionDetail(row.getItem());
+        }
+      });
+      return row;
+    });
 
     TableColumn<AuctionItem, Integer> idCol = new TableColumn<>("ID");
     idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
@@ -192,9 +237,176 @@ public class AdminPanelController {
       }
     );
 
-    table.getColumns().addAll(idCol, titleCol, sellerCol, statusCol, bidCol);
-    table.getItems().setAll(auctions);
+    // thumbnail column
+    TableColumn<AuctionItem, AuctionItem> thumbCol = new TableColumn<>("");
+    thumbCol.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
+    thumbCol.setPrefWidth(64);
+    thumbCol.setCellFactory(col -> new TableCell<>() {
+      private final ImageView imageView = new ImageView();
+
+      {
+        imageView.setFitWidth(54);
+        imageView.setFitHeight(54);
+        imageView.setPreserveRatio(true);
+        imageView.getStyleClass().add("image-thumb");
+      }
+
+      @Override
+      protected void updateItem(AuctionItem item, boolean empty) {
+        super.updateItem(item, empty);
+        if (empty || item == null) {
+          setGraphic(null);
+          return;
+        }
+        loadThumbnailAsync(item.getId(), 0, imageView);
+        setGraphic(imageView);
+      }
+    });
+
+    // actions column
+    TableColumn<AuctionItem, AuctionItem> actions = new TableColumn<>("Actions");
+    actions.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
+    actions.setPrefWidth(140);
+    actions.setCellFactory(col -> new TableCell<>() {
+      private final MenuButton menuButton = new MenuButton("Actions");
+
+      {
+        menuButton.getStyleClass().add(Styles.FLAT);
+        menuButton.setMaxWidth(Double.MAX_VALUE);
+      }
+
+      @Override
+      protected void updateItem(AuctionItem item, boolean empty) {
+        super.updateItem(item, empty);
+        if (empty || item == null) {
+          setGraphic(null);
+          return;
+        }
+        menuButton.getItems().setAll(buildActionMenu(item));
+        setGraphic(menuButton);
+      }
+    });
+
+    table.getColumns().addAll(thumbCol, idCol, titleCol, sellerCol, statusCol, bidCol, actions);
+    table.setItems(auctions);
     return table;
+  }
+
+  // --- Helpers for thumbnails and actions ---
+
+  private final Map<String, Image> thumbnailCache = new ConcurrentHashMap<>();
+  private static final Image PLACEHOLDER = loadPlaceholder();
+
+  private static Image loadPlaceholder() {
+    try (var stream = AdminPanelController.class.getResourceAsStream("/images/placeholder.png")) {
+      return stream == null ? null : new Image(stream);
+    } catch (IOException e) {
+      return null;
+    }
+  }
+
+  private void loadThumbnailAsync(int auctionId, int index, ImageView target) {
+    String key = auctionId + ":" + index;
+    Image cached = thumbnailCache.get(key);
+    if (cached != null) {
+      target.setImage(cached);
+      return;
+    }
+
+    CompletableFuture.supplyAsync(() -> {
+      try {
+        byte[] bytes = ClientContext.getInstance().getRmiProvider().getService().getThumbnail(auctionId, index);
+        return bytes == null || bytes.length == 0 ? null : new Image(new ByteArrayInputStream(bytes));
+      } catch (Exception e) {
+        return null;
+      }
+    }, ThumbnailExecutor.getExecutor()).thenAccept(image -> {
+      Image finalImage = image == null ? PLACEHOLDER : image;
+      thumbnailCache.put(key, finalImage);
+      Platform.runLater(() -> target.setImage(finalImage));
+    });
+  }
+
+  private java.util.List<MenuItem> buildActionMenu(AuctionItem item) {
+    MenuItem viewDetails = new MenuItem("View Details");
+    viewDetails.setOnAction(e -> openAuctionDetail(item));
+
+    if (ownsListing(item) && isActive(item)) {
+      MenuItem cancelListing = new MenuItem("Cancel Listing");
+      cancelListing.setOnAction(e -> performAuctionAction(item, this::cancelAuction));
+      return List.of(viewDetails, cancelListing);
+    }
+
+    if (ownsListing(item) && isRelistable(item)) {
+      MenuItem relist = new MenuItem("Relist");
+      relist.setOnAction(e -> performAuctionAction(item, this::relistAuction));
+      return List.of(viewDetails, relist);
+    }
+
+    return List.of(viewDetails);
+  }
+
+  private boolean ownsListing(AuctionItem item) {
+    String username = ClientContext.getInstance().getUsername();
+    return item != null && username != null && username.equals(item.getSellerUsername());
+  }
+
+  private boolean isActive(AuctionItem item) {
+    return item != null && item.getStatus() != null && Constants.STATUS_ACTIVE.equalsIgnoreCase(item.getStatus());
+  }
+
+  private boolean isRelistable(AuctionItem item) {
+    if (item == null || item.getStatus() == null) return false;
+    String status = item.getStatus().trim().toUpperCase(Locale.ROOT);
+    return status.equals(Constants.STATUS_EXPIRED) || status.equals(Constants.STATUS_CANCELLED) || status.equals("ENDED");
+  }
+
+  private void performAuctionAction(AuctionItem item, AuctionAction action) {
+    if (item == null) return;
+    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+    alert.setTitle("Confirm Action");
+    alert.setHeaderText(item.getTitle());
+    alert.setContentText("Proceed with this auction action?");
+    ButtonType yesButton = new ButtonType("Proceed", ButtonBar.ButtonData.YES);
+    ButtonType noButton = new ButtonType("Cancel", ButtonBar.ButtonData.NO);
+    alert.getButtonTypes().setAll(yesButton, noButton);
+    Optional<ButtonType> result = alert.showAndWait();
+    if (result.isPresent() && result.get() == yesButton) {
+      try {
+        action.execute(item);
+        showAuctions();
+      } catch (Exception e) {
+        showError("Action failed: " + e.getMessage());
+      }
+    }
+  }
+
+  private void cancelAuction(AuctionItem item) throws Exception {
+    ClientContext ctx = ClientContext.getInstance();
+    ctx.getRmiProvider().getService().cancelAuction(item.getId(), ctx.getSessionToken());
+  }
+
+  private void relistAuction(AuctionItem item) throws Exception {
+    ClientContext ctx = ClientContext.getInstance();
+    java.time.Instant newEnd = java.time.Instant.now().plus(java.time.Duration.ofDays(1));
+    ctx.getRmiProvider().getService().relistAuction(item.getId(), newEnd.toString(), ctx.getSessionToken());
+  }
+
+  private void openAuctionDetail(AuctionItem item) {
+    if (item == null) return;
+    try {
+      ClientContext ctx = ClientContext.getInstance();
+      ctx.setPreviousViewName("admin_panel.fxml");
+      ctx.setCurrentAuctionId(item.getId());
+      var controller = ctx.getViewLoader().loadView("auction_detail.fxml");
+      controller.setAuction(item);
+    } catch (Exception e) {
+      showError("Open detail failed: " + e.getMessage());
+    }
+  }
+
+  private interface AuctionAction {
+    void execute(AuctionItem item) throws Exception;
   }
 
   private void showError(String message) {

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonType?>
+<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import java.net.URL?>
+
+<DialogPane xmlns="http://javafx.com/javafx/17"
+    xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.auction.client.controllers.CreateAuctionDialogController">
+    
+    <stylesheets>
+        <URL value="@../css/style.css" />
+    </stylesheets>
+    
+    <header>
+        <VBox spacing="6">
+            <Label text="Create New Auction" styleClass="section-title"/>
+            <Label text="Fill in the details below to create a new auction listing." styleClass="section-copy" wrapText="true"/>
+        </VBox>
+    </header>
+    
+    <content>
+        <VBox spacing="16" styleClass="panel-card">
+            <VBox spacing="10">
+                <Label text="Auction Details" styleClass="section-title"/>
+                
+                <VBox spacing="8">
+                    <Label text="Title *" styleClass="section-copy"/>
+                    <TextField fx:id="titleField" promptText="Enter auction title" styleClass="compact-field"/>
+                </VBox>
+                
+                <VBox spacing="8">
+                    <Label text="Description *" styleClass="section-copy"/>
+                    <TextArea fx:id="descriptionField" promptText="Describe your item in detail" prefRowCount="4" styleClass="compact-field"/>
+                </VBox>
+                
+                <VBox spacing="8">
+                    <Label text="Category *" styleClass="section-copy"/>
+                    <TextField fx:id="categoryField" promptText="e.g. Electronics, Art, Collectibles" styleClass="compact-field"/>
+                </VBox>
+                
+                <HBox spacing="16">
+                    <VBox spacing="8" HBox.hgrow="ALWAYS">
+                        <Label text="Starting Price *" styleClass="section-copy"/>
+                        <TextField fx:id="priceField" promptText="0.00" styleClass="compact-field"/>
+                    </VBox>
+                    
+                    <VBox spacing="8" HBox.hgrow="ALWAYS">
+                        <Label text="Duration (minutes) *" styleClass="section-copy"/>
+                        <TextField fx:id="durationField" promptText="60" styleClass="compact-field"/>
+                    </VBox>
+                </HBox>
+                
+                <VBox spacing="8">
+                    <Label text="Images (Max 3)" styleClass="section-copy"/>
+                    <HBox spacing="8">
+                        <Button text="Select Image 1" onAction="#handleSelectImage1" styleClass="secondary-button" maxWidth="Infinity"/>
+                        <Button text="Select Image 2" onAction="#handleSelectImage2" styleClass="secondary-button" maxWidth="Infinity"/>
+                        <Button text="Select Image 3" onAction="#handleSelectImage3" styleClass="secondary-button" maxWidth="Infinity"/>
+                    </HBox>
+                    <Label fx:id="imageStatusLabel" text="No images selected" styleClass="section-copy"/>
+                </VBox>
+            </VBox>
+        </VBox>
+    </content>
+    
+    <buttonTypes>
+        <ButtonType buttonData="CANCEL" />
+        <ButtonType buttonData="OK" />
+    </buttonTypes>
+</DialogPane>
