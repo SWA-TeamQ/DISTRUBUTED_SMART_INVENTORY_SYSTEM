@@ -1,6 +1,12 @@
 package com.auction.client.controllers;
 
-import atlantafx.base.theme.Styles;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.NumberFormat;
+import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
+
 import com.auction.client.core.ClientContext;
 import com.auction.client.service.PollingService;
 import com.auction.client.service.ThumbnailExecutor;
@@ -10,12 +16,8 @@ import com.auction.shared.exceptions.AuctionException;
 import com.auction.shared.exceptions.InsufficientBidException;
 import com.auction.shared.exceptions.SelfBidException;
 import com.auction.shared.models.AuctionItem;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.NumberFormat;
-import java.util.Locale;
-import java.util.concurrent.CompletableFuture;
+
+import atlantafx.base.theme.Styles;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -154,6 +156,17 @@ public class AuctionDetailController {
     }
     shutdownPolling();
     currentAuction = auction;
+
+    // Check if current user is the seller
+    String currentUser = ClientContext.getInstance().getUsername();
+    if (
+      currentUser != null && currentUser.equals(auction.getSellerUsername())
+    ) {
+      // Redirect seller to auction management view
+      redirectSellerToManagement(auction);
+      return;
+    }
+
     applyAuction(auction);
     loadThumbnails(auction.getId());
     startPolling(auction.getId());
@@ -252,7 +265,7 @@ public class AuctionDetailController {
           }
         } catch (Exception ignored) {}
       },
-      2
+      1 // Update every second for timer
     );
   }
 
@@ -271,6 +284,35 @@ public class AuctionDetailController {
       }
     } catch (Exception e) {
       bidStatusLabel.setText("Refresh failed: " + e.getMessage());
+    }
+  }
+
+  private void redirectSellerToManagement(AuctionItem auction) {
+    try {
+      // Redirect to user dashboard where the seller can manage their auction
+      ClientContext ctx = ClientContext.getInstance();
+      ctx.setPreviousViewName("user_dashboard.fxml");
+      ctx.setCurrentAuctionId(auction.getId());
+
+      // Show a message in the dashboard
+      UserDashboardController dashboardController =
+        (UserDashboardController) ctx
+          .getViewLoader()
+          .loadView("user_dashboard.fxml");
+
+      // You might want to add a specific message or highlight
+      // For now, we'll just redirect to the dashboard
+
+      // Set a status message about the seller redirection
+      if (dashboardController != null) {
+        // This could be enhanced to show a specific message
+        // dashboardController.showSellerManagementMessage(auction);
+      }
+    } catch (Exception e) {
+      // Fallback to showing an error message if navigation fails
+      if (bidStatusLabel != null) {
+        bidStatusLabel.setText("Error: Unable to load management view.");
+      }
     }
   }
 
@@ -393,20 +435,32 @@ public class AuctionDetailController {
 
   private String formatTimeLeft(String iso) {
     try {
+      java.time.Instant endTime = java.time.Instant.parse(iso);
       java.time.Duration duration = java.time.Duration.between(
         java.time.Instant.now(),
-        java.time.Instant.parse(iso)
+        endTime
       );
+
       if (duration.isNegative() || duration.isZero()) {
         return "Ended";
       }
-      return String.format(
-        "%02dh %02dm",
-        duration.toHours(),
-        duration.toMinutesPart()
-      );
+
+      long days = duration.toDays();
+      long hours = duration.toHoursPart();
+      long minutes = duration.toMinutesPart();
+      long seconds = duration.toSecondsPart();
+
+      if (days > 0) {
+        return String.format("%dd %02dh %02dm", days, hours, minutes);
+      } else if (hours > 0) {
+        return String.format("%02dh %02dm %02ds", hours, minutes, seconds);
+      } else if (minutes > 0) {
+        return String.format("%02dm %02ds", minutes, seconds);
+      } else {
+        return String.format("%02ds", seconds);
+      }
     } catch (Exception e) {
-      return "--:--";
+      return "--:--:--";
     }
   }
 

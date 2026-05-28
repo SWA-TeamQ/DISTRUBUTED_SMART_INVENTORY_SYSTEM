@@ -1,9 +1,11 @@
 package com.auction.client.util;
 
-import com.auction.shared.Constants;
-import com.auction.shared.models.AuctionItem;
 import java.time.Duration;
 import java.time.Instant;
+
+import com.auction.shared.Constants;
+import com.auction.shared.models.AuctionItem;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -304,6 +306,41 @@ public final class MockDataGenerator {
     );
 
     return items;
+  }
+
+  private static AuctionItem createAuction(
+    int id,
+    String title,
+    String description,
+    String category,
+    long startingPriceCents,
+    long currentBidCents,
+    String highestBidder,
+    String seller,
+    String status,
+    Instant startTime,
+    Instant endTime,
+    String img1,
+    String img2,
+    String img3
+  ) {
+    return createAuction(
+      id,
+      title,
+      description,
+      category,
+      startingPriceCents,
+      currentBidCents,
+      highestBidder,
+      seller,
+      status,
+      startTime,
+      endTime,
+      null,
+      img1,
+      img2,
+      img3
+    );
   }
 
   private static AuctionItem createAuction(

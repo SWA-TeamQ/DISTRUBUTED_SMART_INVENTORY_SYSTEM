@@ -3,6 +3,9 @@ target/
 build/
 dist/
 
+# Maven installation (use wrapper instead)
+apache-maven-3.9.9/
+
 # Compiled class file
 *.class
 *agent*
@@ -53,11 +56,22 @@ replay_pid*
 # Maven
 .m2/
 maven-repo/
+dependency-reduced-pom.xml
 
 # Node (if used for frontend)
 node_modules/
 npm-debug.log
 yarn-error.log
+
+# Runtime data
+data/
+exports/
+*.db
+*.sqlite
+*.csv
+
+# Dev notes (AI agents, design docs, scratch)
+.dev-notes/
 
 # Misc
 *.tmp

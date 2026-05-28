@@ -1,10 +1,5 @@
 package com.auction.client.controllers;
 
-import com.auction.client.core.ClientContext;
-import com.auction.client.service.PollingService;
-import com.auction.client.service.ThumbnailExecutor;
-import com.auction.client.state.AuctionUiState;
-import com.auction.shared.models.AuctionItem;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,9 +9,18 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.auction.client.core.ClientContext;
+import com.auction.client.service.PollingService;
+import com.auction.client.service.ThumbnailExecutor;
+import com.auction.client.state.AuctionUiState;
+import com.auction.shared.models.AuctionItem;
+
+import atlantafx.base.theme.Styles;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -202,7 +206,7 @@ public class GalleryController {
     seller.getStyleClass().add("section-copy");
 
     HBox buttonBox = new HBox(8);
-    buttonBox.setAlignment(CENTER_LEFT);
+    buttonBox.setAlignment(Pos.CENTER_LEFT);
 
     Button openButton = new Button("View");
     openButton.getStyleClass().addAll(Styles.FLAT, "secondary-button");

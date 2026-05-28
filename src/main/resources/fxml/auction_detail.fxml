@@ -20,50 +20,64 @@
         <HBox spacing="16" alignment="CENTER_LEFT" styleClass="page-header">
             <VBox spacing="4" HBox.hgrow="ALWAYS">
                 <Label fx:id="titleLabel" text="Auction Detail" styleClass="page-title" />
-                <Label fx:id="subtitleLabel" text="Auction details, thumbnails, and live bidding live here." styleClass="page-subtitle" wrapText="true" />
+                <Label fx:id="subtitleLabel" text="View auction details, browse thumbnails, and place live bids." styleClass="page-subtitle" wrapText="true" />
             </VBox>
             <Button fx:id="backButton" text="Back" onAction="#handleBackToPreviousView" styleClass="secondary-button" />
         </HBox>
     </top>
 
     <center>
-        <VBox spacing="16" styleClass="main-stack">
-            <HBox spacing="16" VBox.vgrow="ALWAYS">
-                <VBox spacing="12" styleClass="panel-card" HBox.hgrow="ALWAYS">
+        <VBox spacing="20" styleClass="main-stack">
+            <HBox spacing="20" VBox.vgrow="ALWAYS">
+                <!-- Left Column - Media -->
+                <VBox spacing="16" styleClass="panel-card" HBox.hgrow="ALWAYS">
                     <Label text="Media" styleClass="section-title" />
-                    <VBox styleClass="hero-card" prefHeight="360" VBox.vgrow="ALWAYS">
-                        <ImageView fx:id="heroImageView" fitWidth="720" fitHeight="360" preserveRatio="true" pickOnBounds="true" />
+                    <VBox styleClass="hero-card" prefHeight="400" VBox.vgrow="ALWAYS">
+                        <ImageView fx:id="heroImageView" fitWidth="720" fitHeight="400" preserveRatio="true" pickOnBounds="true" style="-fx-background-color: #f8f9fa; -fx-border-radius: 8; -fx-background-radius: 8;" />
                     </VBox>
                     <Label text="Thumbnails" styleClass="section-copy" />
                     <ListView fx:id="thumbnailListView" prefHeight="120" />
                 </VBox>
 
-                <VBox spacing="12" styleClass="panel-card" prefWidth="420" maxWidth="420">
-                    <HBox spacing="10" alignment="CENTER_LEFT">
+                <!-- Right Column - Auction Info -->
+                <VBox spacing="16" styleClass="panel-card" prefWidth="420" maxWidth="420">
+                    <!-- Status and Timer Row -->
+                    <HBox spacing="12" alignment="CENTER_LEFT">
                         <Label fx:id="statusLabel" text="ACTIVE" styleClass="status-chip status-chip-success" />
                         <Region HBox.hgrow="ALWAYS" />
-                        <Label fx:id="timeLeftLabel" text="--:--" styleClass="status-chip status-chip-accent" />
+                        <Label fx:id="timeLeftLabel" text="--:--:--" styleClass="status-chip status-chip-accent" style="-fx-font-weight: 600; -fx-font-size: 14px;" />
                     </HBox>
 
-                    <Label fx:id="sellerLabel" text="Seller: -" styleClass="section-copy" />
-                    <Label fx:id="highestBidderLabel" text="Highest bidder: -" styleClass="section-copy" />
+                    <!-- Seller and Bidder Info -->
+                    <VBox spacing="8" styleClass="info-card">
+                        <Label fx:id="sellerLabel" text="Seller: -" styleClass="section-copy" />
+                        <Label fx:id="highestBidderLabel" text="Highest bidder: -" styleClass="section-copy" />
+                    </VBox>
 
-                    <VBox spacing="8" styleClass="hero-card">
-                        <Label text="Current Highest Bid" styleClass="section-title" />
-                        <Label fx:id="currentHighestBidLabel" text="ETB 0.00" styleClass="metric-value" />
+                    <!-- Current Bid Section -->
+                    <VBox spacing="8" styleClass="bid-card">
+                        <HBox spacing="8" alignment="CENTER_LEFT">
+                            <Label text="Current Highest Bid" styleClass="section-title" />
+                            <Region HBox.hgrow="ALWAYS" />
+                            <Label fx:id="currentHighestBidLabel" text="ETB 0.00" styleClass="metric-value" style="-fx-font-size: 24px; -fx-font-weight: 700;" />
+                        </HBox>
                         <Label fx:id="minimumBidLabel" text="Minimum next bid: ETB 0.00" styleClass="section-copy" wrapText="true" />
                     </VBox>
 
-                    <VBox spacing="8" styleClass="hero-card">
+                    <!-- Place Bid Section -->
+                    <VBox spacing="8" styleClass="bid-card">
                         <Label text="Place Bid" styleClass="section-title" />
-                        <TextField fx:id="bidAmountField" promptText="Enter amount" styleClass="compact-field" />
-                        <Button fx:id="placeBidButton" text="Place Bid" onAction="#handlePlaceBid" styleClass="primary-button" maxWidth="Infinity" />
+                        <TextField fx:id="bidAmountField" promptText="Enter bid amount" styleClass="field" />
+                        <Button fx:id="placeBidButton" text="Place Bid" onAction="#handlePlaceBid" styleClass="accent-button" maxWidth="Infinity" />
                         <Label fx:id="bidStatusLabel" text="" styleClass="section-copy" wrapText="true" />
                     </VBox>
 
-                    <VBox spacing="8" styleClass="hero-card">
+                    <!-- Description Section -->
+                    <VBox spacing="8" styleClass="description-card">
                         <Label text="Description" styleClass="section-title" />
-                        <Label fx:id="descriptionLabel" text="-" wrapText="true" styleClass="section-copy" />
+                        <ScrollPane styleClass="scroll-pane" fitToWidth="true" prefHeight="150">
+                            <Label fx:id="descriptionLabel" text="-" wrapText="true" styleClass="section-copy" />
+                        </ScrollPane>
                     </VBox>
                 </VBox>
             </HBox>
