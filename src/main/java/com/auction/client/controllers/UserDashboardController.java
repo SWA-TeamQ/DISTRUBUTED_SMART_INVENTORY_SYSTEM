@@ -114,6 +114,7 @@ public class UserDashboardController {
   private java.util.List<com.auction.shared.models.AuctionItem> allMyListings = java.util.List.of();
 
   private Integer editingAuctionId = null;
+  private Integer reschedulingAuctionId = null;
 
   private byte[] img1Bytes;
   private byte[] img2Bytes;
@@ -244,13 +245,27 @@ public class UserDashboardController {
 
   private void updateEditMode(boolean editing, Integer auctionId) {
     editingAuctionId = editing ? auctionId : null;
+    if (editing) {
+      reschedulingAuctionId = null;
+    }
     if (createAuctionButton != null) {
-      createAuctionButton.setText(editing ? "Save Changes" : "Create Auction");
+      createAuctionButton.setText(editing ? "Save Changes" : reschedulingAuctionId != null ? "Create Rescheduled Auction" : "Create Auction");
+    }
+  }
+
+  private void updateRescheduleMode(boolean rescheduling, Integer auctionId) {
+    reschedulingAuctionId = rescheduling ? auctionId : null;
+    if (rescheduling) {
+      editingAuctionId = null;
+    }
+    if (createAuctionButton != null) {
+      createAuctionButton.setText(rescheduling ? "Create Rescheduled Auction" : editingAuctionId != null ? "Save Changes" : "Create Auction");
     }
   }
 
   private void clearEditMode() {
     updateEditMode(false, null);
+    updateRescheduleMode(false, null);
     clearAuctionForm();
     if (statusLabel != null) statusLabel.setText("Edit cancelled.");
   }
@@ -308,6 +323,16 @@ public class UserDashboardController {
       imagesLabel.setText("Current images retained unless changed.");
     }
     img1Bytes = img2Bytes = img3Bytes = null;
+  }
+
+  private void populateRescheduleForm(com.auction.shared.models.AuctionItem item) {
+    populateEditForm(item);
+    if (statusLabel != null) {
+      statusLabel.setText("Reschedule mode: update details and choose a new start/end time.");
+    }
+    if (createAuctionButton != null) {
+      createAuctionButton.setText("Create Rescheduled Auction");
+    }
   }
 
   private com.auction.shared.models.AuctionItem buildAuctionFromForm() {
@@ -517,34 +542,81 @@ public class UserDashboardController {
         item.setStartMode(com.auction.shared.Constants.START_MODE_AUTO);
       }
 
+      if (reschedulingAuctionId != null) {
+        java.time.Instant now = java.time.Instant.now();
+        java.time.Instant startInstant = java.time.Instant.parse(item.getStartTime());
+        if (!startInstant.isAfter(now)) {
+          statusLabel.setText("Rescheduled auction start time must be in the future.");
+          return;
+        }
+        item.setStatus(com.auction.shared.Constants.STATUS_SCHEDULED);
+        item.setRelistedFrom(reschedulingAuctionId);
+      }
+
       if (editingAuctionId != null) {
         com.auction.client.core.ClientContext context = com.auction.client.core.ClientContext.getInstance();
         context.getRmiProvider().getService().updateAuction(editingAuctionId, item, img1Bytes, img2Bytes, img3Bytes, context.getSessionToken());
         statusLabel.setText("Updated auction #" + editingAuctionId);
       } else {
-        com.auction.client.core.ClientContext context =
-          com.auction.client.core.ClientContext.getInstance();
-        int id = context
-          .getRmiProvider()
-          .getService()
-          .createAuction(
-            item,
-            img1Bytes,
-            img2Bytes,
-            img3Bytes,
-            context.getSessionToken()
-          );
-        statusLabel.setText("Created auction #" + id);
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Auction Created");
-        alert.setHeaderText("Auction created successfully");
-        alert.setContentText("Your auction #" + id + " is ready.");
-        alert.showAndWait();
-        refreshDashboard();
-        selectCreatedAuction(id);
+          com.auction.client.core.ClientContext context = com.auction.client.core.ClientContext.getInstance();
+          com.auction.shared.interfaces.IAuctionService service = context.getRmiProvider().getService();
 
-        clearAuctionForm();
-        return;
+          if (reschedulingAuctionId != null) {
+            // Use server-side relist to copy parent image paths (preserves images),
+            // then update the newly created child with any changed fields or newly provided images.
+            service.relistAuction(reschedulingAuctionId, item.getEndTime(), context.getSessionToken());
+
+            // Find the newly created child auction by matching relistedFrom and seller.
+            java.util.List<com.auction.shared.models.AuctionItem> all = service.getAllAuctions();
+            com.auction.shared.models.AuctionItem child = all.stream()
+              .filter(a -> a != null && a.getRelistedFrom() != null && a.getRelistedFrom() == reschedulingAuctionId && context.getUsername().equalsIgnoreCase(a.getSellerUsername()))
+              .max(java.util.Comparator.comparingInt(a -> a.getId()))
+              .orElse(null);
+
+            if (child == null) {
+              statusLabel.setText("Reschedule succeeded but could not locate new auction.");
+              refreshDashboard();
+              updateRescheduleMode(false, null);
+              clearAuctionForm();
+              return;
+            }
+
+            int newId = child.getId();
+            // Push any field edits and image replacements to the newly created scheduled auction.
+            service.updateAuction(newId, item, img1Bytes, img2Bytes, img3Bytes, context.getSessionToken());
+
+            statusLabel.setText("Created rescheduled auction #" + newId);
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Auction Created");
+            alert.setHeaderText("Rescheduled auction created successfully");
+            alert.setContentText("Your rescheduled auction #" + newId + " is ready.");
+            alert.showAndWait();
+            refreshDashboard();
+            selectCreatedAuction(newId);
+
+            updateRescheduleMode(false, null);
+            clearAuctionForm();
+            return;
+          } else {
+            int id = service.createAuction(
+              item,
+              img1Bytes,
+              img2Bytes,
+              img3Bytes,
+              context.getSessionToken()
+            );
+            statusLabel.setText("Created auction #" + id);
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Auction Created");
+            alert.setHeaderText("Auction created successfully");
+            alert.setContentText("Your auction #" + id + " is ready.");
+            alert.showAndWait();
+            refreshDashboard();
+            selectCreatedAuction(id);
+
+            clearAuctionForm();
+            return;
+          }
       }
 
       refreshDashboard();
@@ -582,24 +654,20 @@ public class UserDashboardController {
       .getSelectionModel()
       .getSelectedItem();
     if (selected != null) {
-      try {
-        java.time.Instant newEnd = java.time.Instant.now().plus(
-          java.time.Duration.ofDays(1)
-        );
-        com.auction.client.core.ClientContext context =
-          com.auction.client.core.ClientContext.getInstance();
-        context
-          .getRmiProvider()
-          .getService()
-          .relistAuction(
-            selected.getId(),
-            newEnd.toString(),
-            context.getSessionToken()
-          );
-        refreshDashboard();
-      } catch (Exception e) {
-        statusLabel.setText("Relist failed: " + e.getMessage());
+      if (!com.auction.shared.Constants.STATUS_CANCELLED.equalsIgnoreCase(selected.getStatus()) &&
+          !com.auction.shared.Constants.STATUS_EXPIRED.equalsIgnoreCase(selected.getStatus())) {
+        if (statusLabel != null) statusLabel.setText("Only cancelled or expired listings can be rescheduled.");
+        return;
       }
+
+      if (selected.getSellerUsername() != null && !selected.getSellerUsername().equalsIgnoreCase(com.auction.client.core.ClientContext.getInstance().getUsername())) {
+        if (statusLabel != null) statusLabel.setText("You can only reschedule your own listings.");
+        return;
+      }
+
+      populateRescheduleForm(selected);
+      updateRescheduleMode(true, selected.getId());
+      if (statusLabel != null) statusLabel.setText("Rescheduling listing #" + selected.getId());
     }
   }
 
@@ -794,6 +862,16 @@ public class UserDashboardController {
       items = myListingsTable.getItems();
       if (items != null) {
         for (com.auction.shared.models.AuctionItem item : items) {
+          if (item != null && item.getId() == id) {
+            myListingsTable.getSelectionModel().select(item);
+            myListingsTable.scrollTo(item);
+            return;
+          }
+        }
+      }
+
+      if (allMyListings != null) {
+        for (com.auction.shared.models.AuctionItem item : allMyListings) {
           if (item != null && item.getId() == id) {
             myListingsTable.getSelectionModel().select(item);
             myListingsTable.scrollTo(item);

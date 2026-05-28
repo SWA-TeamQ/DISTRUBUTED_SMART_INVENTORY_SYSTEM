@@ -228,6 +228,10 @@ public class AuctionManager {
                 if (!item.getSellerUsername().equals(user.username()) && !Constants.ADMIN.equals(user.role())) {
                     throw new AuctionException("Only the seller or an admin can cancel this auction");
                 }
+
+                if (!Constants.STATUS_ACTIVE.equals(item.getStatus())) {
+                    throw new AuctionException("Only active auctions can be cancelled before bidding starts");
+                }
                 
                 if (bidRepo.countBidsByAuctionId(auctionId) > 0) {
                     throw new AuctionException("Cannot cancel auction with active bids");
@@ -253,18 +257,19 @@ public class AuctionManager {
                     throw new AuctionException("Only the seller or an admin can relist this auction");
                 }
 
-                if (!Constants.STATUS_EXPIRED.equals(parent.getStatus())) {
-                    throw new AuctionException("Only expired auctions can be relisted");
-                }
-
-                if (bidRepo.countBidsByAuctionId(auctionId) > 0) {
-                    throw new AuctionException("Cannot relist an auction that has bids");
+                if (!Constants.STATUS_EXPIRED.equals(parent.getStatus()) && !Constants.STATUS_CANCELLED.equals(parent.getStatus())) {
+                    throw new AuctionException("Only cancelled or expired auctions can be relisted");
                 }
 
                 Instant now = Instant.now();
                 Instant newEndTime = Instant.parse(newEndTimeIso);
                 if (!newEndTime.isAfter(now)) {
                     throw new AuctionException("New end time must be in the future");
+                }
+
+                Instant newStartTime = now.plus(Duration.ofMinutes(5));
+                if (!newEndTime.isAfter(newStartTime)) {
+                    throw new AuctionException("New end time must be after the new start time");
                 }
 
                 AuctionItem child = new AuctionItem();
@@ -274,11 +279,11 @@ public class AuctionManager {
                 child.setStartingPriceCents(parent.getStartingPriceCents());
                 child.setCurrentBidCents(parent.getStartingPriceCents());
                 child.setSellerUsername(parent.getSellerUsername());
-                child.setStartTime(now.toString());
+                child.setStartTime(newStartTime.toString());
                 child.setEndTime(newEndTimeIso);
                 child.setCapEndTime(newEndTime.plus(Duration.ofMinutes(Constants.SNIPE_CAP_DEFAULT_MINUTES)).toString());
-                child.setStatus(Constants.STATUS_ACTIVE);
-                child.setStartMode(Constants.START_MODE_AUTO);
+                child.setStatus(Constants.STATUS_SCHEDULED);
+                child.setStartMode(Constants.START_MODE_MANUAL);
                 child.setImg1(parent.getImg1());
                 child.setImg2(parent.getImg2());
                 child.setImg3(parent.getImg3());
