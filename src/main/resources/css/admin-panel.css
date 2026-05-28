@@ -270,3 +270,101 @@
 .scroll-pane .corner {
     -fx-background-color: transparent;
 }
+
+/* TabPane – dark theme matching admin shell */
+.admin-tab-pane {
+    -fx-background-color: transparent;
+    -fx-tab-min-height: 42px;
+    -fx-tab-max-height: 42px;
+}
+
+.admin-tab-pane > .tab-header-area {
+    -fx-padding: 0 0 0 12;
+}
+
+.admin-tab-pane > .tab-header-area > .headers-region > .tab {
+    -fx-background-color: #0b0f15;
+    -fx-background-radius: 10px 10px 0 0;
+    -fx-border-color: #30363d;
+    -fx-border-width: 1px 1px 0 1px;
+    -fx-padding: 8px 18px;
+}
+
+.admin-tab-pane > .tab-header-area > .headers-region > .tab:selected {
+    -fx-background-color: #161b22;
+    -fx-border-color: #58a6ff #30363d transparent #30363d;
+}
+
+.admin-tab-pane > .tab-header-area > .headers-region > .tab .tab-label {
+    -fx-text-fill: #8b949e;
+    -fx-font-weight: 700;
+    -fx-font-family: 'Inter';
+    -fx-font-size: 13px;
+}
+
+.admin-tab-pane > .tab-header-area > .headers-region > .tab:selected .tab-label {
+    -fx-text-fill: #f0f6fc;
+}
+
+.admin-tab-pane > .tab-header-area > .tab-header-background {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent #30363d transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.admin-tab-pane > .tab-content-area {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+/* Auction table – inherits users-table look */
+.auction-table {
+    -fx-background-color: #0b0f15;
+    -fx-background-radius: 14px;
+    -fx-border-color: #30363d;
+    -fx-border-radius: 14px;
+    -fx-border-width: 1px;
+}
+
+.auction-table .column-header-background {
+    -fx-background-color: linear-gradient(to bottom, #161b22, #0f1318);
+    -fx-background-radius: 14px 14px 0 0;
+}
+
+.auction-table .column-header,
+.auction-table .filler {
+    -fx-background-color: transparent;
+    -fx-border-color: rgba(48, 54, 61, 0.8);
+    -fx-border-width: 0 0 1 0;
+}
+
+.auction-table .column-header .label {
+    -fx-text-fill: #c9d1d9;
+    -fx-font-weight: 700;
+    -fx-font-family: 'Inter';
+}
+
+.auction-table .table-row-cell {
+    -fx-background-color: #0b0f15;
+    -fx-border-color: rgba(48, 54, 61, 0.55);
+}
+
+.auction-table .table-row-cell:filled:hover {
+    -fx-background-color: rgba(88, 166, 255, 0.08);
+}
+
+.auction-table .table-row-cell:filled:selected {
+    -fx-background-color: rgba(88, 166, 255, 0.16);
+}
+
+.auction-table .table-cell {
+    -fx-text-fill: #c9d1d9;
+    -fx-font-family: 'Inter';
+    -fx-border-color: rgba(48, 54, 61, 0.35);
+}
+
+/* Thumbnail images inside table cells */
+.image-thumb {
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 6, 0, 0, 2);
+}

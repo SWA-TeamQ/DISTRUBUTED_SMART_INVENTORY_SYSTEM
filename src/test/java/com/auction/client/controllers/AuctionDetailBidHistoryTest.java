@@ -28,6 +28,7 @@ public class AuctionDetailBidHistoryTest {
             @Override public void logout(String token) {}
             @Override public String serverTime() { return null; }
             @Override public java.util.List<com.auction.shared.models.AuctionItem> getActiveAuctions() { return null; }
+            @Override public java.util.List<com.auction.shared.models.AuctionItem> getAllAuctions() { return java.util.List.of(); }
             @Override public java.util.List<com.auction.shared.models.AuctionItem> getActiveAuctionsBySeller(String sellerUsername, String token) { return null; }
             @Override public com.auction.shared.models.AuctionItem getAuctionById(int auctionId) { return null; }
             @Override
@@ -47,6 +48,7 @@ public class AuctionDetailBidHistoryTest {
             @Override public int createAuction(com.auction.shared.models.AuctionItem item, byte[] image1, byte[] image2, byte[] image3, String token) { return 0; }
             @Override public void cancelAuction(int auctionId, String token) {}
             @Override public void relistAuction(int auctionId, String newEndTimeIso, String token) {}
+            @Override public void startAuction(int auctionId, String token) {}
         }
         FakeService fake = new FakeService();
 

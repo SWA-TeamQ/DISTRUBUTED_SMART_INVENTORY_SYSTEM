@@ -42,6 +42,7 @@ public class AuctionDetailLazyThumbTest {
             @Override public void logout(String token) {}
             @Override public String serverTime() { return Instant.now().toString(); }
             @Override public List<AuctionItem> getActiveAuctions() { return List.of(); }
+            @Override public List<AuctionItem> getAllAuctions() { return List.of(); }
             @Override public List<AuctionItem> searchActiveAuctions(String query, String category, String sortBy) { return List.of(); }
             @Override public List<AuctionItem> getActiveAuctionsBySeller(String sellerUsername, String token) { return List.of(); }
             @Override public AuctionItem getAuctionById(int auctionId) {
@@ -132,6 +133,7 @@ public class AuctionDetailLazyThumbTest {
             @Override public void logout(String token) {}
             @Override public String serverTime() { return Instant.now().toString(); }
             @Override public List<AuctionItem> getActiveAuctions() { return List.of(); }
+            @Override public List<AuctionItem> getAllAuctions() { return List.of(); }
             @Override public List<AuctionItem> searchActiveAuctions(String query, String category, String sortBy) { return List.of(); }
             @Override public List<AuctionItem> getActiveAuctionsBySeller(String sellerUsername, String token) { return List.of(); }
             @Override public AuctionItem getAuctionById(int auctionId) {
@@ -209,6 +211,7 @@ public class AuctionDetailLazyThumbTest {
             @Override public void logout(String token) {}
             @Override public String serverTime() { return Instant.now().toString(); }
             @Override public List<AuctionItem> getActiveAuctions() { return List.of(); }
+            @Override public List<AuctionItem> getAllAuctions() { return List.of(); }
             @Override public List<AuctionItem> searchActiveAuctions(String query, String category, String sortBy) { return List.of(); }
             @Override public List<AuctionItem> getActiveAuctionsBySeller(String sellerUsername, String token) { return List.of(); }
             @Override public AuctionItem getAuctionById(int auctionId) {
@@ -282,6 +285,7 @@ public class AuctionDetailLazyThumbTest {
             @Override public void logout(String token) {}
             @Override public String serverTime() { return Instant.now().toString(); }
             @Override public List<AuctionItem> getActiveAuctions() { return List.of(); }
+            @Override public List<AuctionItem> getAllAuctions() { return List.of(); }
             @Override public List<AuctionItem> searchActiveAuctions(String query, String category, String sortBy) { return List.of(); }
             @Override public List<AuctionItem> getActiveAuctionsBySeller(String sellerUsername, String token) { return List.of(); }
             @Override public AuctionItem getAuctionById(int auctionId) {

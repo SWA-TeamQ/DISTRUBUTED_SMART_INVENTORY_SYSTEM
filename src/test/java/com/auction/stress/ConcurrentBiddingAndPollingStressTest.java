@@ -156,12 +156,14 @@ class ConcurrentBiddingAndPollingStressTest {
             @Override public void logout(String token) { throw new UnsupportedOperationException(); }
             @Override public String serverTime() { throw new UnsupportedOperationException(); }
             @Override public List<AuctionItem> getActiveAuctions() { throw new UnsupportedOperationException(); }
+            @Override public List<AuctionItem> getAllAuctions() { throw new UnsupportedOperationException(); }
             @Override public List<AuctionItem> getActiveAuctionsBySeller(String sellerUsername, String token) { throw new UnsupportedOperationException(); }
             @Override public void placeBid(int auctionId, long amountCents, long clientExpectedPriceCents, String token) { throw new UnsupportedOperationException(); }
             @Override public List<Bid> getBidHistory(int auctionId) { throw new UnsupportedOperationException(); }
             @Override public int createAuction(AuctionItem item, byte[] image1, byte[] image2, byte[] image3, String token) { throw new UnsupportedOperationException(); }
             @Override public void cancelAuction(int auctionId, String token) { throw new UnsupportedOperationException(); }
             @Override public void relistAuction(int auctionId, String newEndTimeIso, String token) { throw new UnsupportedOperationException(); }
+            @Override public void startAuction(int auctionId, String token) { throw new UnsupportedOperationException(); }
             @Override public List<Bid> getMyBids(String token) { throw new UnsupportedOperationException(); }
             @Override public List<AuctionItem> getMyWonAuctions(String token) { throw new UnsupportedOperationException(); }
             @Override public byte[] getThumbnail(int auctionId, int imageIndex) { throw new UnsupportedOperationException(); }

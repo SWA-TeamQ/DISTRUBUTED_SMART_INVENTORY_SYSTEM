@@ -35,6 +35,7 @@ public class GalleryControllerCategorySortTest {
                 AuctionItem a3 = new AuctionItem(3, "A3", "d", "CAT1", 1200L, "s", "2026-01-01T00:00:00Z", "2026-11-01T00:00:00Z", null);
                 return List.of(a1, a2, a3);
             }
+            @Override public List<AuctionItem> getAllAuctions() { return List.of(); }
             @Override public List<AuctionItem> getActiveAuctionsBySeller(String sellerUsername, String token) { return null; }
             @Override public AuctionItem getAuctionById(int auctionId) { return null; }
             @Override public java.util.List<com.auction.shared.models.Bid> getBidHistory(int auctionId) { return null; }
@@ -51,6 +52,7 @@ public class GalleryControllerCategorySortTest {
             @Override public int createAuction(AuctionItem item, byte[] image1, byte[] image2, byte[] image3, String token) { return 0; }
             @Override public void cancelAuction(int auctionId, String token) {}
             @Override public void relistAuction(int auctionId, String newEndTimeIso, String token) {}
+            @Override public void startAuction(int auctionId, String token) {}
         }
         FakeService fake = new FakeService();
 

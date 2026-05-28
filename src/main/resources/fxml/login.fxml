@@ -32,7 +32,7 @@
 
         <VBox styleClass="login-card" spacing="14">
             <VBox styleClass="form-group" spacing="6">
-                <Label text="Terminal ID" styleClass="form-label"/>
+                <Label text="Username" styleClass="form-label"/>
                 <HBox alignment="CENTER_LEFT" spacing="10" styleClass="input-field">
                     <FontIcon iconLiteral="fas-user" styleClass="input-icon"/>
                     <TextField fx:id="usernameField" promptText="Enter your ID" HBox.hgrow="ALWAYS" style="-fx-background-color: transparent; -fx-padding: 0;"/>
@@ -40,7 +40,7 @@
             </VBox>
 
             <VBox styleClass="form-group" spacing="6">
-                <Label text="Passkey" styleClass="form-label"/>
+                <Label text="Password" styleClass="form-label"/>
                 <HBox alignment="CENTER_LEFT" spacing="10" styleClass="input-field">
                     <FontIcon iconLiteral="fas-lock" styleClass="input-icon"/>
                     <PasswordField fx:id="passwordField" promptText="••••••••" HBox.hgrow="ALWAYS" style="-fx-background-color: transparent; -fx-padding: 0;"/>
