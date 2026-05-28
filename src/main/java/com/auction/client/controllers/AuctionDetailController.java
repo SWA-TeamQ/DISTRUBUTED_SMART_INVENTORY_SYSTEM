@@ -250,6 +250,7 @@ public class AuctionDetailController {
 
   private void startPolling(int auctionId) {
     pollingService = new PollingService();
+    ClientContext.getInstance().setActivePollingService(pollingService);
     pollingService.startPolling(
       () -> {
         try {
@@ -505,6 +506,7 @@ public class AuctionDetailController {
     if (pollingService != null) {
       pollingService.shutdown();
     }
+    ClientContext.getInstance().clearActivePollingService();
   }
 
   private static Image loadPlaceholder() {

@@ -2,6 +2,7 @@ package com.auction.client.core;
 
 import com.auction.client.network.RmiClientProvider;
 import com.auction.client.network.UdpDiscoveryClient;
+import com.auction.client.service.PollingService;
 import com.auction.client.ui.ViewLoader;
 
 public class ClientContext {
@@ -15,6 +16,7 @@ public class ClientContext {
     private String username;
     private String previousViewName;
     private int currentAuctionId = -1;
+    private PollingService activePollingService;
 
     private ClientContext() {
         rmiProvider = new RmiClientProvider();
@@ -45,11 +47,31 @@ public class ClientContext {
     public int getCurrentAuctionId() { return currentAuctionId; }
     public void setCurrentAuctionId(int currentAuctionId) { this.currentAuctionId = currentAuctionId; }
 
+    public void setActivePollingService(PollingService service) {
+        this.activePollingService = service;
+    }
+
+    public void clearActivePollingService() {
+        if (this.activePollingService != null) {
+            this.activePollingService.shutdown();
+            this.activePollingService = null;
+        }
+    }
+
     public void clearSession() {
         this.sessionToken = null;
         this.userRole = null;
         this.username = null;
         this.previousViewName = null;
+    }
+
+    public void shutdown() {
+        if (activePollingService != null) {
+            activePollingService.shutdown();
+            activePollingService = null;
+        }
+        udpClient.stopListening();
+        rmiProvider.reset();
     }
 
     public void handleConnectionLost() {

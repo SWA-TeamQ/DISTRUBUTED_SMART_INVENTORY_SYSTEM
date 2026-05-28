@@ -73,6 +73,7 @@ public class GalleryController {
     }
 
     pollingService = new PollingService();
+    ClientContext.getInstance().setActivePollingService(pollingService);
     pollingService.startPolling(
       () -> Platform.runLater(this::refreshAuctions),
       2
@@ -309,6 +310,7 @@ public class GalleryController {
     if (pollingService != null) {
       pollingService.shutdown();
     }
+    ClientContext.getInstance().clearActivePollingService();
   }
 
   private static Image loadPlaceholder() {

@@ -1,9 +1,11 @@
 package com.auction.client;
 
-import javafx.application.Application;
-import javafx.stage.Stage;
+import com.auction.client.core.ClientContext;
+import com.auction.client.service.ThumbnailExecutor;
 
 import atlantafx.base.theme.PrimerDark;
+import javafx.application.Application;
+import javafx.stage.Stage;
 
 /**
  * JavaFX Application entry point.
@@ -16,7 +18,7 @@ public class ClientApp extends Application {
     public void start(Stage primaryStage) throws Exception {
         Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
         com.auction.client.ui.ViewLoader loader = new com.auction.client.ui.ViewLoader(primaryStage);
-        com.auction.client.core.ClientContext.getInstance().setViewLoader(loader);
+        ClientContext.getInstance().setViewLoader(loader);
         loader.loadView("connect.fxml");
         primaryStage.setTitle("RTDAS - Real-Time Distributed Auction System");
         primaryStage.setWidth(800);
@@ -26,6 +28,7 @@ public class ClientApp extends Application {
 
     @Override
     public void stop() {
-        // TODO: cleanup polling threads, close RMI connections
+        ClientContext.getInstance().shutdown();
+        ThumbnailExecutor.shutdown();
     }
 }

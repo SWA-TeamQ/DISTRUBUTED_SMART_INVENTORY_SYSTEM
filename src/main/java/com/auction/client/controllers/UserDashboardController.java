@@ -165,6 +165,7 @@ public class UserDashboardController {
     wonAuctionsTable.setItems(wonAuctions);
 
     pollingService = new PollingService();
+    ClientContext.getInstance().setActivePollingService(pollingService);
     pollingService.startPolling(
       () -> Platform.runLater(this::refreshDashboard),
       2
@@ -597,6 +598,7 @@ public class UserDashboardController {
     if (pollingService != null) {
       pollingService.shutdown();
     }
+    ClientContext.getInstance().clearActivePollingService();
   }
 
   private static Image loadPlaceholder() {
