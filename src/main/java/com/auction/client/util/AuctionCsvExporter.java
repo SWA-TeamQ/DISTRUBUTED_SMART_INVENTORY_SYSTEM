@@ -17,7 +17,7 @@ public final class AuctionCsvExporter {
   public static String toCsv(Collection<AuctionItem> items) {
     StringBuilder builder = new StringBuilder();
     builder.append(
-      "AuctionID,Title,Description,Category,StartingPriceCents,CurrentBidCents,HighestBidder,Seller,Status,StartTime,EndTime,CapEndTime\n"
+      "AuctionID,Title,Description,Category,StartingPrice,CurrentBid,HighestBidder,Seller,Status,StartTime,EndTime,CapEndTime\n"
     );
 
     if (items == null) {
@@ -44,8 +44,8 @@ public final class AuctionCsvExporter {
     builder.append(escape(item.getTitle())).append(',');
     builder.append(escape(item.getDescription())).append(',');
     builder.append(escape(item.getCategory())).append(',');
-    builder.append(item.getStartingPriceCents()).append(',');
-    builder.append(item.getCurrentBidCents()).append(',');
+    builder.append(item.getStartingPriceCents() / 100.0).append(',');
+    builder.append(item.getCurrentBidCents() / 100.0).append(',');
     builder.append(escape(item.getHighestBidderUsername())).append(',');
     builder.append(escape(item.getSellerUsername())).append(',');
     builder.append(escape(item.getStatus())).append(',');
