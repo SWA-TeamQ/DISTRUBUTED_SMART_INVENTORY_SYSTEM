@@ -327,8 +327,30 @@ public class UserDashboardController {
 
   private void populateRescheduleForm(com.auction.shared.models.AuctionItem item) {
     populateEditForm(item);
+    try {
+      java.time.Instant now = java.time.Instant.now();
+      java.time.Instant suggestedStart = now.plus(java.time.Duration.ofMinutes(5));
+      java.time.Duration duration = java.time.Duration.ofHours(1);
+      if (item != null && item.getStartTime() != null && !item.getStartTime().isBlank() && item.getEndTime() != null && !item.getEndTime().isBlank()) {
+        java.time.Duration original = java.time.Duration.between(
+          java.time.Instant.parse(item.getStartTime()),
+          java.time.Instant.parse(item.getEndTime())
+        );
+        if (!original.isNegative() && !original.isZero()) {
+          duration = original;
+        }
+      }
+      java.time.Instant suggestedEnd = suggestedStart.plus(duration);
+      java.time.ZoneId zone = java.time.ZoneId.systemDefault();
+      java.time.LocalDateTime startLocal = java.time.LocalDateTime.ofInstant(suggestedStart, zone);
+      java.time.LocalDateTime endLocal = java.time.LocalDateTime.ofInstant(suggestedEnd, zone);
+      if (startDatePicker != null) startDatePicker.setValue(startLocal.toLocalDate());
+      if (startTimeField != null) startTimeField.setText(startLocal.toLocalTime().withSecond(0).withNano(0).toString());
+      if (endDatePicker != null) endDatePicker.setValue(endLocal.toLocalDate());
+      if (endTimeField != null) endTimeField.setText(endLocal.toLocalTime().withSecond(0).withNano(0).toString());
+    } catch (Exception ignored) {}
     if (statusLabel != null) {
-      statusLabel.setText("Reschedule mode: update details and choose a new start/end time.");
+      statusLabel.setText("Reschedule mode: future start/end suggested. Update if needed.");
     }
     if (createAuctionButton != null) {
       createAuctionButton.setText("Create Rescheduled Auction");
@@ -564,14 +586,26 @@ public class UserDashboardController {
           if (reschedulingAuctionId != null) {
             // Use server-side relist to copy parent image paths (preserves images),
             // then update the newly created child with any changed fields or newly provided images.
-            service.relistAuction(reschedulingAuctionId, item.getEndTime(), context.getSessionToken());
+            java.time.Instant now = java.time.Instant.now();
+            java.time.Instant requestedEnd = java.time.Instant.parse(item.getEndTime());
+            java.time.Instant bootstrapMinEnd = now.plus(java.time.Duration.ofMinutes(6));
+            java.time.Instant bootstrapEnd = requestedEnd.isAfter(bootstrapMinEnd) ? requestedEnd : bootstrapMinEnd;
+            service.relistAuction(reschedulingAuctionId, bootstrapEnd.toString(), context.getSessionToken());
 
             // Find the newly created child auction by matching relistedFrom and seller.
-            java.util.List<com.auction.shared.models.AuctionItem> all = service.getAllAuctions();
-            com.auction.shared.models.AuctionItem child = all.stream()
-              .filter(a -> a != null && a.getRelistedFrom() != null && a.getRelistedFrom() == reschedulingAuctionId && context.getUsername().equalsIgnoreCase(a.getSellerUsername()))
-              .max(java.util.Comparator.comparingInt(a -> a.getId()))
-              .orElse(null);
+            com.auction.shared.models.AuctionItem child = null;
+            // Try a few times to find the newly-created child (small race window)
+            for (int attempt = 0; attempt < 5 && child == null; attempt++) {
+              java.util.List<com.auction.shared.models.AuctionItem> all = service.getAllAuctions();
+              child = all.stream()
+                .filter(a -> a != null && a.getRelistedFrom() != null && context.getUsername().equalsIgnoreCase(a.getSellerUsername())
+                  && (a.getRelistedFrom().equals(reschedulingAuctionId) || a.getRelistedFrom().intValue() == reschedulingAuctionId.intValue()))
+                .max(java.util.Comparator.comparingInt(a -> a.getId()))
+                .orElse(null);
+              if (child == null) {
+                try { Thread.sleep(150); } catch (InterruptedException ignored) {}
+              }
+            }
 
             if (child == null) {
               statusLabel.setText("Reschedule succeeded but could not locate new auction.");
@@ -662,6 +696,13 @@ public class UserDashboardController {
 
       if (selected.getSellerUsername() != null && !selected.getSellerUsername().equalsIgnoreCase(com.auction.client.core.ClientContext.getInstance().getUsername())) {
         if (statusLabel != null) statusLabel.setText("You can only reschedule your own listings.");
+        return;
+      }
+
+      boolean alreadyRelisted = allMyListings != null && allMyListings.stream()
+        .anyMatch(a -> a != null && a.getRelistedFrom() != null && a.getRelistedFrom().intValue() == selected.getId());
+      if (alreadyRelisted) {
+        if (statusLabel != null) statusLabel.setText("This listing was already rescheduled and is kept as history.");
         return;
       }
 

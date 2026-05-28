@@ -261,6 +261,14 @@ public class AuctionManager {
                     throw new AuctionException("Only cancelled or expired auctions can be relisted");
                 }
 
+                boolean alreadyRelisted = auctionRepo
+                    .findAuctionsBySeller(parent.getSellerUsername())
+                    .stream()
+                    .anyMatch(a -> a != null && a.getRelistedFrom() != null && a.getRelistedFrom().intValue() == auctionId);
+                if (alreadyRelisted) {
+                    throw new AuctionException("This auction has already been rescheduled and is kept as history");
+                }
+
                 Instant now = Instant.now();
                 Instant newEndTime = Instant.parse(newEndTimeIso);
                 if (!newEndTime.isAfter(now)) {

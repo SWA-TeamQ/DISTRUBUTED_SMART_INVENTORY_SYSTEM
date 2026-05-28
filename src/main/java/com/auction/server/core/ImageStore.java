@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Deep module for media persistence.
@@ -103,15 +105,40 @@ public class ImageStore {
 
     private byte[] readBytes(String pathStr) {
         if (pathStr == null || pathStr.isEmpty()) return new byte[0];
-        try {
-            Path path = Paths.get(pathStr);
-            if (Files.exists(path)) {
-                return Files.readAllBytes(path);
+        for (Path candidate : resolveReadCandidates(pathStr)) {
+            try {
+                if (Files.exists(candidate)) {
+                    return Files.readAllBytes(candidate);
+                }
+            } catch (IOException e) {
+                System.err.println("Failed to read image: " + candidate);
             }
-        } catch (IOException e) {
-            System.err.println("Failed to read image: " + pathStr);
         }
         return new byte[0];
+    }
+
+    private List<Path> resolveReadCandidates(String pathStr) {
+        List<Path> candidates = new ArrayList<>();
+        Path raw = Paths.get(pathStr);
+        if (raw.isAbsolute()) {
+            candidates.add(raw.normalize());
+            return candidates;
+        }
+
+        Path cwd = Paths.get("").toAbsolutePath().normalize();
+        // Current process directory (normal case)
+        candidates.add(cwd.resolve(pathStr).normalize());
+        // Direct path as-is (legacy relative usage)
+        candidates.add(raw.normalize());
+        // One level above process directory (workspace root when running from project dir)
+        Path parent = cwd.getParent();
+        if (parent != null) {
+            candidates.add(parent.resolve(pathStr).normalize());
+        }
+        // Project subfolder from workspace root (when running server from workspace root)
+        candidates.add(cwd.resolve("Real-Time-Distributed-Auction-System").resolve(pathStr).normalize());
+
+        return candidates;
     }
 
     private String saveToDisk(String baseId, int index, byte[] data) {
@@ -125,7 +152,8 @@ public class ImageStore {
             Path thumbPath = Paths.get(THUMBS_DIR, baseId + "_" + index + "_thumb.jpg");
             Files.write(thumbPath, payload.thumbBytes);
 
-            return path.toString();
+            // Persist absolute paths so image loading is independent of process working directory.
+            return path.toAbsolutePath().normalize().toString();
         } catch (IllegalArgumentException e) {
             System.err.println("Failed to process image for storage: " + e.getMessage());
             return null;
