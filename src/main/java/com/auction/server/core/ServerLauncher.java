@@ -14,6 +14,7 @@ public class ServerLauncher {
       // Ensure RMI advertises a reachable hostname. If the JVM flag is
       // not provided, attempt to auto-detect and set it so clients can
       // connect when the server isn't bound to the loopback address.
+      
       String existing = System.getProperty("java.rmi.server.hostname");
       if (existing == null || existing.isBlank()) {
         try {

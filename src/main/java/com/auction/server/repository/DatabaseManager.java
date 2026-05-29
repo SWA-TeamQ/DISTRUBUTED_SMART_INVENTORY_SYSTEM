@@ -32,7 +32,7 @@ public class DatabaseManager {
         }
 
         bootstrapDirectories();
-        migrateLegacyDatabaseIfNeeded(dbUrl);
+        
         try {
             connection = DriverManager.getConnection(dbUrl);
             try (var stmt = connection.createStatement()) {
@@ -168,31 +168,6 @@ public class DatabaseManager {
 
         } catch (Exception e) {
             System.err.println("[RTDAS] Migration check failed: " + e.getMessage());
-        }
-    }
-
-    private void migrateLegacyDatabaseIfNeeded(String dbUrl) {
-        String sqlitePrefix = "jdbc:sqlite:";
-        if (!dbUrl.startsWith(sqlitePrefix)) {
-            return;
-        }
-
-        String configuredPath = dbUrl.substring(sqlitePrefix.length());
-        if (":memory:".equals(configuredPath)) {
-            return;
-        }
-        Path configuredDbPath = Path.of(configuredPath);
-        Path legacyDbPath = configuredDbPath.resolveSibling("auction.db");
-
-        if (Files.exists(configuredDbPath) || !Files.exists(legacyDbPath)) {
-            return;
-        }
-
-        try {
-            Files.copy(legacyDbPath, configuredDbPath, StandardCopyOption.COPY_ATTRIBUTES);
-            System.out.println("[RTDAS] Migrated legacy database from " + legacyDbPath + " to " + configuredDbPath);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to migrate legacy database", e);
         }
     }
 

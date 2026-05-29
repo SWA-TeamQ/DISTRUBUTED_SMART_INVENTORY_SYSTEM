@@ -1,5 +1,7 @@
 # Final Presentation Classification — Real-Time Distributed Auction System (RTDAS)
 
+> **See also:** [`docs/project-documentation.md`](docs/project-documentation.md) — complete 13-section technical reference with class docs, function docs, concurrency analysis, presentation Q&A, and code quality review.
+
 This version classifies the presentation outline against the current repository state.
 
 ## Legend

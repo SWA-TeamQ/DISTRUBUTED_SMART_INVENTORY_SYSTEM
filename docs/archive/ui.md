@@ -6,14 +6,14 @@ This document provides a concise overview. For full UI/UX specification, see `do
 
 ## Quick Reference
 
-| Screen | Controller | Roles |
-|--------|------------|-------|
-| `connect.fxml` | `ConnectController` | All (pre-login) |
-| `login.fxml` | `LoginController` | All |
-| `gallery.fxml` | `GalleryController` | Authenticated users |
+| Screen                | Controller                | Roles               |
+| --------------------- | ------------------------- | ------------------- |
+| `connect.fxml`        | `ConnectController`       | All (pre-login)     |
+| `login.fxml`          | `LoginController`         | All                 |
+| `gallery.fxml`        | `GalleryController`       | Authenticated users |
 | `auction_detail.fxml` | `AuctionDetailController` | Authenticated users |
 | `user_dashboard.fxml` | `UserDashboardController` | Authenticated users |
-| `admin_panel.fxml` | `AdminPanelController` | Admin |
+| `admin_panel.fxml`    | `AdminPanelController`    | Admin               |
 
 ## Key Interactions
 

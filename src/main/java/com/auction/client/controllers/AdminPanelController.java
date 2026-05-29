@@ -29,7 +29,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuButton;
@@ -59,15 +58,6 @@ public class AdminPanelController {
 
   @FXML
   private VBox contentArea;
-
-  @FXML
-  private TextField usernameField;
-
-  @FXML
-  private PasswordField passwordField;
-
-  @FXML
-  private ComboBox<String> roleCombo;
 
   @FXML
   private Label statusLabel;
@@ -161,11 +151,6 @@ public class AdminPanelController {
   }
 
   @FXML
-  private void handleRefreshUsers() {
-    showUsers();
-  }
-
-  @FXML
   private void handleRefreshAuctions() {
     showAuctions();
   }
@@ -173,36 +158,6 @@ public class AdminPanelController {
   @FXML
   private void handleRefreshLogs() {
     showLogs();
-  }
-
-  @FXML
-  private void handleCreateUser() {
-    try {
-      String username = usernameField == null ? null : usernameField.getText();
-      String password = passwordField == null ? null : passwordField.getText();
-      String role = roleCombo == null ? null : roleCombo.getValue();
-
-      requireService().createUser(
-        username,
-        password,
-        role,
-        ClientContext.getInstance().getSessionToken()
-      );
-      if (usernameField != null) {
-        usernameField.clear();
-      }
-      if (passwordField != null) {
-        passwordField.clear();
-      }
-      updateStatus("User created successfully.");
-      refreshCurrentSection();
-    } catch (AuctionException | java.rmi.RemoteException e) {
-      if (e instanceof java.rmi.RemoteException) {
-        ClientContext.getInstance().handleConnectionLost();
-      } else {
-        showError("Creation failed", (AuctionException) e);
-      }
-    }
   }
 
   @FXML
