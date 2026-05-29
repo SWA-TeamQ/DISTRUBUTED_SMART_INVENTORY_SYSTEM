@@ -14,7 +14,7 @@ public class ServerLauncher {
       // Ensure RMI advertises a reachable hostname. If the JVM flag is
       // not provided, attempt to auto-detect and set it so clients can
       // connect when the server isn't bound to the loopback address.
-      
+
       String existing = System.getProperty("java.rmi.server.hostname");
       if (existing == null || existing.isBlank()) {
         try {
@@ -37,6 +37,7 @@ public class ServerLauncher {
 
       ServerBootstrap bootstrap = new ServerBootstrap(rmiPort);
       bootstrap.start();
+      
     } catch (Exception e) {
       System.err.println("[RTDAS] Server failed to start: " + e.getMessage());
       e.printStackTrace();
@@ -53,7 +54,7 @@ public class ServerLauncher {
 
     try {
       int parsed = Integer.parseInt(args[0].trim());
-      if (parsed < 1 || parsed > 65535) {
+      if (parsed < 1024 || parsed > 65535) {
         System.err.println(
           "[RTDAS] Invalid RMI port '" +
             args[0] +
@@ -63,6 +64,7 @@ public class ServerLauncher {
         return defaultPort;
       }
       return parsed;
+
     } catch (NumberFormatException ex) {
       System.err.println(
         "[RTDAS] Invalid RMI port '" +

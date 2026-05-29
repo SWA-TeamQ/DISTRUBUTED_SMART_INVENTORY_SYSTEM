@@ -77,10 +77,6 @@ public class AdminPanelController {
 
   @FXML
   public void initialize() {
-    if (roleCombo != null) {
-      roleCombo.getItems().setAll(Constants.USER, Constants.ADMIN);
-      roleCombo.getSelectionModel().selectFirst();
-    }
     showUsers();
   }
 

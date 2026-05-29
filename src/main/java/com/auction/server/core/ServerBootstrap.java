@@ -99,6 +99,7 @@ public class ServerBootstrap {
     reaper.recoverFromCrash();
     reaper.start();
     broadcaster.start();
+    
     System.out.println("[RTDAS] Auction Reaper and UDP Broadcaster started.");
     System.out.println("[RTDAS] Server is ready.");
   }
